@@ -18,8 +18,6 @@ CLAUDE.md         this file
 
 Deploy = commit and push to `main`; Pages rebuilds in about a minute. Keep it a single self-contained file: no frameworks, no CDN, no network requests (fonts are local via `@font-face`).
 
-**Pending:** the latest `index.html` (folded-corner files, greyed system folders, "System (look, don't touch)" legend) may not be committed yet. Check `git log`.
-
 ## Owner's preferences and decisions (keep these)
 
 - **Lightweight**: one small file (~75 KB), instant start. A real Linux in the browser (v86, Alpine) was considered and rejected: 8 to 14 MB, slow boot, BusyBox has no man pages, and it would break the live tree.
