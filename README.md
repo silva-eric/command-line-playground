@@ -8,7 +8,7 @@ Type real commands on the left and watch the file system tree on the right chang
 
 ## What you can do
 
-- **Move around:** `pwd`, `ls` (`-a`, `-l`, `-R`), `cd` (`..`, `~`, `-`, `/`), `find`, `which`
+- **Move around:** `pwd`, `ls` (`-a`, `-l`, `-R`), `cd` (`..`, `~`, `-`, `/`), `tree` (`-a`, `-d`, `-F`, `-L`), `find`, `which`
 - **Files and folders:** `mkdir -p`, `touch`, `cp -r`, `mv`, `rm -i -r`, `rmdir`
 - **Read and write:** `cat`, `less`, `more`, `head`, `tail`, `echo`, `printf`, with `>`, `>>` and `<`
 - **Work with text:** `grep`, `sort`, `uniq`, `wc`, `cut`, pipes (`|`) and `*` wildcards

@@ -140,7 +140,7 @@ button.toggle[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 const MAN = {
  ls:{n:'list what is inside a folder', s:['ls [-a] [-l] [-R] [FILE]...'], d:['Lists the files and folders inside each FILE you name. With no FILE, lists the folder you are in.','Names are listed in alphabetical order; on Ubuntu, folders are shown in colour. Names that start with a dot are hidden unless you use -a.'],
   o:[['-a','show everything, including hidden names that start with a dot, and the . and .. entries'],['-l','long format: permissions, owner, size and date on one line per entry'],['-R','list each folder, then every folder inside it, all the way down']],
-  e:[['ls','list the folder you are in'],['ls -la ~','everything in your home folder, in detail'],['ls notes | wc -l','count the entries in notes']], see:'cd, pwd, find'},
+  e:[['ls','list the folder you are in'],['ls -la ~','everything in your home folder, in detail'],['ls notes | wc -l','count the entries in notes']], see:'cd, pwd, find, tree'},
  pwd:{n:'print the name of the folder you are in', s:['pwd'], d:['Prints the full, absolute path of your current folder, starting from the root, /.'], e:[['pwd','for example /home/yourname/projects']], see:'cd, ls'},
  mkdir:{n:'make folders', s:['mkdir [-p] FOLDER...'], d:['Creates each FOLDER. It is an error if the folder already exists, or if the folder it should go in does not exist.'],
   o:[['-p','make any missing parent folders as well, and do not complain if the folder already exists']], e:[['mkdir notes','make one folder'],['mkdir -p a/b/c','make a, then b inside it, then c inside that']], see:'rmdir, rm'},
@@ -173,7 +173,10 @@ const MAN = {
   o:[['-d DELIMITER','the character that separates the fields, for example , or :'],['-f FIELDS','which fields to print, for example 1 or 1,3']], e:[['cut -d , -f 1 people.csv','the first column of a CSV file']], see:'grep, sort'},
  find:{n:'search for files in a folder tree', s:['find [FOLDER]... [-name PATTERN] [-type f|d]'], d:['Walks through each FOLDER and everything inside it, printing the path of every entry that matches. With no FOLDER, starts from the current folder, written as .'],
   o:[['-name PATTERN','only names that match PATTERN; * matches anything, so "*.txt" means every name ending in .txt'],['-type f','only files'],['-type d','only folders']],
-  e:[['find . -name "*.txt"','every .txt file from here down'],['find ~ -type d','every folder in your home']], see:'ls, grep'},
+  e:[['find . -name "*.txt"','every .txt file from here down'],['find ~ -type d','every folder in your home']], see:'ls, grep, tree'},
+ tree:{n:'show folders and files as a tree', s:['tree [-a] [-d] [-F] [-L LEVEL] [FOLDER]...'], d:['Draws each FOLDER and everything inside it as a tree, with lines showing what is inside what. With no FOLDER, starts from the folder you are in, written as .','At the end it counts the folders and files it showed. Names that start with a dot are hidden unless you use -a.','tree does not come with Ubuntu or macOS. On your own laptop, install it first: sudo apt install tree on Ubuntu, or brew install tree on a Mac.'],
+  o:[['-a','show everything, including hidden names that start with a dot'],['-d','show folders only'],['-F','put / after each folder and * after each program'],['-L LEVEL','go only LEVEL levels deep; tree -L 1 shows just what is directly inside']],
+  e:[['tree','everything from here down'],['tree -L 1 ~','just the top level of your home folder'],['tree -d /','only the folders, starting from the root']], see:'ls, find'},
  echo:{n:'print a line of text', s:['echo [TEXT]...'], d:['Prints its words, separated by spaces, then a new line. With > it writes them into a file instead; with >> it adds them to the end.','Words like $HOME are replaced by their value first, unless they are inside single quotes.'],
   e:[['echo "Hello"','prints Hello'],['echo "Practise cd every day" > todo.txt','writes the line into todo.txt'],['echo $HOME','prints the path of your home folder']], see:'printf, cat'},
  printf:{n:'print formatted text', s:['printf FORMAT [ARGUMENT]...'], d:['Prints FORMAT, replacing each %s with the next ARGUMENT and each %d with the next number. \\n starts a new line and \\t is a tab. Unlike echo, printf adds no new line unless you ask for one.'],
@@ -221,7 +224,7 @@ const mine = (n) => inside(n, S.home);
 const can = (n, b) => { const bit = { r:4, w:2, x:1 }[b]; return !!((mine(n) ? n.mode >> 6 : n.mode) & bit); };
 const modeStr = (n) => (n.dir ? 'd' : '-') + [6, 3, 0].map(s => { const v = n.mode >> s & 7; return (v & 4 ? 'r' : '-') + (v & 2 ? 'w' : '-') + (v & 1 ? 'x' : '-'); }).join('');
 function tree(spec, parent){ for (const [name, v] of Object.entries(spec)){ if (typeof v === 'string') add(parent, mk(name, false, v, parent.name === 'bin' ? 0o755 : 0o644)); else tree(v, add(parent, mk(name, true))); } }
-const CMDS = ['cat','chmod','cp','cut','date','echo','env','find','grep','head','id','kill','less','ls','man','mkdir','more','mv','printf','ps','pwd','rm','rmdir','sleep','sort','tail','touch','uniq','wc','which','whoami'];
+const CMDS = ['cat','chmod','cp','cut','date','echo','env','find','grep','head','id','kill','less','ls','man','mkdir','more','mv','printf','ps','pwd','rm','rmdir','sleep','sort','tail','touch','tree','uniq','wc','which','whoami'];
 function buildRoot(){
   S.root = mk('', true);
   const bin = Object.fromEntries(CMDS.concat(['bash', 'sh', 'zsh']).map(c => [c, '\u0000']));
@@ -396,7 +399,7 @@ const C = {};
 C.help = (args) => {
   if (args[0]){ const b = BUILTIN[args[0]]; if (b) return b.split('\n').forEach(x => line(x)); return err(mac() ? `help: no help found for ${args[0]}` : `bash: help: no help topics match \`${args[0]}'.  Try \`help help' or \`man -k ${args[0]}' or \`info ${args[0]}'.`); }
   line('Commands you can use here (man COMMAND explains each one):', 'note');
-  [['Find your way','pwd  ls  cd  find  which'],['Files and folders','mkdir  touch  cp  mv  rm  rmdir'],['Read and write','cat  less  head  tail  echo  printf  >  >>  <'],
+  [['Find your way','pwd  ls  cd  tree  find  which'],['Files and folders','mkdir  touch  cp  mv  rm  rmdir'],['Read and write','cat  less  head  tail  echo  printf  >  >>  <'],
    ['Work with text','grep  sort  uniq  wc  cut  |'],['Permissions','chmod  id  whoami  ls -l'],['Processes','sleep  sleep 100 &  jobs  ps  kill  Ctrl + C'],
    ['Settings','echo $HOME  env  export  unset'],['Everything else','man  help  date  clear  history']].forEach(([a, b]) => line(`  ${a.padEnd(20)}${b}`));
   line('You can look anywhere, but only change things inside your home folder. Tab finishes names; ↑ brings back earlier commands.', 'note');
@@ -558,6 +561,43 @@ C.find = (args) => {
     kids(n).forEach(k => go(k, (p.endsWith('/') ? p : p + '/') + k.name));
   };
   starts.forEach(t => { const r = resolve(t); if (!r.node) return err(mac() ? `find: ${t}: ${why(r)}` : `find: ‘${t}’: ${why(r)}`); go(r.node, t); });
+};
+function treeLine(pre, name, dir, after){
+  if (S.cap){ S.cap.push(pre + name + after); return; }
+  const d = document.createElement('div'); d.className = 'l'; d.append(pre);
+  const s = document.createElement('span'); if (dir) s.className = 'd'; s.textContent = name; d.append(s, after); out.appendChild(d);
+}
+C.tree = (args) => {
+  const f = new Set(), starts = []; let max = Infinity, nd = 0, nf = 0;
+  for (let i = 0; i < args.length; i++){
+    const x = args[i];
+    if (x.length < 2 || x[0] !== '-'){ starts.push(x); continue; }
+    if (x === '--') continue;
+    for (const c of x.slice(1)){
+      if (c === 'L'){ if (args[i + 1] === undefined) return err('tree: Missing argument to -L option.'); max = parseInt(args[++i], 10); if (!(max > 0)) return err('tree: Invalid level, must be greater than 0.'); }
+      else if ('adF'.includes(c)) f.add(c);
+      else return err(`tree: Invalid argument -\`${c}'.`);
+    }
+  }
+  if (!starts.length) starts.push('.');
+  const mark = (n) => f.has('F') ? (n.dir ? '/' : n.mode & 0o111 ? '*' : '') : '';
+  const shut = (n) => !can(n, 'r') || !can(n, 'x');
+  const go = (n, pre, level) => {
+    const k = kids(n).filter(x => (f.has('a') || !x.name.startsWith('.')) && (x.dir || !f.has('d')));
+    k.forEach((c, i) => {
+      const end = i === k.length - 1, deeper = c.dir && level < max;
+      if (c.dir) nd++; else nf++;
+      treeLine(pre + (end ? '└── ' : '├── '), c.name, c.dir, mark(c) + (deeper && shut(c) ? ' [error opening dir]' : ''));
+      if (deeper && !shut(c)) go(c, pre + (end ? '    ' : '│   '), level + 1);
+    });
+  };
+  starts.forEach(t => {
+    const r = resolve(t), label = t.replace(/^~(?=\/|$)/, full(S.home));
+    if (!r.node || (r.node.dir && shut(r.node))) return treeLine('', label, false, ' [error opening dir]');
+    treeLine('', label, r.node.dir, '');
+    if (r.node.dir) go(r.node, '', 1); else nf++;
+  });
+  line(''); line(`${nd} director${nd === 1 ? 'y' : 'ies'}` + (f.has('d') ? '' : `, ${nf} file${nf === 1 ? '' : 's'}`));
 };
 C.which = (args) => {
   args.forEach(c => {
@@ -778,7 +818,7 @@ function pagerKey(e){
 }
 
 /* ---------- running a command line: pipes, redirection, background ---------- */
-const TOOLS = { tree:'tree', nano:'nano', vim:'vim', git:'git', python:'python3', python3:'python3' };
+const TOOLS = { nano:'nano', vim:'vim', git:'git', python:'python3', python3:'python3' };
 function run(text){
   const toks = tokenize(text);
   if (toks === null){ S.cont = text; return; }
