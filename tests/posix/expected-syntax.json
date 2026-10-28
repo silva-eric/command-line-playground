@@ -1,0 +1,306 @@
+{
+  "001-if-without-fi": {
+    "dash": {
+      "stdout": "this line runs first\n",
+      "stderr": "t.sh: 5: Syntax error: end of file unexpected (expecting \"fi\")\n",
+      "status": 2
+    },
+    "bash": {
+      "stdout": "this line runs first\n",
+      "stderr": "t.sh: line 5: syntax error: unexpected end of file\n",
+      "status": 2
+    },
+    "bashPosix": {
+      "stdout": "this line runs first\n",
+      "stderr": "t.sh: line 5: syntax error: unexpected end of file\n",
+      "status": 2
+    },
+    "differs": false,
+    "notes": "An if without fi: the commands before it run, then the parser hits the end of the file (status 2)"
+  },
+  "002-stray-done": {
+    "dash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: 3: Syntax error: \"done\" unexpected\n",
+      "status": 2
+    },
+    "bash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: syntax error near unexpected token `done'\nt.sh: line 3: `done'\n",
+      "status": 2
+    },
+    "bashPosix": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: syntax error near unexpected token `done'\nt.sh: line 3: `done'\n",
+      "status": 2
+    },
+    "differs": false,
+    "notes": "A done without a loop: commands before it run, nothing after it does"
+  },
+  "003-missing-then": {
+    "dash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: 3: Syntax error: \"fi\" unexpected (expecting \"then\")\n",
+      "status": 2
+    },
+    "bash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: syntax error near unexpected token `fi'\nt.sh: line 3: `if true; echo x; fi'\n",
+      "status": 2
+    },
+    "bashPosix": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: syntax error near unexpected token `fi'\nt.sh: line 3: `if true; echo x; fi'\n",
+      "status": 2
+    },
+    "differs": false,
+    "notes": "An if whose then is missing"
+  },
+  "004-unclosed-single-quote": {
+    "dash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: 5: Syntax error: Unterminated quoted string\n",
+      "status": 2
+    },
+    "bash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: unexpected EOF while looking for matching `''\nt.sh: line 5: syntax error: unexpected end of file\n",
+      "status": 2
+    },
+    "bashPosix": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: unexpected EOF while looking for matching `''\nt.sh: line 5: syntax error: unexpected end of file\n",
+      "status": 2
+    },
+    "differs": false,
+    "notes": "A single quote that is never closed (the rest of the file becomes part of the string)"
+  },
+  "005-unclosed-double-quote": {
+    "dash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: 5: Syntax error: Unterminated quoted string\n",
+      "status": 2
+    },
+    "bash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: unexpected EOF while looking for matching `\"'\nt.sh: line 5: syntax error: unexpected end of file\n",
+      "status": 2
+    },
+    "bashPosix": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: unexpected EOF while looking for matching `\"'\nt.sh: line 5: syntax error: unexpected end of file\n",
+      "status": 2
+    },
+    "differs": false,
+    "notes": "A double quote that is never closed"
+  },
+  "006-unmatched-paren": {
+    "dash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: 3: Syntax error: \")\" unexpected\n",
+      "status": 2
+    },
+    "bash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: syntax error near unexpected token `)'\nt.sh: line 3: `echo a )'\n",
+      "status": 2
+    },
+    "bashPosix": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: syntax error near unexpected token `)'\nt.sh: line 3: `echo a )'\n",
+      "status": 2
+    },
+    "differs": false,
+    "notes": "A closing parenthesis with no opening one"
+  },
+  "007-case-without-esac": {
+    "dash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: 5: Syntax error: end of file unexpected (expecting \")\")\n",
+      "status": 2
+    },
+    "bash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 5: syntax error: unexpected end of file\n",
+      "status": 2
+    },
+    "bashPosix": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 5: syntax error: unexpected end of file\n",
+      "status": 2
+    },
+    "differs": false,
+    "notes": "A case that is never closed with esac"
+  },
+  "008-empty-brace-group": {
+    "dash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: 3: Syntax error: \"}\" unexpected\n",
+      "status": 2
+    },
+    "bash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: syntax error near unexpected token `}'\nt.sh: line 3: `{ }'\n",
+      "status": 2
+    },
+    "bashPosix": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: syntax error near unexpected token `}'\nt.sh: line 3: `{ }'\n",
+      "status": 2
+    },
+    "differs": false,
+    "notes": "An empty { } group is not allowed: a group needs at least one command"
+  },
+  "009-double-semicolon": {
+    "dash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: 3: Syntax error: \";;\" unexpected\n",
+      "status": 2
+    },
+    "bash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: syntax error near unexpected token `;;'\nt.sh: line 3: `echo a;; echo b'\n",
+      "status": 2
+    },
+    "bashPosix": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: syntax error near unexpected token `;;'\nt.sh: line 3: `echo a;; echo b'\n",
+      "status": 2
+    },
+    "differs": false,
+    "notes": "';;' outside a case statement"
+  },
+  "010-pipe-at-end": {
+    "dash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: 4: Syntax error: end of file unexpected\n",
+      "status": 2
+    },
+    "bash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 4: syntax error: unexpected end of file\n",
+      "status": 2
+    },
+    "bashPosix": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 4: syntax error: unexpected end of file\n",
+      "status": 2
+    },
+    "differs": false,
+    "notes": "A pipeline that ends with '|' at the end of the file"
+  },
+  "011-bad-for-name": {
+    "dash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: 4: Syntax error: Bad for loop variable\n",
+      "status": 2
+    },
+    "bash": {
+      "stdout": "before\nafter\n",
+      "stderr": "t.sh: line 4: `1x': not a valid identifier\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 4: `1x': not a valid identifier\n",
+      "status": 2
+    },
+    "differs": true,
+    "notes": "A for loop whose variable is not a valid name Differs: outside POSIX mode bash reports \"not a valid identifier\" as a run-time error and carries on (prints 'after', status 0); dash and bash --posix stop with status 2"
+  },
+  "012-unclosed-command-substitution": {
+    "dash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: 5: Syntax error: end of file unexpected (expecting \")\")\n",
+      "status": 2
+    },
+    "bash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: unexpected EOF while looking for matching `)'\nt.sh: line 5: syntax error: unexpected end of file\n",
+      "status": 2
+    },
+    "bashPosix": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 3: unexpected EOF while looking for matching `)'\nt.sh: line 5: syntax error: unexpected end of file\n",
+      "status": 2
+    },
+    "differs": false,
+    "notes": "A $( that is never closed"
+  },
+  "013-function-keyword": {
+    "dash": {
+      "stdout": "",
+      "stderr": "t.sh: 3: Syntax error: \"}\" unexpected\n",
+      "status": 2
+    },
+    "bash": {
+      "stdout": "in f\nafter\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "in f\nafter\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "The bash 'function name { ... }' form is not POSIX syntax Differs: dash reports a syntax error at '}' (it reads 'function' as a command name); bash defines and runs the function"
+  },
+  "014-cmdsub-case-without-paren": {
+    "dash": {
+      "stdout": "matched\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "",
+      "stderr": "t.sh: line 3: syntax error near unexpected token `;;'\nt.sh: line 3: `x=$(case y in y) echo matched;; esac)'\n",
+      "status": 2
+    },
+    "bashPosix": {
+      "stdout": "",
+      "stderr": "t.sh: line 3: syntax error near unexpected token `;;'\nt.sh: line 3: `x=$(case y in y) echo matched;; esac)'\n",
+      "status": 2
+    },
+    "differs": true,
+    "notes": "A case item without the optional '(' inside $(...): valid POSIX Differs: bash 3.2 stops at the ')' of the pattern and reports a syntax error; dash (and bash 4.0+, Ubuntu ships 5.2) print 'matched'"
+  },
+  "015-heredoc-unterminated": {
+    "dash": {
+      "stdout": "body line\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "body line\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "body line\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A here-document whose delimiter line never comes: the body runs to the end of the file Note: bash 4.0+ (Ubuntu ships 5.2) also prints a warning about the missing delimiter on stderr; dash and bash 3.2 say nothing"
+  },
+  "016-error-in-uncalled-function": {
+    "dash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: 5: Syntax error: \"}\" unexpected (expecting \"fi\")\n",
+      "status": 2
+    },
+    "bash": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 5: syntax error near unexpected token `}'\nt.sh: line 5: `}'\n",
+      "status": 2
+    },
+    "bashPosix": {
+      "stdout": "before\n",
+      "stderr": "t.sh: line 5: syntax error near unexpected token `}'\nt.sh: line 5: `}'\n",
+      "status": 2
+    },
+    "differs": false,
+    "notes": "A syntax error inside a function that is never called still stops the script when the definition is read"
+  }
+}

@@ -1,0 +1,3577 @@
+{
+ "about": [
+  "Regression scenarios for the command line playground. Run with: node tests/run.js regression (see tests/README.md).",
+  "Each scenario loads a fresh page; \"os\": \"both\" runs it once in Ubuntu mode (name@ubuntu) and once in Mac mode (name@mac).",
+  "Steps: \"text\" = type it and press Enter, then wait for the prompt. {\"cmd\": \"...\", \"wait\": \"pager\"|\"busy\"|\"idle\"|\"any\"|ms} = the same with another wait.",
+  "{\"type\": \"...\"} types without Enter. {\"key\": \"Tab\"|\"Enter\"|\"ArrowUp\"|\"Ctrl+C\"|\"Ctrl+L\"|\"Space\"|\"q\"|\"G\"...} presses a key.",
+  "{\"click\": \"mac\"|\"ubuntu\"|\"perms\"|\"reset\"|\"term\"|CSS selector}. {\"name\": \"ada\"} types into the Your name field.",
+  "{\"wait\": 1500} pauses; {\"wait\": \"tree\"} waits until the dot and its trail have gone (do this before Start again or an OS switch that follows a cd).",
+  "{\"snap\": \"pager\"|\"tree\"|\"terminal\"|\"screen\"|\"all\"} records that part of the page at that moment. {\"check\": \"dot\"} asserts the tree dot is moving.",
+  "Optional scenario fields: \"viewport\": [width, height] (default [1400, 900]) and \"theme\": \"dark\" (default light).",
+  "At the end the runner waits for the tree to stop animating and records the terminal, the tree, the status line, the prompt and the input."
+ ],
+ "scenarios": [
+  {
+   "name": "start",
+   "os": "both",
+   "steps": []
+  },
+  {
+   "name": "help/list",
+   "os": "both",
+   "steps": [
+    "help"
+   ]
+  },
+  {
+   "name": "help/builtins",
+   "os": "both",
+   "steps": [
+    "help cd",
+    "help export",
+    "help unset",
+    "help jobs",
+    "help history",
+    "help help"
+   ]
+  },
+  {
+   "name": "help/unknown",
+   "os": "both",
+   "steps": [
+    "help ls",
+    "echo $?"
+   ]
+  },
+  {
+   "name": "pwd/moving",
+   "os": "both",
+   "steps": [
+    "pwd",
+    "cd projects",
+    "pwd",
+    "cd /",
+    "pwd",
+    "cd",
+    "pwd"
+   ]
+  },
+  {
+   "name": "clear/command",
+   "os": "both",
+   "steps": [
+    "echo one",
+    "echo two",
+    "clear",
+    "echo three"
+   ]
+  },
+  {
+   "name": "clear/ctrl-l",
+   "os": "both",
+   "steps": [
+    "echo one",
+    {
+     "type": "ech"
+    },
+    {
+     "key": "Ctrl+L"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "type": "o kept"
+    },
+    {
+     "key": "Enter"
+    }
+   ]
+  },
+  {
+   "name": "whoami/id",
+   "os": "both",
+   "steps": [
+    "whoami",
+    "id"
+   ]
+  },
+  {
+   "name": "history/list",
+   "os": "both",
+   "steps": [
+    "pwd",
+    "ls",
+    "",
+    "   ",
+    "echo hi",
+    "history",
+    "history | grep echo"
+   ]
+  },
+  {
+   "name": "history/arrows",
+   "os": "ubuntu",
+   "steps": [
+    "echo one",
+    "echo two",
+    "echo three",
+    {
+     "key": "ArrowUp"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "key": "ArrowUp"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "key": "ArrowUp"
+    },
+    {
+     "key": "ArrowUp"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "key": "ArrowDown"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "key": "ArrowDown"
+    },
+    {
+     "key": "ArrowDown"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "key": "ArrowUp"
+    },
+    {
+     "key": "Enter"
+    },
+    "history"
+   ]
+  },
+  {
+   "name": "exit/note",
+   "os": "both",
+   "steps": [
+    "exit"
+   ]
+  },
+  {
+   "name": "sudo/switched-off",
+   "os": "both",
+   "steps": [
+    "sudo rm /bin/ls",
+    "touch /etc/x",
+    "sudo"
+   ]
+  },
+  {
+   "name": "sudo/note-once",
+   "os": "both",
+   "steps": [
+    "touch /etc/x",
+    "rm /bin/ls",
+    "mkdir /etc/new",
+    "echo hi > /etc/x"
+   ]
+  },
+  {
+   "name": "date/format",
+   "os": "both",
+   "steps": [
+    "date",
+    "date | wc -w"
+   ]
+  },
+  {
+   "name": "cd/basic",
+   "os": "both",
+   "steps": [
+    "cd projects",
+    "pwd",
+    "cd ..",
+    "pwd",
+    "cd /",
+    "pwd",
+    "cd",
+    "pwd"
+   ]
+  },
+  {
+   "name": "cd/tilde",
+   "os": "both",
+   "steps": [
+    "cd /etc",
+    "cd ~/projects",
+    "pwd",
+    "cd ~",
+    "pwd"
+   ]
+  },
+  {
+   "name": "cd/dash",
+   "os": "both",
+   "steps": [
+    "cd -",
+    "cd projects",
+    "cd -",
+    "cd -",
+    "echo $OLDPWD"
+   ]
+  },
+  {
+   "name": "cd/errors",
+   "os": "both",
+   "steps": [
+    "cd nowhere",
+    "echo $?",
+    "touch f.txt",
+    "cd f.txt",
+    "cd f.txt/x",
+    "mkdir locked",
+    "chmod 600 locked",
+    "cd locked",
+    "pwd"
+   ]
+  },
+  {
+   "name": "cd/system",
+   "os": "ubuntu",
+   "steps": [
+    "cd /etc",
+    "ls",
+    "cd ../mnt/c",
+    "ls",
+    "cd \"Program Files\"",
+    "pwd",
+    {
+     "snap": "tree"
+    },
+    "cd /bin",
+    "pwd"
+   ]
+  },
+  {
+   "name": "cd/system",
+   "os": "mac",
+   "steps": [
+    "cd /Applications",
+    "ls",
+    "cd Safari.app",
+    "pwd",
+    "cd /System/Library",
+    "pwd",
+    "cd /Users",
+    "ls"
+   ]
+  },
+  {
+   "name": "cd/dots",
+   "os": "ubuntu",
+   "steps": [
+    "cd ../../../..",
+    "pwd",
+    "cd ./home/./yourname/projects/",
+    "pwd",
+    "cd ../..",
+    "pwd"
+   ]
+  },
+  {
+   "name": "cd/dots",
+   "os": "mac",
+   "steps": [
+    "cd ../../../..",
+    "pwd",
+    "cd ./Users/./yourname/projects/",
+    "pwd",
+    "cd ../..",
+    "pwd"
+   ]
+  },
+  {
+   "name": "cd/same-folder",
+   "os": "ubuntu",
+   "steps": [
+    "cd .",
+    "cd ~",
+    "cd projects/..",
+    {
+     "snap": "tree"
+    },
+    "pwd"
+   ]
+  },
+  {
+   "name": "cd/prompts",
+   "os": "mac",
+   "steps": [
+    "cd projects",
+    "cd /etc",
+    "cd /",
+    "cd ~"
+   ]
+  },
+  {
+   "name": "ls/plain",
+   "os": "both",
+   "steps": [
+    "ls",
+    "mkdir notes",
+    "touch a.txt b.txt",
+    "ls",
+    "ls notes"
+   ]
+  },
+  {
+   "name": "ls/all",
+   "os": "both",
+   "steps": [
+    "touch .hidden visible",
+    "ls",
+    "ls -a",
+    "ls -a projects"
+   ]
+  },
+  {
+   "name": "ls/long",
+   "os": "both",
+   "steps": [
+    "echo hello > a.txt",
+    "mkdir d",
+    "touch d/x d/y",
+    "ls -l",
+    "ls -la",
+    "ls -l -a d",
+    "ls -al d"
+   ]
+  },
+  {
+   "name": "ls/long-system",
+   "os": "both",
+   "steps": [
+    "ls -l /etc",
+    "ls -l /",
+    "ls -l /bin | head -n 3"
+   ]
+  },
+  {
+   "name": "ls/root",
+   "os": "both",
+   "steps": [
+    "ls /",
+    "ls /bin",
+    "ls /etc"
+   ]
+  },
+  {
+   "name": "ls/recursive",
+   "os": "both",
+   "steps": [
+    "mkdir -p a/b/c",
+    "touch a/one.txt a/b/two.txt",
+    "ls -R",
+    "ls -R a",
+    "ls -lR a/b"
+   ]
+  },
+  {
+   "name": "ls/recursive-denied",
+   "os": "both",
+   "steps": [
+    "mkdir -p x/y/z",
+    "chmod 000 x/y",
+    "ls -R x"
+   ]
+  },
+  {
+   "name": "ls/errors",
+   "os": "both",
+   "steps": [
+    "ls nothing",
+    "echo $?",
+    "ls nothing projects",
+    "ls -l nothing"
+   ]
+  },
+  {
+   "name": "ls/file-args",
+   "os": "both",
+   "steps": [
+    "touch a.txt",
+    "ls a.txt",
+    "ls -l a.txt",
+    "ls a.txt projects",
+    "ls projects a.txt"
+   ]
+  },
+  {
+   "name": "ls/several-folders",
+   "os": "both",
+   "steps": [
+    "mkdir one two",
+    "touch one/x",
+    "ls one two",
+    "ls -a one two"
+   ]
+  },
+  {
+   "name": "ls/denied",
+   "os": "both",
+   "steps": [
+    "mkdir secret",
+    "touch secret/inside",
+    "chmod 300 secret",
+    "ls secret",
+    "ls -l secret",
+    "chmod 600 secret",
+    "ls secret",
+    "ls secret/inside"
+   ]
+  },
+  {
+   "name": "ls/paths",
+   "os": "ubuntu",
+   "steps": [
+    "ls ~",
+    "ls ..",
+    "ls ../..",
+    "ls /mnt/c",
+    "ls /home",
+    "cd projects",
+    "ls ~/.."
+   ]
+  },
+  {
+   "name": "ls/paths",
+   "os": "mac",
+   "steps": [
+    "ls ~",
+    "ls ..",
+    "ls /Users",
+    "ls /Applications",
+    "ls /Library",
+    "ls /System"
+   ]
+  },
+  {
+   "name": "ls/glob",
+   "os": "both",
+   "steps": [
+    "touch a.txt b.txt c.md",
+    "ls *.txt",
+    "ls ?.md",
+    "ls -l *.md"
+   ]
+  },
+  {
+   "name": "ls/folder-sizes",
+   "os": "mac",
+   "steps": [
+    "mkdir d",
+    "touch d/1 d/2 d/3",
+    "ls -l",
+    "ls -la d"
+   ]
+  },
+  {
+   "name": "mkdir/basic",
+   "os": "both",
+   "steps": [
+    "mkdir notes",
+    "ls",
+    "mkdir a b c",
+    "ls"
+   ]
+  },
+  {
+   "name": "mkdir/exists",
+   "os": "both",
+   "steps": [
+    "mkdir projects",
+    "echo $?",
+    "mkdir .",
+    "mkdir .."
+   ]
+  },
+  {
+   "name": "mkdir/missing-parent",
+   "os": "both",
+   "steps": [
+    "mkdir a/b/c",
+    "ls"
+   ]
+  },
+  {
+   "name": "mkdir/parents",
+   "os": "both",
+   "steps": [
+    "mkdir -p a/b/c",
+    "mkdir -p a/b/c",
+    "echo $?",
+    "mkdir -p projects/new ./x/../y",
+    "ls -R"
+   ]
+  },
+  {
+   "name": "mkdir/no-operand",
+   "os": "both",
+   "steps": [
+    "mkdir",
+    "mkdir -p"
+   ]
+  },
+  {
+   "name": "mkdir/system",
+   "os": "both",
+   "steps": [
+    "mkdir /etc/x",
+    "mkdir -p /etc/x/y",
+    "mkdir /new"
+   ]
+  },
+  {
+   "name": "mkdir/not-a-folder",
+   "os": "both",
+   "steps": [
+    "touch f",
+    "mkdir f/x",
+    "mkdir -p f/x"
+   ]
+  },
+  {
+   "name": "mkdir/no-write",
+   "os": "both",
+   "steps": [
+    "mkdir ro",
+    "chmod 500 ro",
+    "mkdir ro/x",
+    "mkdir -p ro/y/z",
+    "ls ro"
+   ]
+  },
+  {
+   "name": "mkdir/spaces",
+   "os": "both",
+   "steps": [
+    "mkdir \"my folder\"",
+    "mkdir another\\ one",
+    "ls",
+    "cd my\\ folder",
+    "pwd"
+   ]
+  },
+  {
+   "name": "touch/basic",
+   "os": "both",
+   "steps": [
+    "touch a.txt",
+    "ls",
+    "touch a.txt",
+    "touch b c d",
+    "ls"
+   ]
+  },
+  {
+   "name": "touch/no-operand",
+   "os": "both",
+   "steps": [
+    "touch"
+   ]
+  },
+  {
+   "name": "touch/system",
+   "os": "both",
+   "steps": [
+    "touch /etc/x",
+    "touch /x"
+   ]
+  },
+  {
+   "name": "touch/missing-folder",
+   "os": "both",
+   "steps": [
+    "touch nowhere/x.txt"
+   ]
+  },
+  {
+   "name": "touch/read-only",
+   "os": "both",
+   "steps": [
+    "touch f",
+    "chmod 444 f",
+    "touch f",
+    "mkdir d",
+    "chmod 500 d",
+    "touch d/x"
+   ]
+  },
+  {
+   "name": "echo/basic",
+   "os": "both",
+   "steps": [
+    "echo hello",
+    "echo hello   world",
+    "echo \"hello   world\"",
+    "echo",
+    "echo \"\"",
+    "echo -n no newline",
+    "echo -n",
+    "echo one two three"
+   ]
+  },
+  {
+   "name": "echo/variables",
+   "os": "both",
+   "steps": [
+    "echo $HOME",
+    "echo \"$HOME\"",
+    "echo '$HOME'",
+    "echo ${USER}",
+    "echo $USER$USER",
+    "echo ${HOME}/notes",
+    "echo $SHELL",
+    "echo $PATH",
+    "echo $LANG $TERM",
+    "echo $LOGNAME",
+    "echo [$NOPE]"
+   ]
+  },
+  {
+   "name": "echo/status",
+   "os": "both",
+   "steps": [
+    "echo $?",
+    "ls nowhere",
+    "echo $?",
+    "echo $?",
+    "echo hi >",
+    "echo $?"
+   ]
+  },
+  {
+   "name": "echo/redirect",
+   "os": "both",
+   "steps": [
+    "echo one > f.txt",
+    "cat f.txt",
+    "echo two >> f.txt",
+    "cat f.txt",
+    "echo three > f.txt",
+    "cat f.txt",
+    "echo -n four >> f.txt",
+    "cat f.txt"
+   ]
+  },
+  {
+   "name": "echo/escapes",
+   "os": "both",
+   "steps": [
+    "echo a\\ b",
+    "echo \"say \\\"hi\\\"\"",
+    "echo 'it'\\''s'",
+    "echo \\$HOME",
+    "echo \"back\\\\slash\"",
+    "echo \"a\\nb\"",
+    "echo \\\\",
+    "echo \"$\"",
+    "echo a$"
+   ]
+  },
+  {
+   "name": "echo/continuation",
+   "os": "both",
+   "steps": [
+    "echo \"first",
+    "second\"",
+    "echo 'a",
+    "b'",
+    "echo \"x",
+    {
+     "key": "Ctrl+C"
+    },
+    "echo after"
+   ]
+  },
+  {
+   "name": "printf/formats",
+   "os": "both",
+   "steps": [
+    "printf \"%s is %d\\n\" Ada 36",
+    "printf \"%s\\n\" one two three",
+    "printf \"100%%\\n\"",
+    "printf \"a\\tb\\n\"",
+    "printf \"%d\\n\" abc",
+    "printf \"no newline\"",
+    "printf \"%s-%s\\n\" a b c",
+    "printf"
+   ]
+  },
+  {
+   "name": "printf/redirect",
+   "os": "ubuntu",
+   "steps": [
+    "printf \"x\\ny\\n\" > f",
+    "cat f",
+    "wc -l f",
+    "printf \"%s\\n\" 3 1 2 | sort"
+   ]
+  },
+  {
+   "name": "env/list",
+   "os": "both",
+   "steps": [
+    "env"
+   ]
+  },
+  {
+   "name": "export/basic",
+   "os": "both",
+   "steps": [
+    "export GREETING=hello",
+    "echo $GREETING",
+    "env | grep GREETING",
+    "export"
+   ]
+  },
+  {
+   "name": "export/invalid",
+   "os": "both",
+   "steps": [
+    "export 1x=y",
+    "export a-b",
+    "echo $?"
+   ]
+  },
+  {
+   "name": "vars/assign",
+   "os": "both",
+   "steps": [
+    "PET=cat",
+    "echo $PET",
+    "env | grep PET",
+    "export PET",
+    "env | grep PET",
+    "unset PET",
+    "echo \"[$PET]\"",
+    "env | grep PET"
+   ]
+  },
+  {
+   "name": "vars/braces",
+   "os": "both",
+   "steps": [
+    "X=abc",
+    "echo ${X}def",
+    "echo $Xdef",
+    "echo \"$X-$X\"",
+    "echo '$X'",
+    "echo \\$X",
+    "X=\"two words\"",
+    "echo $X",
+    "X=",
+    "echo [$X]"
+   ]
+  },
+  {
+   "name": "vars/special",
+   "os": "both",
+   "steps": [
+    "echo $HOME $PWD",
+    "cd projects",
+    "echo $PWD $OLDPWD",
+    "echo $USER $LOGNAME $SHELL"
+   ]
+  },
+  {
+   "name": "cat/files",
+   "os": "both",
+   "steps": [
+    "echo one > a.txt",
+    "echo two > b.txt",
+    "cat a.txt",
+    "cat a.txt b.txt",
+    "cat a.txt b.txt > both.txt",
+    "cat both.txt"
+   ]
+  },
+  {
+   "name": "cat/errors",
+   "os": "both",
+   "steps": [
+    "cat nothing.txt",
+    "echo $?",
+    "cat projects",
+    "cat",
+    "echo hi > a.txt",
+    "cat a.txt nothing.txt a.txt"
+   ]
+  },
+  {
+   "name": "cat/system",
+   "os": "both",
+   "steps": [
+    "cat /etc/hosts",
+    "cat /etc/shells",
+    "cat /bin/ls",
+    "cat /etc"
+   ]
+  },
+  {
+   "name": "cat/hostname",
+   "os": "ubuntu",
+   "steps": [
+    "cat /etc/hostname"
+   ]
+  },
+  {
+   "name": "cat/denied",
+   "os": "both",
+   "steps": [
+    "echo secret > s.txt",
+    "chmod 000 s.txt",
+    "cat s.txt",
+    "echo $?",
+    "mkdir d",
+    "echo x > d/f",
+    "chmod 600 d",
+    "cat d/f"
+   ]
+  },
+  {
+   "name": "cat/stdin",
+   "os": "both",
+   "steps": [
+    "echo piped | cat",
+    "echo hi > f",
+    "cat < f",
+    "cat < f | wc -c"
+   ]
+  },
+  {
+   "name": "head/options",
+   "os": "both",
+   "steps": [
+    "printf \"%s\\n\" 1 2 3 4 5 6 7 8 9 10 11 12 > n.txt",
+    "head n.txt",
+    "head -n 3 n.txt",
+    "head -3 n.txt",
+    "head -n3 n.txt",
+    "head -n 0 n.txt"
+   ]
+  },
+  {
+   "name": "tail/options",
+   "os": "both",
+   "steps": [
+    "printf \"%s\\n\" 1 2 3 4 5 6 7 8 9 10 11 12 > n.txt",
+    "tail n.txt",
+    "tail -n 2 n.txt",
+    "tail -1 n.txt",
+    "tail -n 20 n.txt"
+   ]
+  },
+  {
+   "name": "headtail/several",
+   "os": "both",
+   "steps": [
+    "printf \"%s\\n\" 1 2 3 4 5 6 7 8 9 10 11 12 > n.txt",
+    "printf \"a\\nb\\nc\\n\" > m.txt",
+    "head -n 2 n.txt m.txt",
+    "tail -n 1 n.txt m.txt"
+   ]
+  },
+  {
+   "name": "headtail/pipe",
+   "os": "ubuntu",
+   "steps": [
+    "ls /bin | head -n 3",
+    "ls /bin | tail -n 2",
+    "printf \"%s\\n\" 1 2 3 4 5 6 7 8 9 10 11 12 > n.txt",
+    "cat n.txt | head -n 1",
+    "cat n.txt | tail -n 3 | head -n 1"
+   ]
+  },
+  {
+   "name": "headtail/errors",
+   "os": "both",
+   "steps": [
+    "head missing",
+    "tail missing",
+    "head projects",
+    "tail -n 2 /bin/ls"
+   ]
+  },
+  {
+   "name": "redirect/output",
+   "os": "both",
+   "steps": [
+    "ls / > list.txt",
+    "cat list.txt",
+    "ls /etc >> list.txt",
+    "cat list.txt",
+    "wc -l < list.txt",
+    "> empty.txt",
+    "ls -l empty.txt",
+    "ls missing > out.txt",
+    "cat out.txt",
+    "cat list.txt | grep e > e.txt",
+    "cat e.txt"
+   ]
+  },
+  {
+   "name": "redirect/output-errors",
+   "os": "both",
+   "steps": [
+    "echo hi > nowhere/f.txt",
+    "echo hi > projects",
+    "echo hi > /etc/x",
+    "echo hi >",
+    "echo hi >> /etc/hosts"
+   ]
+  },
+  {
+   "name": "redirect/input-errors",
+   "os": "both",
+   "steps": [
+    "cat < missing.txt",
+    "echo $?",
+    "cat < projects",
+    "cat <",
+    "echo $?"
+   ]
+  },
+  {
+   "name": "redirect/read-only",
+   "os": "both",
+   "steps": [
+    "echo a > f",
+    "chmod 444 f",
+    "echo b > f",
+    "echo c >> f",
+    "cat f",
+    "mkdir d",
+    "chmod 500 d",
+    "echo x > d/f"
+   ]
+  },
+  {
+   "name": "wc/file",
+   "os": "both",
+   "steps": [
+    "printf \"one two\\nthree\\n\" > f.txt",
+    "wc f.txt",
+    "wc -l f.txt",
+    "wc -w f.txt",
+    "wc -c f.txt",
+    "wc -lw f.txt"
+   ]
+  },
+  {
+   "name": "wc/several",
+   "os": "both",
+   "steps": [
+    "echo a > a.txt",
+    "echo b c > b.txt",
+    "wc a.txt b.txt",
+    "wc -l a.txt b.txt"
+   ]
+  },
+  {
+   "name": "wc/pipe",
+   "os": "both",
+   "steps": [
+    "ls / | wc -l",
+    "echo hi | wc",
+    "echo hello world | wc -w",
+    "echo hi | wc -c",
+    "ls /bin | wc -l"
+   ]
+  },
+  {
+   "name": "wc/bytes",
+   "os": "ubuntu",
+   "steps": [
+    "echo café > f.txt",
+    "wc -c f.txt",
+    "ls -l f.txt"
+   ]
+  },
+  {
+   "name": "wc/errors",
+   "os": "both",
+   "steps": [
+    "wc missing",
+    "wc projects"
+   ]
+  },
+  {
+   "name": "grep/options",
+   "os": "both",
+   "steps": [
+    "printf \"apple\\nBanana\\ncherry\\napple pie\\n\" > fruit.txt",
+    "grep apple fruit.txt",
+    "grep -i banana fruit.txt",
+    "grep -v apple fruit.txt",
+    "grep -n apple fruit.txt",
+    "grep -c apple fruit.txt",
+    "grep -in A fruit.txt",
+    "grep -vc apple fruit.txt"
+   ]
+  },
+  {
+   "name": "grep/status",
+   "os": "both",
+   "steps": [
+    "printf \"apple\\nBanana\\ncherry\\napple pie\\n\" > fruit.txt",
+    "grep zzz fruit.txt",
+    "echo $?",
+    "grep apple fruit.txt",
+    "echo $?"
+   ]
+  },
+  {
+   "name": "grep/several",
+   "os": "both",
+   "steps": [
+    "printf \"apple\\nBanana\\ncherry\\napple pie\\n\" > fruit.txt",
+    "printf \"carrot\\npea\\n\" > veg.txt",
+    "grep a fruit.txt veg.txt",
+    "grep -c a fruit.txt veg.txt",
+    "grep -n p fruit.txt veg.txt"
+   ]
+  },
+  {
+   "name": "grep/pipe",
+   "os": "both",
+   "steps": [
+    "ls /bin | grep ^c",
+    "env | grep HOME",
+    "ls / | grep -v bin"
+   ]
+  },
+  {
+   "name": "grep/patterns",
+   "os": "ubuntu",
+   "steps": [
+    "printf \"apple\\nBanana\\ncherry\\napple pie\\n\" > fruit.txt",
+    "grep \"^a\" fruit.txt",
+    "grep \"e$\" fruit.txt",
+    "grep \"(\" fruit.txt",
+    "grep \"p+\" fruit.txt",
+    "grep \"an.n\" fruit.txt"
+   ]
+  },
+  {
+   "name": "grep/errors",
+   "os": "both",
+   "steps": [
+    "grep",
+    "grep x missing.txt",
+    "grep x projects"
+   ]
+  },
+  {
+   "name": "sort/options",
+   "os": "both",
+   "steps": [
+    "printf \"pear\\napple\\nfig\\napple\\n\" > f.txt",
+    "sort f.txt",
+    "sort -r f.txt",
+    "sort -u f.txt",
+    "sort -ru f.txt"
+   ]
+  },
+  {
+   "name": "sort/numbers",
+   "os": "ubuntu",
+   "steps": [
+    "printf \"10\\n9\\n100\\n2\\n\" > n.txt",
+    "sort n.txt",
+    "sort -n n.txt",
+    "sort -rn n.txt",
+    "ls /bin | sort -r | head -n 3"
+   ]
+  },
+  {
+   "name": "sort/errors",
+   "os": "both",
+   "steps": [
+    "sort missing.txt"
+   ]
+  },
+  {
+   "name": "uniq/options",
+   "os": "both",
+   "steps": [
+    "printf \"a\\na\\nb\\na\\n\" > f.txt",
+    "uniq f.txt",
+    "uniq -c f.txt",
+    "sort f.txt | uniq",
+    "sort f.txt | uniq -c"
+   ]
+  },
+  {
+   "name": "uniq/claude-md-check",
+   "os": "both",
+   "steps": [
+    "mkdir -p cli-practice/notes",
+    "cd cli-practice",
+    "echo Ada >> names.txt",
+    "echo Ada >> names.txt",
+    "echo Ada >> names.txt",
+    "echo Grace >> names.txt",
+    "cat names.txt",
+    "sort names.txt | uniq -c",
+    "ls / | wc -l"
+   ]
+  },
+  {
+   "name": "cut/fields",
+   "os": "both",
+   "steps": [
+    "printf \"name,age,city\\nAda,36,London\\nAlan,41,Wilmslow\\n\" > people.csv",
+    "cut -d , -f 1 people.csv",
+    "cut -d , -f 1,3 people.csv",
+    "cut -d, -f2 people.csv",
+    "cut -d , -f 2- people.csv",
+    "cut -d : -f 1 people.csv"
+   ]
+  },
+  {
+   "name": "cut/errors",
+   "os": "both",
+   "steps": [
+    "printf \"name,age,city\\nAda,36,London\\nAlan,41,Wilmslow\\n\" > people.csv",
+    "cut people.csv",
+    "cut -d , -f 1 missing.csv"
+   ]
+  },
+  {
+   "name": "cut/pipe",
+   "os": "ubuntu",
+   "steps": [
+    "cat /etc/hosts | cut -f 2",
+    "echo a:b:c | cut -d : -f 2",
+    "echo a:b:c | cut -d : -f 1,3"
+   ]
+  },
+  {
+   "name": "find/basic",
+   "os": "both",
+   "steps": [
+    "mkdir -p notes/old",
+    "touch notes/a.txt notes/old/b.txt c.md",
+    "find",
+    "find . -name \"*.txt\"",
+    "find ~ -type d",
+    "find notes -type f",
+    "find . -name \"*.md\" -type f",
+    "find notes/old"
+   ]
+  },
+  {
+   "name": "find/system",
+   "os": "both",
+   "steps": [
+    "find /etc",
+    "find / -name hosts",
+    "find /etc -type f"
+   ]
+  },
+  {
+   "name": "find/root-folders",
+   "os": "both",
+   "steps": [
+    "find / -type d"
+   ]
+  },
+  {
+   "name": "find/errors",
+   "os": "both",
+   "steps": [
+    "find nowhere",
+    "find . -size 1",
+    "mkdir locked",
+    "touch locked/x",
+    "chmod 000 locked",
+    "find ."
+   ]
+  },
+  {
+   "name": "tree-cmd/options",
+   "os": "both",
+   "steps": [
+    "mkdir -p notes/old",
+    "touch notes/a.txt notes/old/b.txt c.md .hidden",
+    "tree",
+    "tree -a",
+    "tree -d",
+    "tree -F",
+    "tree -L 1",
+    "tree notes",
+    "tree -dF",
+    "tree -aF -L 2"
+   ]
+  },
+  {
+   "name": "tree-cmd/system",
+   "os": "both",
+   "steps": [
+    "tree /",
+    "tree -d /",
+    "tree -L 1 /",
+    "tree /etc",
+    "tree -F /bin | head -n 4",
+    "tree ~"
+   ]
+  },
+  {
+   "name": "tree-cmd/errors",
+   "os": "both",
+   "steps": [
+    "mkdir -p notes/old",
+    "touch notes/a.txt notes/old/b.txt c.md .hidden",
+    "tree -L",
+    "tree -L 0",
+    "tree -L x",
+    "tree -x",
+    "tree nowhere",
+    "tree c.md",
+    "mkdir locked",
+    "chmod 000 locked",
+    "tree",
+    "tree locked"
+   ]
+  },
+  {
+   "name": "tree-cmd/pipe",
+   "os": "ubuntu",
+   "steps": [
+    "mkdir -p notes/old",
+    "touch notes/a.txt notes/old/b.txt c.md .hidden",
+    "tree | wc -l",
+    "tree -d | tail -n 1",
+    "tree > t.txt",
+    "cat t.txt"
+   ]
+  },
+  {
+   "name": "which/lookups",
+   "os": "both",
+   "steps": [
+    "which ls",
+    "which grep",
+    "which cd",
+    "echo $?",
+    "which nope",
+    "echo $?",
+    "which bash sh zsh",
+    "which ls cat cd nope",
+    "which tree"
+   ]
+  },
+  {
+   "name": "cp/files",
+   "os": "both",
+   "steps": [
+    "echo hi > a.txt",
+    "cp a.txt b.txt",
+    "ls",
+    "cat b.txt",
+    "cp a.txt projects",
+    "ls projects",
+    "echo new > a.txt",
+    "cp a.txt projects/",
+    "cat projects/a.txt",
+    "cp a.txt projects/c.txt",
+    "ls projects"
+   ]
+  },
+  {
+   "name": "cp/folders",
+   "os": "both",
+   "steps": [
+    "mkdir -p d/e",
+    "touch d/e/f.txt",
+    "cp d d2",
+    "cp -r d d2",
+    "ls -R d2",
+    "cp -R d d3",
+    "cp -r d d/e/inner",
+    "ls"
+   ]
+  },
+  {
+   "name": "cp/errors",
+   "os": "both",
+   "steps": [
+    "cp",
+    "touch a.txt",
+    "cp a.txt",
+    "cp nope.txt x"
+   ]
+  },
+  {
+   "name": "cp/denied",
+   "os": "both",
+   "steps": [
+    "echo s > s.txt",
+    "chmod 000 s.txt",
+    "cp s.txt t.txt",
+    "chmod 644 s.txt",
+    "cp s.txt /etc/",
+    "cp s.txt /etc/s.txt",
+    "cp -r projects /"
+   ]
+  },
+  {
+   "name": "cp/from-system",
+   "os": "both",
+   "steps": [
+    "cp /etc/hosts .",
+    "cat hosts",
+    "ls -l hosts",
+    "cp /bin/ls mybin",
+    "ls -l mybin",
+    "cat mybin"
+   ]
+  },
+  {
+   "name": "cp/overwrite-folder",
+   "os": "both",
+   "steps": [
+    "mkdir x",
+    "mkdir -p target/x",
+    "cp -r x target",
+    "touch f",
+    "cp f target/x",
+    "ls target/x"
+   ]
+  },
+  {
+   "name": "mv/rename",
+   "os": "both",
+   "steps": [
+    "touch a.txt",
+    "mv a.txt b.txt",
+    "ls"
+   ]
+  },
+  {
+   "name": "mv/into-folder",
+   "os": "both",
+   "steps": [
+    "touch a.txt",
+    "mv a.txt projects",
+    "ls projects",
+    "mv projects/a.txt .",
+    "ls",
+    "mkdir archive",
+    "mv projects archive/",
+    "ls -R"
+   ]
+  },
+  {
+   "name": "mv/overwrite",
+   "os": "both",
+   "steps": [
+    "echo 1 > a",
+    "echo 2 > b",
+    "mv a b",
+    "cat b",
+    "ls"
+   ]
+  },
+  {
+   "name": "mv/errors",
+   "os": "both",
+   "steps": [
+    "mv",
+    "touch a.txt",
+    "mv a.txt",
+    "mv nope x",
+    "mkdir d",
+    "mv d d/sub",
+    "mkdir -p e/d",
+    "mv d e",
+    "mv a.txt a.txt",
+    "ls"
+   ]
+  },
+  {
+   "name": "mv/denied",
+   "os": "both",
+   "steps": [
+    "mv /etc/hosts ~/",
+    "touch f",
+    "mv f /etc/",
+    "mv ~ x",
+    "mkdir ro",
+    "touch ro/g",
+    "chmod 500 ro",
+    "mv ro/g ."
+   ]
+  },
+  {
+   "name": "mv/current-folder",
+   "os": "both",
+   "steps": [
+    "mkdir d",
+    "cd d",
+    "mv ../d ../e",
+    "pwd",
+    "ls .."
+   ]
+  },
+  {
+   "name": "rm/files",
+   "os": "both",
+   "steps": [
+    "touch a.txt b.txt",
+    "rm a.txt",
+    "ls",
+    "rm b.txt"
+   ]
+  },
+  {
+   "name": "rm/folders",
+   "os": "both",
+   "steps": [
+    "mkdir -p d/e",
+    "rm d",
+    "rm -r d",
+    "ls"
+   ]
+  },
+  {
+   "name": "rm/interactive",
+   "os": "both",
+   "steps": [
+    "touch a.txt",
+    "echo x > b.txt",
+    "rm -i a.txt",
+    "y",
+    "rm -i b.txt",
+    "n",
+    "ls"
+   ]
+  },
+  {
+   "name": "rm/interactive-several",
+   "os": "both",
+   "steps": [
+    "touch a b c",
+    "rm -i a b c",
+    "y",
+    "n",
+    "yes",
+    "ls"
+   ]
+  },
+  {
+   "name": "rm/interactive-folder",
+   "os": "both",
+   "steps": [
+    "mkdir d",
+    "rm -ri d",
+    "y",
+    "ls"
+   ]
+  },
+  {
+   "name": "rm/write-protected",
+   "os": "both",
+   "steps": [
+    "echo x > p.txt",
+    "chmod 444 p.txt",
+    "rm p.txt",
+    "n",
+    "ls",
+    "rm p.txt",
+    "y",
+    "ls"
+   ]
+  },
+  {
+   "name": "rm/force",
+   "os": "both",
+   "steps": [
+    "echo x > p.txt",
+    "chmod 444 p.txt",
+    "rm -f p.txt",
+    "rm -f nothing",
+    "echo $?",
+    "rm nothing",
+    "echo $?",
+    "ls"
+   ]
+  },
+  {
+   "name": "rm/errors",
+   "os": "both",
+   "steps": [
+    "rm",
+    "rm -r /",
+    "rm -r ~",
+    "rm -rf /etc",
+    "rm /bin/ls"
+   ]
+  },
+  {
+   "name": "rm/inside",
+   "os": "both",
+   "steps": [
+    "mkdir -p d/e",
+    "cd d/e",
+    {
+     "wait": "tree"
+    },
+    "rm -r ~/d",
+    "pwd"
+   ]
+  },
+  {
+   "name": "rm/ctrl-c",
+   "os": "both",
+   "steps": [
+    "touch a",
+    "rm -i a",
+    {
+     "key": "Ctrl+C"
+    },
+    "ls"
+   ]
+  },
+  {
+   "name": "rm/glob",
+   "os": "both",
+   "steps": [
+    "touch a.txt b.txt c.md",
+    "rm *.txt",
+    "ls"
+   ]
+  },
+  {
+   "name": "rmdir/basic",
+   "os": "both",
+   "steps": [
+    "mkdir empty",
+    "rmdir empty",
+    "ls",
+    "rmdir projects",
+    "ls"
+   ]
+  },
+  {
+   "name": "rmdir/errors",
+   "os": "both",
+   "steps": [
+    "rmdir",
+    "rmdir nope",
+    "touch f",
+    "rmdir f",
+    "mkdir -p a/b",
+    "rmdir a"
+   ]
+  },
+  {
+   "name": "rmdir/system",
+   "os": "ubuntu",
+   "steps": [
+    "rmdir /mnt/c/Users",
+    "rmdir /etc",
+    "rmdir /home"
+   ]
+  },
+  {
+   "name": "rmdir/system",
+   "os": "mac",
+   "steps": [
+    "rmdir /Users/Shared",
+    "rmdir /etc",
+    "rmdir /Library/Fonts"
+   ]
+  },
+  {
+   "name": "rmdir/home",
+   "os": "both",
+   "steps": [
+    "rmdir ~",
+    "rmdir projects",
+    "rmdir ~"
+   ]
+  },
+  {
+   "name": "chmod/octal",
+   "os": "both",
+   "steps": [
+    "touch f",
+    "chmod 600 f",
+    "ls -l f",
+    "chmod 755 f",
+    "ls -l f",
+    "chmod 0640 f",
+    "ls -l f",
+    "chmod 000 f",
+    "ls -l f"
+   ]
+  },
+  {
+   "name": "chmod/letters",
+   "os": "both",
+   "steps": [
+    "touch f",
+    "chmod u+x f",
+    "ls -l f",
+    "chmod go-r f",
+    "ls -l f",
+    "chmod a=r f",
+    "ls -l f",
+    "chmod u=rwx,g=rx,o= f",
+    "ls -l f",
+    "chmod +x f",
+    "ls -l f",
+    "chmod o+w,g-x f",
+    "ls -l f"
+   ]
+  },
+  {
+   "name": "chmod/recursive",
+   "os": "both",
+   "steps": [
+    "mkdir -p d/e",
+    "touch d/e/f",
+    "chmod -R 700 d",
+    "ls -lR d",
+    "chmod -R go+rx d",
+    "ls -lR d"
+   ]
+  },
+  {
+   "name": "chmod/errors",
+   "os": "both",
+   "steps": [
+    "touch f",
+    "chmod",
+    "chmod 600",
+    "chmod abc f",
+    "chmod 600 nope",
+    "chmod u+q f",
+    "chmod 999 f"
+   ]
+  },
+  {
+   "name": "chmod/system",
+   "os": "both",
+   "steps": [
+    "chmod 600 /etc/hosts",
+    "chmod 755 /bin",
+    "chmod -R 700 /etc"
+   ]
+  },
+  {
+   "name": "chmod/denied-paths",
+   "os": "both",
+   "steps": [
+    "echo s > f",
+    "chmod 000 f",
+    "cat f",
+    "echo x > f",
+    "echo x >> f",
+    "mkdir d",
+    "chmod 600 d",
+    "cd d",
+    "ls d",
+    "touch d/x",
+    "chmod 300 d",
+    "ls d",
+    "chmod 700 d",
+    "cd d",
+    "pwd"
+   ]
+  },
+  {
+   "name": "chmod/claude-md-check",
+   "os": "both",
+   "steps": [
+    "touch f",
+    "chmod 000 f",
+    "cat f",
+    "mkdir dir",
+    "chmod 600 dir",
+    "cd dir",
+    "chmod 600 /etc/hosts"
+   ]
+  },
+  {
+   "name": "perms/show",
+   "os": "both",
+   "steps": [
+    {
+     "click": "perms"
+    },
+    {
+     "snap": "tree"
+    },
+    "chmod 700 projects",
+    "touch f",
+    "chmod 640 f",
+    "cd /etc"
+   ]
+  },
+  {
+   "name": "perms/hide-again",
+   "os": "ubuntu",
+   "steps": [
+    {
+     "click": "perms"
+    },
+    "touch f",
+    {
+     "click": "perms"
+    }
+   ]
+  },
+  {
+   "name": "sleep/foreground",
+   "os": "both",
+   "steps": [
+    {
+     "cmd": "sleep 1",
+     "wait": "busy"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "wait": "idle"
+    },
+    "echo after"
+   ]
+  },
+  {
+   "name": "sleep/ctrl-c",
+   "os": "both",
+   "steps": [
+    {
+     "cmd": "sleep 30",
+     "wait": "busy"
+    },
+    {
+     "key": "Ctrl+C"
+    },
+    "echo back",
+    "jobs"
+   ]
+  },
+  {
+   "name": "sleep/errors",
+   "os": "both",
+   "steps": [
+    "sleep",
+    "sleep abc",
+    "sleep -1",
+    "echo $?"
+   ]
+  },
+  {
+   "name": "sleep/fraction",
+   "os": "ubuntu",
+   "steps": [
+    "sleep 0.3",
+    "echo done"
+   ]
+  },
+  {
+   "name": "jobs/background",
+   "os": "both",
+   "steps": [
+    "sleep 100 &",
+    "jobs",
+    "ps",
+    "kill %1",
+    "jobs",
+    "ps"
+   ]
+  },
+  {
+   "name": "jobs/two",
+   "os": "both",
+   "steps": [
+    "sleep 100 &",
+    "sleep 200 &",
+    "jobs",
+    "kill 1202",
+    "jobs",
+    "kill -9 %1",
+    "jobs"
+   ]
+  },
+  {
+   "name": "jobs/done",
+   "os": "both",
+   "steps": [
+    "sleep 1 &",
+    {
+     "wait": 2500
+    },
+    "",
+    "jobs"
+   ]
+  },
+  {
+   "name": "jobs/claude-md-check",
+   "os": "both",
+   "steps": [
+    "sleep 100 &",
+    "kill %1"
+   ]
+  },
+  {
+   "name": "kill/errors",
+   "os": "both",
+   "steps": [
+    "kill",
+    "kill %3",
+    "kill 4242",
+    "kill 1001",
+    "kill $$",
+    "sleep 100 &",
+    "kill %1",
+    "kill %1"
+   ]
+  },
+  {
+   "name": "ps/plain",
+   "os": "both",
+   "steps": [
+    "ps",
+    "ps"
+   ]
+  },
+  {
+   "name": "pipes/basic",
+   "os": "both",
+   "steps": [
+    "echo hello | cat",
+    "ls / | wc -l",
+    "ls /bin | grep ^s | sort -r",
+    "echo hi | ls",
+    "history | tail -n 1",
+    "cat /etc/hosts | wc -c"
+   ]
+  },
+  {
+   "name": "glob/patterns",
+   "os": "both",
+   "steps": [
+    "touch a.txt b.txt c.md .hidden.txt",
+    "echo *",
+    "echo *.txt",
+    "echo ?.md",
+    "echo .*",
+    "echo projects/*",
+    "echo *.xyz",
+    "echo $?",
+    "echo \"*.txt\"",
+    "echo \\*.txt",
+    "echo '*'"
+   ]
+  },
+  {
+   "name": "glob/commands",
+   "os": "both",
+   "steps": [
+    "mkdir d",
+    "touch d/x.txt d/y.txt",
+    "ls d/*.txt",
+    "cat d/*.txt",
+    "wc -l d/*.txt",
+    "rm d/*.txt",
+    "ls d"
+   ]
+  },
+  {
+   "name": "glob/folders",
+   "os": "ubuntu",
+   "steps": [
+    "echo /e*",
+    "echo /etc/h*",
+    "echo */x",
+    "echo /*/c"
+   ]
+  },
+  {
+   "name": "quotes/words",
+   "os": "both",
+   "steps": [
+    "echo \"double quotes keep   spaces\"",
+    "echo 'single quotes keep $HOME'",
+    "echo \"mixed 'inner' quotes\"",
+    "echo 'mixed \"inner\" quotes'",
+    "echo one\\ two",
+    "echo \"a\"'b'c"
+   ]
+  },
+  {
+   "name": "quotes/names-with-spaces",
+   "os": "both",
+   "steps": [
+    "mkdir \"my notes\"",
+    "touch my\\ notes/to\\ do.txt",
+    "ls",
+    "ls \"my notes\"",
+    "cd my\\ notes",
+    "pwd",
+    "ls -l"
+   ]
+  },
+  {
+   "name": "unknown/commands",
+   "os": "both",
+   "steps": [
+    "foo",
+    "echo $?",
+    "Ls",
+    "./run",
+    "foo | wc -l"
+   ]
+  },
+  {
+   "name": "unknown/tools",
+   "os": "both",
+   "steps": [
+    "nano notes.txt",
+    "vim",
+    "git status",
+    "python",
+    "python3",
+    "echo $?"
+   ]
+  },
+  {
+   "name": "man/pager-keys",
+   "os": "both",
+   "steps": [
+    {
+     "cmd": "man ls",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "Space",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "G",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "g",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "j",
+     "wait": "pager"
+    },
+    {
+     "key": "ArrowDown",
+     "wait": "pager"
+    },
+    {
+     "key": "Enter",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "k",
+     "wait": "pager"
+    },
+    {
+     "key": "ArrowUp",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "f",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "b",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "End",
+     "wait": "pager"
+    },
+    {
+     "key": "Home",
+     "wait": "pager"
+    },
+    {
+     "key": "PageDown",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    },
+    "echo back"
+   ]
+  },
+  {
+   "name": "man/quit-ctrl-c",
+   "os": "ubuntu",
+   "steps": [
+    {
+     "cmd": "man pwd",
+     "wait": "pager"
+    },
+    {
+     "key": "Ctrl+C",
+     "wait": "idle"
+    },
+    "pwd"
+   ]
+  },
+  {
+   "name": "man/errors",
+   "os": "both",
+   "steps": [
+    "man",
+    "man nosuch",
+    "echo $?"
+   ]
+  },
+  {
+   "name": "man/builtin",
+   "os": "ubuntu",
+   "steps": [
+    "man cd",
+    "man export",
+    "man history"
+   ]
+  },
+  {
+   "name": "man/builtin",
+   "os": "mac",
+   "steps": [
+    {
+     "cmd": "man cd",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "G",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/ls",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man ls",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/pwd",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man pwd",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/mkdir",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man mkdir",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/rmdir",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man rmdir",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/touch",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man touch",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/cp",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man cp",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/mv",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man mv",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/rm",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man rm",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/cat",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man cat",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/less",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man less",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/more",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man more",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/head",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man head",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/tail",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man tail",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/wc",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man wc",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/grep",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man grep",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/sort",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man sort",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/uniq",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man uniq",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/cut",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man cut",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/find",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man find",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/tree",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man tree",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/echo",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man echo",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/printf",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man printf",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/date",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man date",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/whoami",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man whoami",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/id",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man id",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/which",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man which",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/chmod",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man chmod",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/ps",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man ps",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/kill",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man kill",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/sleep",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man sleep",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/env",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man env",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/man",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man man",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/clear",
+   "os": "ubuntu",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man clear",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/ls",
+   "os": "mac",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man ls",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/man",
+   "os": "mac",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man man",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "man/page/cd",
+   "os": "mac",
+   "viewport": [
+    1400,
+    3000
+   ],
+   "steps": [
+    {
+     "cmd": "man cd",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "less/file",
+   "os": "both",
+   "steps": [
+    "printf \"line %d\\n\" 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 > long.txt",
+    {
+     "cmd": "less long.txt",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "Space",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "G",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    },
+    "echo back"
+   ]
+  },
+  {
+   "name": "less/short",
+   "os": "ubuntu",
+   "steps": [
+    "echo hi > s.txt",
+    {
+     "cmd": "less s.txt",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "less/stdin",
+   "os": "both",
+   "steps": [
+    {
+     "cmd": "ls -l /bin | less",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "less/errors",
+   "os": "both",
+   "steps": [
+    "less",
+    "less nope.txt",
+    "less projects",
+    "less /bin/ls"
+   ]
+  },
+  {
+   "name": "more/file",
+   "os": "ubuntu",
+   "steps": [
+    "printf \"line %d\\n\" 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 > long.txt",
+    {
+     "cmd": "more long.txt",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "Space",
+     "wait": "pager"
+    },
+    {
+     "snap": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    }
+   ]
+  },
+  {
+   "name": "tab/command",
+   "os": "both",
+   "steps": [
+    {
+     "type": "ec"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "type": "hi"
+    },
+    {
+     "key": "Enter"
+    }
+   ]
+  },
+  {
+   "name": "tab/command-list",
+   "os": "ubuntu",
+   "steps": [
+    {
+     "type": "l"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "type": "s"
+    },
+    {
+     "key": "Enter"
+    },
+    {
+     "type": "c"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "key": "Ctrl+C"
+    }
+   ]
+  },
+  {
+   "name": "tab/path",
+   "os": "both",
+   "steps": [
+    "mkdir notes",
+    {
+     "type": "cd no"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "key": "Enter"
+    },
+    "pwd"
+   ]
+  },
+  {
+   "name": "tab/common-prefix",
+   "os": "ubuntu",
+   "steps": [
+    "touch report1.txt report2.txt",
+    {
+     "type": "cat rep"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "type": "1"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "key": "Enter"
+    }
+   ]
+  },
+  {
+   "name": "tab/system-path",
+   "os": "ubuntu",
+   "steps": [
+    {
+     "type": "ls /e"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "type": "ho"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "type": "s"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "key": "Enter"
+    }
+   ]
+  },
+  {
+   "name": "tab/space-in-name",
+   "os": "ubuntu",
+   "steps": [
+    {
+     "type": "ls /mnt/c/Pro"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "key": "Enter"
+    }
+   ]
+  },
+  {
+   "name": "tab/hidden",
+   "os": "ubuntu",
+   "steps": [
+    "touch .secret visible",
+    {
+     "type": "cat "
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "type": ".s"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "key": "Enter"
+    }
+   ]
+  },
+  {
+   "name": "tab/paths",
+   "os": "mac",
+   "steps": [
+    {
+     "type": "ls /Ap"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "type": "Sa"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "key": "Enter"
+    }
+   ]
+  },
+  {
+   "name": "tab/no-match",
+   "os": "both",
+   "steps": [
+    {
+     "type": "cat zz"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "snap": "screen"
+    },
+    {
+     "key": "Enter"
+    },
+    {
+     "type": "zz"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "key": "Tab"
+    },
+    {
+     "key": "Enter"
+    }
+   ]
+  },
+  {
+   "name": "keys/ctrl-c",
+   "os": "both",
+   "steps": [
+    {
+     "type": "echo never"
+    },
+    {
+     "key": "Ctrl+C"
+    },
+    {
+     "snap": "screen"
+    },
+    "echo after"
+   ]
+  },
+  {
+   "name": "name/change",
+   "os": "both",
+   "steps": [
+    {
+     "name": "ada"
+    },
+    "whoami",
+    "pwd",
+    "id",
+    "ls -l ..",
+    "echo $USER $HOME"
+   ]
+  },
+  {
+   "name": "name/sanitise",
+   "os": "ubuntu",
+   "steps": [
+    {
+     "name": "Ada Lovelace!"
+    },
+    "whoami",
+    {
+     "name": ""
+    },
+    "whoami",
+    {
+     "name": "GRACE_h.1"
+    },
+    "whoami"
+   ]
+  },
+  {
+   "name": "name/keeps-files",
+   "os": "both",
+   "steps": [
+    "touch a.txt",
+    "cd projects",
+    {
+     "wait": "tree"
+    },
+    {
+     "name": "grace"
+    },
+    "pwd",
+    "ls ..",
+    "cd",
+    "ls",
+    "ls -l"
+   ]
+  },
+  {
+   "name": "reset/everything",
+   "os": "both",
+   "steps": [
+    "mkdir a",
+    "touch b",
+    "cd a",
+    "export X=1",
+    "sleep 100 &",
+    {
+     "wait": "tree"
+    },
+    {
+     "click": "reset"
+    },
+    "ls",
+    "pwd",
+    "echo [$X]",
+    "jobs",
+    "history"
+   ]
+  },
+  {
+   "name": "reset/keeps-settings",
+   "os": "ubuntu",
+   "steps": [
+    {
+     "name": "ada"
+    },
+    {
+     "click": "perms"
+    },
+    {
+     "click": "mac"
+    },
+    "touch f",
+    {
+     "click": "reset"
+    },
+    "whoami",
+    "pwd"
+   ]
+  },
+  {
+   "name": "reset/closes-pager",
+   "os": "ubuntu",
+   "steps": [
+    {
+     "cmd": "man ls",
+     "wait": "pager"
+    },
+    {
+     "click": "reset"
+    },
+    "pwd"
+   ]
+  },
+  {
+   "name": "reset/during-sleep",
+   "os": "ubuntu",
+   "steps": [
+    {
+     "cmd": "sleep 30",
+     "wait": "busy"
+    },
+    {
+     "click": "reset"
+    },
+    "echo awake"
+   ]
+  },
+  {
+   "name": "reset/during-question",
+   "os": "ubuntu",
+   "steps": [
+    "touch a",
+    "rm -i a",
+    {
+     "click": "reset"
+    },
+    "ls"
+   ]
+  },
+  {
+   "name": "os/switch-is-silent",
+   "os": "ubuntu",
+   "steps": [
+    "mkdir notes",
+    "touch notes/a.txt",
+    "cd notes",
+    {
+     "wait": "tree"
+    },
+    {
+     "click": "mac"
+    },
+    {
+     "snap": "terminal"
+    },
+    "pwd",
+    "ls",
+    {
+     "click": "ubuntu"
+    },
+    "pwd",
+    "ls /"
+   ]
+  },
+  {
+   "name": "os/switch-outside-home",
+   "os": "ubuntu",
+   "steps": [
+    "cd /etc",
+    {
+     "wait": "tree"
+    },
+    {
+     "click": "mac"
+    },
+    "pwd",
+    "cd -",
+    "cd /Library",
+    {
+     "wait": "tree"
+    },
+    {
+     "click": "ubuntu"
+    },
+    "pwd"
+   ]
+  },
+  {
+   "name": "os/same-button",
+   "os": "ubuntu",
+   "steps": [
+    {
+     "click": "ubuntu"
+    },
+    "pwd"
+   ]
+  },
+  {
+   "name": "os/same-button",
+   "os": "mac",
+   "steps": [
+    {
+     "click": "mac"
+    },
+    "pwd"
+   ]
+  },
+  {
+   "name": "os/jobs-survive",
+   "os": "ubuntu",
+   "steps": [
+    "sleep 100 &",
+    {
+     "click": "mac"
+    },
+    "jobs",
+    "ps",
+    "kill %1",
+    "export A=1",
+    "echo $A"
+   ]
+  },
+  {
+   "name": "os/history-survives",
+   "os": "ubuntu",
+   "steps": [
+    "echo one",
+    {
+     "click": "mac"
+    },
+    "history"
+   ]
+  },
+  {
+   "name": "tree/dot-moves",
+   "os": "ubuntu",
+   "steps": [
+    "cd /etc",
+    {
+     "check": "dot"
+    }
+   ]
+  },
+  {
+   "name": "tree/dot-moves",
+   "os": "mac",
+   "steps": [
+    "cd /Applications/Safari.app",
+    {
+     "check": "dot"
+    }
+   ]
+  },
+  {
+   "name": "tree/dot-survives-rerender",
+   "os": "ubuntu",
+   "steps": [
+    "cd /mnt/c/Users",
+    "ls",
+    "touch ~/x",
+    {
+     "check": "dot"
+    }
+   ]
+  },
+  {
+   "name": "tree/system-folder-open",
+   "os": "both",
+   "steps": [
+    "cd /bin"
+   ]
+  },
+  {
+   "name": "tree/removed-items-go",
+   "os": "both",
+   "steps": [
+    "mkdir a",
+    "touch a/f",
+    "rm -r a",
+    {
+     "snap": "tree"
+    }
+   ]
+  },
+  {
+   "name": "tree/new-items",
+   "os": "both",
+   "steps": [
+    "mkdir -p a/b",
+    "touch a/b/c.txt a/d.txt",
+    "cd a/b"
+   ]
+  },
+  {
+   "name": "theme/dark",
+   "os": "both",
+   "theme": "dark",
+   "steps": [
+    "mkdir -p notes",
+    "touch notes/a.txt",
+    "ls -l",
+    "cd /etc",
+    {
+     "cmd": "man ls",
+     "wait": "pager"
+    },
+    {
+     "key": "q",
+     "wait": "idle"
+    },
+    "touch x"
+   ]
+  },
+  {
+   "name": "misc/blank-lines",
+   "os": "both",
+   "steps": [
+    "",
+    "   ",
+    "history"
+   ]
+  },
+  {
+   "name": "misc/padded-command",
+   "os": "ubuntu",
+   "steps": [
+    "   ls   ",
+    "history"
+   ]
+  },
+  {
+   "name": "misc/long-line",
+   "os": "ubuntu",
+   "steps": [
+    "echo abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,4828 @@
+{
+  "001-lex-comment": {
+    "dash": {
+      "stdout": "one\ntwo#three\nfour # five six # seven eight#nine\nten#\n0 args, 4 chars\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "one\ntwo#three\nfour # five six # seven eight#nine\nten#\n0 args, 4 chars\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "one\ntwo#three\nfour # five six # seven eight#nine\nten#\n0 args, 4 chars\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Comments: an unquoted '#' at the start of a word starts a comment up to the end of the line; elsewhere it is literal"
+  },
+  "002-lex-continuation": {
+    "dash": {
+      "stdout": "one two three\njoined\ndquoted\nsingle\\\nquoted\nconcat\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "one two three\njoined\ndquoted\nsingle\\\nquoted\nconcat\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "one two three\njoined\ndquoted\nsingle\\\nquoted\nconcat\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Backslash-newline is a line continuation: it is removed before words are formed, even mid-word and inside double quotes, but not inside single quotes"
+  },
+  "003-lex-continuation-operators": {
+    "dash": {
+      "stdout": "and-and split over two lines\npiped\nstatus 0\nthis line runs\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "and-and split over two lines\npiped\nstatus 0\nthis line runs\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "and-and split over two lines\npiped\nstatus 0\nthis line runs\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Line continuation can split an operator; a backslash at the end of a comment does not continue the comment"
+  },
+  "004-lex-operators-no-space": {
+    "dash": {
+      "stdout": "a\nb\nand\nor2\npiped\nfile\nfile\nmore\nsub\ngrp\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a\nb\nand\nor2\npiped\nfile\nfile\nmore\nsub\ngrp\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a\nb\nand\nor2\npiped\nfile\nfile\nmore\nsub\ngrp\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Operators are recognised without blanks around them: ; && || | > >> < ( ) and { } after ';'"
+  },
+  "005-lex-dollar-literal": {
+    "dash": {
+      "stdout": "$ a$ $ a$ $/ $ x\n5$ 100$ 5.5\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "$ a$ $ a$ $/ $ x\n5$ 100$ 5.5\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "$ a$ $ a$ $/ $ x\n5$ 100$ 5.5\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A '$' that is not followed by a name, digit, special parameter, '{' or '(' is an ordinary character"
+  },
+  "006-quote-backslash": {
+    "dash": {
+      "stdout": "[a]\n[$HOME]\n[\"x\"]\n['y']\n[a b]\n[\\]\n[;]\n[|]\n[&]\n[$x]\n[${x}]\n[*]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[a]\n[$HOME]\n[\"x\"]\n['y']\n[a b]\n[\\]\n[;]\n[|]\n[&]\n[$x]\n[${x}]\n[*]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[a]\n[$HOME]\n[\"x\"]\n['y']\n[a b]\n[\\]\n[;]\n[|]\n[&]\n[$x]\n[${x}]\n[*]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A backslash outside quotes quotes the next character; quote removal then deletes the backslash"
+  },
+  "007-quote-single": {
+    "dash": {
+      "stdout": "[$x]\n[${x}]\n[a\\nb]\n[\"dq\"]\n[a  b]\n[`echo no`]\n[$(echo no)]\n[\\]\n[it's]\n[]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[$x]\n[${x}]\n[a\\nb]\n[\"dq\"]\n[a  b]\n[`echo no`]\n[$(echo no)]\n[\\]\n[it's]\n[]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[$x]\n[${x}]\n[a\\nb]\n[\"dq\"]\n[a  b]\n[`echo no`]\n[$(echo no)]\n[\\]\n[it's]\n[]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Single quotes keep every character literally: no expansion, and a backslash is an ordinary character"
+  },
+  "008-quote-double": {
+    "dash": {
+      "stdout": "[val]\n[$x]\n[a\\b]\n[\"]\n[\\]\n[`]\n[a\\'b]\n[vals]\n['val']\n[a   b]\n[*]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[val]\n[$x]\n[a\\b]\n[\"]\n[\\]\n[`]\n[a\\'b]\n[vals]\n['val']\n[a   b]\n[*]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[val]\n[$x]\n[a\\b]\n[\"]\n[\\]\n[`]\n[a\\'b]\n[vals]\n['val']\n[a   b]\n[*]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Double quotes: $ and ` keep their meaning; a backslash only quotes $ ` \" \\ and newline, otherwise it stays"
+  },
+  "009-quote-concat": {
+    "dash": {
+      "stdout": "[abcd]\n[X$xX]\n[]\n[ab]\n[]\n[]\n5\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[abcd]\n[X$xX]\n[]\n[ab]\n[]\n[]\n5\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[abcd]\n[X$xX]\n[]\n[ab]\n[]\n[]\n5\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Adjacent quoted and unquoted parts join into one word; empty quotes give an empty argument, an unquoted empty expansion gives none"
+  },
+  "010-quote-operators": {
+    "dash": {
+      "stdout": "| & ; < > ( ) { } ! # * ? [ ] ~ = $ \na|b;c&d\nx>y<z\n(sub)\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "| & ; < > ( ) { } ! # * ? [ ] ~ = $ \na|b;c&d\nx>y<z\n(sub)\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "| & ; < > ( ) { } ! # * ? [ ] ~ = $ \na|b;c&d\nx>y<z\n(sub)\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Quoted operator and reserved characters are plain text"
+  },
+  "011-quote-nested-cmdsub": {
+    "dash": {
+      "stdout": "[outer inner  'q'  deep  er]\n[a  b]\n[\"]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[outer inner  'q'  deep  er]\n[a  b]\n[\"]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[outer inner  'q'  deep  er]\n[a  b]\n[\"]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Quotes inside $(...) are independent of the double quotes around the substitution"
+  },
+  "012-quote-param-word": {
+    "dash": {
+      "stdout": "[a  b]\n['q']\n[dq]\n[x  y]\n[b]\n[b]\n[*b]\n[*b]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[a  b]\n['q']\n[dq]\n[x  y]\n[b]\n[b]\n[*b]\n[*b]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[a  b]\n['q']\n[dq]\n[x  y]\n[b]\n[b]\n[*b]\n[*b]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Quotes in the word of ${x:-word} and in ${x#pattern}: inside double quotes, single quotes in a :- word are literal, but quotes in a # pattern still quote"
+  },
+  "013-reserved-as-args": {
+    "dash": {
+      "stdout": "if then else elif fi do done case esac while until for in\n{ } ! function select time\nif\nloop variable named in: in\ncase word in, pattern in\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "if then else elif fi do done case esac while until for in\n{ } ! function select time\nif\nloop variable named in: in\ncase word in, pattern in\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "if then else elif fi do done case esac while until for in\n{ } ! function select time\nif\nloop variable named in: in\ncase word in, pattern in\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Reserved words are only special in command position; as arguments they are plain words"
+  },
+  "014-reserved-quoted": {
+    "dash": {
+      "stdout": "status 127\nstatus 127\nstatus 127\nstatus 127\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "status 127\nstatus 127\nstatus 127\nstatus 127\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "status 127\nstatus 127\nstatus 127\nstatus 127\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A quoted reserved word in command position is not recognised: it is looked up as a command (status 127); a quoted name also stops an assignment"
+  },
+  "015-reserved-positions": {
+    "dash": {
+      "stdout": "a\nb\nc\nd\ne\nf\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a\nb\nc\nd\ne\nf\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a\nb\nc\nd\ne\nf\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Reserved words are recognised after ; && || | ( and newlines, and after other reserved words"
+  },
+  "016-simple-assign": {
+    "dash": {
+      "stdout": "1 2 12\n[x   y]\n[*]\n[]\n3z\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1 2 12\n[x   y]\n[*]\n[]\n3z\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1 2 12\n[x   y]\n[*]\n[]\n3z\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Assignment-only commands set shell variables; values are expanded but not field split or globbed"
+  },
+  "017-simple-assign-order": {
+    "dash": {
+      "stdout": "b=1\necho saw old\nchild got d=1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "b=1\necho saw old\nchild got d=1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "b=1\necho saw old\nchild got d=1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Assignments happen left to right (later ones see earlier ones); the command's own words are expanded before the prefix assignments"
+  },
+  "018-simple-prefix-external": {
+    "dash": {
+      "stdout": "child sees X=inner\nshell keeps X=outer\nchild sees Y=temp\nY afterwards: [unset]\nZ afterwards: [unset]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "child sees X=inner\nshell keeps X=outer\nchild sees Y=temp\nY afterwards: [unset]\nZ afterwards: [unset]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "child sees X=inner\nshell keeps X=outer\nchild sees Y=temp\nY afterwards: [unset]\nZ afterwards: [unset]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A prefix assignment on an external command goes into that command's environment only and does not stay in the shell"
+  },
+  "019-simple-prefix-special-builtin": {
+    "dash": {
+      "stdout": "after colon: X=after\ninside eval: Y=2\nafter eval: Y=2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "after colon: X=before\ninside eval: Y=2\nafter eval: Y=1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "after colon: X=after\ninside eval: Y=2\nafter eval: Y=2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "Prefix assignments before a special built-in (':' and eval here) stay set after it (POSIX) Differs: bash outside POSIX mode makes them temporary (X stays 'before', Y goes back to 1); bash --posix keeps them like dash"
+  },
+  "020-simple-prefix-regular-builtin": {
+    "dash": {
+      "stdout": "after true: [unset]\nprintf argument: [unset]\nafter printf: [unset]\nread got [one] [two]; IFS is default again: 2 fields\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "after true: [unset]\nprintf argument: [unset]\nafter printf: [unset]\nread got [one] [two]; IFS is default again: 2 fields\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "after true: [unset]\nprintf argument: [unset]\nafter printf: [unset]\nread got [one] [two]; IFS is default again: 2 fields\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Prefix assignments before a regular built-in (true, printf, read) are temporary; the arguments were expanded before the assignment"
+  },
+  "021-simple-prefix-function": {
+    "dash": {
+      "stdout": "in f: V=temp\nafter f: V=global\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "in f: V=temp\nafter f: V=global\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "in f: V=temp\nafter f: V=temp\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Prefix assignments before a function call are visible inside the function; afterwards the old value is back Note: POSIX leaves it unspecified whether they persist after the function returns. bash 3.2 --posix keeps them ('after f: V=temp'); bash 5 --posix restores the old value like dash and bash"
+  },
+  "022-simple-command-from-expansion": {
+    "dash": {
+      "stdout": "hello\nquoted\na|b|\nsplit words\nempty expansion vanished before the command name\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "hello\nquoted\na|b|\nsplit words\nempty expansion vanished before the command name\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "hello\nquoted\na|b|\nsplit words\nempty expansion vanished before the command name\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "The command name can come from an expansion; it is field split like any other word, and an empty unquoted expansion disappears"
+  },
+  "023-simple-no-command-status": {
+    "dash": {
+      "stdout": "plain assignment: 0\nassignment with a failing substitution: 1\nthe last substitution counts: 5\nsubstitution as the whole command: 4\nredirection only: 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "plain assignment: 0\nassignment with a failing substitution: 1\nthe last substitution counts: 5\nsubstitution as the whole command: 4\nredirection only: 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "plain assignment: 0\nassignment with a failing substitution: 1\nthe last substitution counts: 5\nsubstitution as the whole command: 4\nredirection only: 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A command with no command name has status 0, or the status of the last command substitution it performed"
+  },
+  "024-param-basic": {
+    "dash": {
+      "stdout": "val val vals vals []\nval_val-val.val\na a a0 j k\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "val val vals vals []\nval_val-val.val\na a a0 j k\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "val val vals vals []\nval_val-val.val\na a a0 j k\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "$name and ${name}: braces delimit the name; an unset variable expands to nothing; $10 is ${1} followed by 0"
+  },
+  "025-param-minus": {
+    "dash": {
+      "stdout": "[w] [] [set]\n[w] [w] [set]\n[] [] [set]\nu is still [unset], e is still []\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[w] [] [set]\n[w] [w] [set]\n[] [] [set]\nu is still [unset], e is still []\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[w] [] [set]\n[w] [w] [set]\n[] [] [set]\nu is still [unset], e is still []\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "${x-word} uses word when x is unset; ${x:-word} also when x is empty; x itself is not changed"
+  },
+  "026-param-assign": {
+    "dash": {
+      "stdout": "[one] u=one\n[] e=[]\n[three] e=three\nu=four\nu=four\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[one] u=one\n[] e=[]\n[three] e=three\nu=four\nu=four\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[one] u=one\n[] e=[]\n[three] e=three\nu=four\nu=four\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "${x=word} and ${x:=word} assign word to x (the colon form also when x is empty)"
+  },
+  "027-param-alt": {
+    "dash": {
+      "stdout": "[] [w] [w]\n[] [] [w]\n[val and more]\n[set] []\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[] [w] [w]\n[] [] [w]\n[val and more]\n[set] []\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[] [w] [w]\n[] [] [w]\n[val and more]\n[set] []\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "${x+word} gives word when x is set; ${x:+word} only when x is set and not empty"
+  },
+  "028-param-error": {
+    "dash": {
+      "stdout": "status 2\n[]\nstatus 0\nstatus 2\nstatus 2\nok\n",
+      "stderr": "t.sh: 4: u: custom message\nt.sh: 8: e: empty is not ok\nt.sh: 10: u: parameter not set\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "status 1\n[]\nstatus 0\nstatus 1\nstatus 1\nok\n",
+      "stderr": "t.sh: line 4: u: custom message\nt.sh: line 8: e: empty is not ok\nt.sh: line 10: u: parameter null or not set\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "status 1\n[]\nstatus 0\nstatus 1\nstatus 1\nok\n",
+      "stderr": "t.sh: line 4: u: custom message\nt.sh: line 8: e: empty is not ok\nt.sh: line 10: u: parameter null or not set\n",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "${x?word} and ${x:?word} write word (or a default message) to stderr and exit a non-interactive shell; subshells keep the script going Differs: the subshell exits with status 2 in dash and 1 in bash; the default messages differ too (\"parameter not set\" vs \"parameter null or not set\")"
+  },
+  "029-param-length": {
+    "dash": {
+      "stdout": "5 0 0\n6\n5\n3 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "5 0 0\n6\n5\n3 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "5 0 0\n6\n5\n3 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "${#x} is the length of the value in characters; ${#} is the number of positional parameters"
+  },
+  "030-param-suffix": {
+    "dash": {
+      "stdout": "archive.tar archive\n/usr/local/bin end\narchive.tar.gz archive.tar. x archive.tar.g\narchive.tar.\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "archive.tar archive\n/usr/local/bin end\narchive.tar.gz archive.tar. x archive.tar.g\narchive.tar.\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "archive.tar archive\n/usr/local/bin end\narchive.tar.gz archive.tar. x archive.tar.g\narchive.tar.\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "${x%pattern} removes the shortest matching suffix, ${x%%pattern} the longest"
+  },
+  "031-param-prefix": {
+    "dash": {
+      "stdout": "usr/local/bin/tool tool\ntar.gz gz\nrchive.tar.gz rchive.tar.gz .gz rchive.tar.gz archive.tar.gz\nend end\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "usr/local/bin/tool tool\ntar.gz gz\nrchive.tar.gz rchive.tar.gz .gz rchive.tar.gz archive.tar.gz\nend end\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "usr/local/bin/tool tool\ntar.gz gz\nrchive.tar.gz rchive.tar.gz .gz rchive.tar.gz archive.tar.gz\nend end\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "${x#pattern} removes the shortest matching prefix, ${x##pattern} the longest"
+  },
+  "032-param-pattern-quoting": {
+    "dash": {
+      "stdout": "[a*b]\n[a*b]\n[b*c]\n[b*c]\n[abc]\n[c]\n[abc]\n[]\n[*abc]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[a*b]\n[a*b]\n[b*c]\n[b*c]\n[abc]\n[c]\n[abc]\n[]\n[*abc]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[a*b]\n[a*b]\n[b*c]\n[b*c]\n[abc]\n[c]\n[abc]\n[]\n[*abc]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "In pattern removal, quoted * ? are literal while unquoted ones (also from an unquoted $var) are pattern characters"
+  },
+  "033-param-word-expansion": {
+    "dash": {
+      "stdout": "why why2 cmd 3 deep /home/yourname\nset\n5\n$HOME\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "why why2 cmd 3 deep /home/yourname\nset\n5\n$HOME\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "why why2 cmd 3 deep /home/yourname\nset\n5\n$HOME\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "The word in ${x:-word} gets tilde, parameter, command and arithmetic expansion, and only when it is used; unquoted, the result is split"
+  },
+  "034-param-nested-patterns": {
+    "dash": {
+      "stdout": "h o\n/a/b c.txt c txt\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "h o\n/a/b c.txt c txt\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "h o\n/a/b c.txt c txt\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Patterns can contain expansions: ${x%\"${x#?}\"} is the first character, ${x#\"${x%?}\"} the last"
+  },
+  "035-param-assign-positional": {
+    "dash": {
+      "stdout": "status 2\nstatus 2\n",
+      "stderr": "t.sh: 3: 1: bad variable name\nt.sh: 5: 1: bad variable name\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "status 1\nstatus 1\n",
+      "stderr": "t.sh: line 3: $1: cannot assign in this way\nt.sh: line 5: $1: cannot assign in this way\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "status 1\nstatus 1\n",
+      "stderr": "t.sh: line 3: $1: cannot assign in this way\nt.sh: line 5: $1: cannot assign in this way\n",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "${1=word} and ${1:=word} cannot assign to a positional parameter: an expansion error that exits the (sub)shell Differs: the subshell exits with status 2 in dash and 1 in bash (messages: \"1: bad variable name\" vs \"$1: cannot assign in this way\")"
+  },
+  "036-special-at-star": {
+    "dash": {
+      "stdout": "4\n4\n4\n1\n[a b][c][][d]\n[a b c  d]\n[a][b][c][d][a b c  d]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "4\n4\n4\n1\n[a b][c][][d]\n[a b c  d]\n[a][b][c][d][a b c  d]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "4\n4\n4\n1\n[a b][c][][d]\n[a b c  d]\n[a][b][c][d][a b c  d]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Unquoted $@ and $* are split into fields (empty ones vanish); \"$@\" keeps every parameter as it is; \"$*\" joins them into one field"
+  },
+  "037-special-star-ifs": {
+    "dash": {
+      "stdout": "a:b:c\na,b,c\nabc\na b c\na b c\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a:b:c\na,b,c\nabc\na b c\na b c\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a:b:c\na,b,c\nabc\na b c\na b c\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "\"$*\" joins the parameters with the first character of IFS; with IFS empty they are joined with nothing; with IFS unset, with a space"
+  },
+  "038-special-at-empty": {
+    "dash": {
+      "stdout": "0\n1\n1\n0\n2\n[xa][by]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "0\n1\n1\n0\n2\n[xa][by]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "0\n1\n1\n0\n2\n[xa][by]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "With no positional parameters \"$@\" expands to no field at all, while \"$*\" gives one empty field; text around \"$@\" sticks to the first and last parameters"
+  },
+  "039-special-at-ifs": {
+    "dash": {
+      "stdout": "3\n3\n1\n2\n2\n6\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "3\n3\n1\n2\n2\n6\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "3\n3\n1\n2\n2\n6\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Unquoted $* and $@ with a non-whitespace IFS, an empty IFS and IFS unset"
+  },
+  "040-special-hash": {
+    "dash": {
+      "stdout": "0\n3\n2\nin f: 4\nafter f: 2\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "0\n3\n2\nin f: 4\nafter f: 2\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "0\n3\n2\nin f: 4\nafter f: 2\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "$# is the number of positional parameters; it changes with set and shift and is the function's own inside a function"
+  },
+  "041-special-question": {
+    "dash": {
+      "stdout": "0\n1\n7\n1\n0\n127\n1 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "0\n1\n7\n1\n0\n127\n1 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "0\n1\n7\n1\n0\n127\n1 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "$? is the exit status of the most recent pipeline"
+  },
+  "042-special-zero": {
+    "dash": {
+      "stdout": "t.sh\nin f: t.sh\nsh -c: name arg\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "t.sh\nin f: t.sh\nsh -c: name arg\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "t.sh\nin f: t.sh\nsh -c: name arg\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "$0 is the script name as given to the shell; it does not change inside functions; sh -c takes it from the next argument"
+  },
+  "043-special-dollar": {
+    "dash": {
+      "stdout": "numeric\nsame\nsame in a subshell\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "numeric\nsame\nsame in a subshell\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "numeric\nsame\nsame in a subshell\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "$$ is a decimal number and is the same inside subshells and command substitutions (the main shell's process ID)"
+  },
+  "044-special-bang": {
+    "dash": {
+      "stdout": "before: []\nnumeric\nwait status 0\nunchanged by foreground commands\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "before: []\nnumeric\nwait status 0\nunchanged by foreground commands\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "before: []\nnumeric\nwait status 0\nunchanged by foreground commands\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "$! is empty until an asynchronous command starts, then it holds that job's decimal process ID"
+  },
+  "045-special-dash-flags": {
+    "dash": {
+      "stdout": "e off\nf off\nu off\ne on\ne off\nf on\nf off\nu on\nu off\ne on\nu on\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "e off\nf off\nu off\ne on\ne off\nf on\nf off\nu on\nu off\ne on\nu on\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "e off\nf off\nu off\ne on\ne off\nf on\nf off\nu on\nu off\ne on\nu on\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "$- holds the single-letter options in effect; check e, f and u as they are turned on and off"
+  },
+  "046-special-initial-values": {
+    "dash": {
+      "stdout": "IFS is space tab newline\nOPTIND=1\nHOME=/home/yourname\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "IFS is space tab newline\nOPTIND=1\nHOME=/home/yourname\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "IFS is space tab newline\nOPTIND=1\nHOME=/home/yourname\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Initial values: IFS is space, tab, newline; OPTIND is 1; HOME comes from the environment"
+  },
+  "047-pos-set": {
+    "dash": {
+      "stdout": "3 [a b c]\n2 [-x -e]\noptions unchanged\n0 []\n2 [one two]\n3: beta\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "3 [a b c]\n2 [-x -e]\noptions unchanged\n0 []\n2 [one two]\n3: beta\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "3 [a b c]\n2 [-x -e]\noptions unchanged\n0 []\n2 [one two]\n3: beta\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "set -- replaces the positional parameters (also from a split expansion); set -- alone clears them; -- protects values starting with '-'"
+  },
+  "048-pos-shift": {
+    "dash": {
+      "stdout": "4 [b c d e]\n2 [d e]\n2 [d e]\n0 []\n2 [k l]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "4 [b c d e]\n2 [d e]\n2 [d e]\n0 []\n2 [k l]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "4 [b c d e]\n2 [d e]\n2 [d e]\n0 []\n2 [k l]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "shift drops the first n parameters (default 1); shift 0 does nothing"
+  },
+  "049-pos-shift-too-far": {
+    "dash": {
+      "stdout": "subshell status 2\nnow 0\n",
+      "stderr": "t.sh: 5: shift: can't shift that many\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "shift status 1, still 2 params: a b\nsubshell status 0\nnow 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "shift status 1, still 2 params: a b\nsubshell status 0\nnow 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "shift n with n greater than $# is an error and leaves the parameters alone Differs: dash treats it as a special built-in error and exits the subshell (status 2, message on stderr); bash returns 1 and carries on silently Note: bash 5 --posix also prints \"shift: 5: shift count out of range\"; bash 3.2 --posix prints nothing"
+  },
+  "050-split-default": {
+    "dash": {
+      "stdout": "4\n[a][b][c][d]\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "4\n[a][b][c][d]\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "4\n[a][b][c][d]\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Field splitting with the default IFS: runs of spaces, tabs and newlines separate fields; leading and trailing ones produce nothing"
+  },
+  "051-split-colon": {
+    "dash": {
+      "stdout": "3\n[a][][b]\n2\n[][a]\n1\n2\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "3\n[a][][b]\n2\n[][a]\n1\n2\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "3\n[a][][b]\n2\n[][a]\n1\n2\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "IFS=: (not whitespace): every ':' ends a field, so '::' gives an empty field, but a final ':' does not start a new one"
+  },
+  "052-split-mixed": {
+    "dash": {
+      "stdout": "6\n[a][b][][c][d][e]\n2\n[][x]\n1\n[x]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "6\n[a][b][][c][d][e]\n2\n[][x]\n1\n[x]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "6\n[a][b][][c][d][e]\n2\n[][x]\n1\n[x]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "IFS mixing whitespace and ',': whitespace around a ',' belongs to that one delimiter; ',,' still gives an empty field"
+  },
+  "053-split-empty-ifs": {
+    "dash": {
+      "stdout": "1\n0\n2\n2\n[a b  c]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1\n0\n2\n2\n[a b  c]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1\n0\n2\n2\n[a b  c]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "With IFS empty no field splitting happens; empty unquoted expansions still vanish; $* and $@ still give one field per parameter"
+  },
+  "054-split-unset-ifs": {
+    "dash": {
+      "stdout": "3\np q r\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "3\np q r\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "3\np q r\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "With IFS unset, splitting works as with the default space, tab, newline"
+  },
+  "055-split-tab-only": {
+    "dash": {
+      "stdout": "2\n[a b][c d]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "2\n[a b][c d]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "2\n[a b][c d]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "IFS set to a tab only: spaces are ordinary characters"
+  },
+  "056-split-only-expansions": {
+    "dash": {
+      "stdout": "a:b a b a:b\n[a:b][a][b]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a:b a b a:b\n[a:b][a][b]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a:b a b a:b\n[a:b][a][b]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Only the results of unquoted expansions are split; literal text in the script is not split by IFS"
+  },
+  "057-split-cmdsub": {
+    "dash": {
+      "stdout": "3\n1\n2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "3\n1\n2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "3\n1\n2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "The output of an unquoted $(...) is split with IFS like a variable"
+  },
+  "058-split-arith": {
+    "dash": {
+      "stdout": " 2 12\n3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": " 2 12\n3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": " 2 12\n3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "The result of an unquoted $((...)) is split with IFS too"
+  },
+  "059-split-backslash": {
+    "dash": {
+      "stdout": "4\n[a\\][b][\"c][d\"]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "4\n[a\\][b][\"c][d\"]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "4\n[a\\][b][\"c][d\"]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Backslashes and quotes that come out of an expansion are ordinary characters: they do not quote anything"
+  },
+  "060-split-empty-fields": {
+    "dash": {
+      "stdout": "1\n3\n0\n1\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1\n3\n0\n1\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1\n3\n0\n1\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Unquoted expansions that are empty give no field, even between other words, unless something quoted is attached"
+  },
+  "061-glob-star": {
+    "dash": {
+      "stdout": "a ab b c\na ab\nab b\n. .. .hidden\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a ab b c\na ab\nab b\n. .. .hidden\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a ab b c\na ab\nab b\n. .. .hidden\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "'*' matches any string but not a leading '.', and the matches are sorted; '.*' matches dot files Note: bash 5.2 (Ubuntu 24.04) has globskipdots on by default, so there '.*' gives only '.hidden'; dash and bash 3.2 also list '.' and '..'"
+  },
+  "062-glob-question": {
+    "dash": {
+      "stdout": "a\nab\nabc\nab\nabc\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a\nab\nabc\nab\nabc\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a\nab\nabc\nab\nabc\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "'?' matches exactly one character, but not a leading '.'"
+  },
+  "063-glob-bracket": {
+    "dash": {
+      "stdout": "a b c\n1 2 d\na b c\n1 2 d\n1 2\na b c d\n[ab][!x]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a b c\n1 2 d\na b c\n1 2 d\n1 2\na b c d\n[ab][!x]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a b c\n1 2 d\na b c\n1 2 d\n1 2\na b c d\n[ab][!x]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Bracket expressions: [abc], [!abc], ranges [a-c] and character classes [[:digit:]] [[:alpha:]]"
+  },
+  "064-glob-nomatch": {
+    "dash": {
+      "stdout": "z* [z] [z] ?? a\n1\nnomatch*\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "z* [z] [z] ?? a\n1\nnomatch*\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "z* [z] [z] ?? a\n1\nnomatch*\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A pattern that matches nothing is left as it is"
+  },
+  "065-glob-quoted": {
+    "dash": {
+      "stdout": "* * * a\na b *\na b [ab]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "* * * a\na b *\na b [ab]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "* * * a\na b *\na b [ab]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Quoted pattern characters are literal; a pattern character coming from an unquoted variable still globs"
+  },
+  "066-glob-noglob": {
+    "dash": {
+      "stdout": "* ?\na b a b\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "* ?\na b a b\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "* ?\na b a b\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "set -f turns pathname expansion off; set +f turns it back on"
+  },
+  "067-glob-dirs": {
+    "dash": {
+      "stdout": "d1/ d2/\nd1/x d2/y d2/z\nd1/x\nd2/y d2/z\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "d1/ d2/\nd1/x d2/y d2/z\nd1/x\nd2/y d2/z\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "d1/ d2/\nd1/x d2/y d2/z\nd1/x\nd2/y d2/z\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Patterns with '/' are matched component by component; a trailing '/' matches directories only"
+  },
+  "068-glob-dotfiles": {
+    "dash": {
+      "stdout": ".a .b\nd/f\nd/.e\nc d\n.a .b\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": ".a .b\nd/f\nd/.e\nc d\n.a .b\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": ".a .b\nd/f\nd/.e\nc d\n.a .b\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A leading '.' must be matched by a literal '.', also after a '/'; .[!.]* skips . and .."
+  },
+  "069-glob-for-loop": {
+    "dash": {
+      "stdout": "txt: one.txt\ntxt: two.txt\nmd: *.md\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "txt: one.txt\ntxt: two.txt\nmd: *.md\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "txt: one.txt\ntxt: two.txt\nmd: *.md\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Pathname expansion in a for word list; with no match the pattern itself is used"
+  },
+  "070-glob-after-expansion": {
+    "dash": {
+      "stdout": "a.c b.c a.h\n*.c *.h\nword: a.c\nword: b.c\nword: a.h\na.h *.h\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a.c b.c a.h\n*.c *.h\nword: a.c\nword: b.c\nword: a.h\na.h *.h\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a.c b.c a.h\n*.c *.h\nword: a.c\nword: b.c\nword: a.h\na.h *.h\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Pathname expansion is applied to the fields left after parameter expansion, command substitution and field splitting"
+  },
+  "071-glob-special-brackets": {
+    "dash": {
+      "stdout": "]\nb\n-\n[x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "]\nb\n-\n[x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "]\nb\n-\n[x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Bracket edge cases: ']' first in the list is literal, '-' first is literal, an unclosed '[' is an ordinary character"
+  },
+  "072-tilde-basic": {
+    "dash": {
+      "stdout": "/home/yourname /home/yourname/docs /home/yourname/\n~ ~ ~ a~b ~/q /home/yourname/a~b\n/other /other/x\n[]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "/home/yourname /home/yourname/docs /home/yourname/\n~ ~ ~ a~b ~/q /home/yourname/a~b\n/other /other/x\n[]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "/home/yourname /home/yourname/docs /home/yourname/\n~ ~ ~ a~b ~/q /home/yourname/a~b\n/other /other/x\n[]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Tilde expansion: an unquoted ~ at the start of a word becomes $HOME; quoted or mid-word tildes stay; an empty HOME gives an empty string"
+  },
+  "073-tilde-assignment": {
+    "dash": {
+      "stdout": "/home/yourname/bin:/home/yourname/lib\na~:/home/yourname\na:~/x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "/home/yourname/bin:/home/yourname/lib\na~:/home/yourname\na:~/x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "/home/yourname/bin:/home/yourname/lib\na~:/home/yourname\na:~/x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "In an assignment a tilde right after '=' or after an unquoted ':' is expanded; in an ordinary argument only at the start"
+  },
+  "074-tilde-argument-like-assignment": {
+    "dash": {
+      "stdout": "opt=~/x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "opt=/home/yourname/x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "opt=~/x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "An argument that only looks like an assignment (opt=~/x) gets no tilde expansion in POSIX Differs: bash outside POSIX mode expands a ~ after '=' in such arguments; bash --posix leaves it like dash"
+  },
+  "075-tilde-colon": {
+    "dash": {
+      "stdout": "~: /home/yourname/\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "/home/yourname: /home/yourname/\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "/home/yourname: /home/yourname/\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "A tilde-prefix in an ordinary word runs up to the first '/', so '~:' is the (unknown) login name ':' and stays as it is Differs: bash (also with --posix) ends the tilde-prefix at ':' and prints /home/yourname: ; dash keeps ~:"
+  },
+  "076-tilde-in-param-word": {
+    "dash": {
+      "stdout": "/home/yourname /home/yourname/x ~ ~\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "/home/yourname /home/yourname/x ~ ~\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "/home/yourname /home/yourname/x ~ ~\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Tilde expansion in the word of ${x:-word}: expanded when unquoted, literal inside double quotes"
+  },
+  "077-arith-basic": {
+    "dash": {
+      "stdout": "3 -3 42 3 -3 1 -1 1\n5 20\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "3 -3 42 3 -3 1 -1 1\n5 20\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "3 -3 42 3 -3 1 -1 1\n5 20\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Arithmetic expansion: + - * / % on signed integers; / and % truncate toward zero; blanks and newlines are allowed inside"
+  },
+  "078-arith-precedence": {
+    "dash": {
+      "stdout": "14 20 3 2 2\n6 1 3 -1 -6 1 0 -5\n6 8 10 1 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "14 20 3 2 2\n6 1 3 -1 -6 1 0 -5\n6 8 10 1 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "14 20 3 2 2\n6 1 3 -1 -6 1 0 -5\n6 8 10 1 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Operator precedence and associativity, parentheses, and the unary operators - + ~ !"
+  },
+  "079-arith-compare": {
+    "dash": {
+      "stdout": "1 0 1 1 0 1 0 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1 0 1 1 0 1 0 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1 0 1 1 0 1 0 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Comparison operators give 1 (true) or 0 (false)"
+  },
+  "080-arith-logical": {
+    "dash": {
+      "stdout": "1 0 0 1\n0 x=0\n1 x=0\n1 x=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1 0 0 1\n0 x=0\n1 x=0\n1 x=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1 0 0 1\n0 x=0\n1 x=0\n1 x=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "&& and || give 1 or 0 and short-circuit: the right side is not evaluated when the left side decides"
+  },
+  "081-arith-bitwise": {
+    "dash": {
+      "stdout": "8 14 6 16 32 -13 -4\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "8 14 6 16 32 -13 -4\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "8 14 6 16 32 -13 -4\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Bitwise operators & | ^ << >> ~"
+  },
+  "082-arith-ternary": {
+    "dash": {
+      "stdout": "1 20 2 3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1 20 2 3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1 20 2 3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "The conditional operator ?: , also nested"
+  },
+  "083-arith-assign-ops": {
+    "dash": {
+      "stdout": "6 8 7 21 5 2 2\n16 8 0 8 13 13\ny=10\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "6 8 7 21 5 2 2\n16 8 0 8 13 13\ny=10\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "6 8 7 21 5 2 2\n16 8 0 8 13 13\ny=10\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Assignment operators = += -= *= /= %= <<= >>= &= ^= |= change the variable and give its new value"
+  },
+  "084-arith-variables": {
+    "dash": {
+      "stdout": "6 6 1 1 1 25\n-6 3 -6\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "6 6 1 1 1 25\n-6 3 -6\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "6 6 1 1 1 25\n-6 3 -6\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Variables in arithmetic: with or without '$'; an unset or empty variable counts as 0"
+  },
+  "085-arith-variable-expression": {
+    "dash": {
+      "stdout": "8\nstatus 2\n",
+      "stderr": "t.sh: 5: Illegal number: 2+3\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "8\n10\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "8\n10\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "A variable holding an expression (y=2+3): $y is pasted in as text first (2+3*2); a bare y must hold an integer Differs: bash evaluates the value of a bare y as an expression (2+3, so 10); dash requires an integer and fails with \"Illegal number\" (status 2)"
+  },
+  "086-arith-constants": {
+    "dash": {
+      "stdout": "8 31 16 0 8 128\n9 9\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "8 31 16 0 8 128\n9 9\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "8 31 16 0 8 128\n9 9\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Integer constants: decimal, octal (leading 0) and hexadecimal (0x or 0X), also as variable values"
+  },
+  "087-arith-divzero": {
+    "dash": {
+      "stdout": "status 2\nstatus 2\nstatus 2\n",
+      "stderr": "t.sh: 3: arithmetic expression: division by zero: \"1 / 0\"\nt.sh: 5: arithmetic expression: division by zero: \"5 % 0\"\nt.sh: 7: arithmetic expression: division by zero: \"10 / x\"\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "status 1\nstatus 1\nstatus 1\n",
+      "stderr": "t.sh: line 3: 1 / 0: division by 0 (error token is \"0\")\nt.sh: line 5: 5 % 0: division by 0 (error token is \"0\")\nt.sh: line 7: 10 / x: division by 0 (error token is \"x\")\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "status 1\nstatus 1\nstatus 1\n",
+      "stderr": "t.sh: line 3: 1 / 0: division by 0 (error token is \"0\")\nt.sh: line 5: 5 % 0: division by 0 (error token is \"0\")\nt.sh: line 7: 10 / x: division by 0 (error token is \"x\")\n",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "Division or remainder by zero is an error: a message on stderr and the (sub)shell exits Differs: the subshell exits with status 2 in dash and 1 in bash (messages differ too)"
+  },
+  "088-arith-nested": {
+    "dash": {
+      "stdout": "6 5 6 20\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "6 5 6 20\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "6 5 6 20\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Arithmetic expansion may contain parameter, command and nested arithmetic expansions"
+  },
+  "089-cmdsub-basic": {
+    "dash": {
+      "stdout": "[a]\n[a\n\nb]\nback\none two\n[]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[a]\n[a\n\nb]\nback\none two\n[]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[a]\n[a\n\nb]\nback\none two\n[]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "$(...) and backquotes substitute a command's output; all trailing newlines are removed, inner ones are kept"
+  },
+  "090-cmdsub-nesting": {
+    "dash": {
+      "stdout": "deep\ninner\ntwo levels\nsubshell inside\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "deep\ninner\ntwo levels\nsubshell inside\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "deep\ninner\ntwo levels\nsubshell inside\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Command substitutions nest: $( $( ) ) directly, backquotes with \\` inside, and a subshell inside $( ( ) )"
+  },
+  "091-cmdsub-backquote-backslash": {
+    "dash": {
+      "stdout": "/home/yourname\n$HOME\n\\\n\\\\\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "/home/yourname\n$HOME\n\\\n\\\\\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "/home/yourname\n$HOME\n\\\n\\\\\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Inside backquotes \\$ \\` \\\\ lose their backslash before the inner command is parsed; $(...) keeps its text as written"
+  },
+  "092-cmdsub-quotes-inside-dq": {
+    "dash": {
+      "stdout": "dq in backquotes\ndq in dollar-paren\nparen ) in single quotes\nparen ) in double quotes\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "dq in backquotes\ndq in dollar-paren\nparen ) in single quotes\nparen ) in double quotes\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "dq in backquotes\ndq in dollar-paren\nparen ) in single quotes\nparen ) in double quotes\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Inside double quotes, $(...) may contain double quotes and ')' in quotes freely; backquotes need \\\" for inner double quotes"
+  },
+  "093-cmdsub-subshell-isolation": {
+    "dash": {
+      "stdout": "x=1 y=2\ncd stayed inside the substitution: ok\nw=before status=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "x=1 y=2\ncd stayed inside the substitution: ok\nw=before status=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "x=1 y=2\ncd stayed inside the substitution: ok\nw=before status=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A command substitution runs in a subshell: variable changes, cd and exit inside it do not affect the shell"
+  },
+  "094-cmdsub-status": {
+    "dash": {
+      "stdout": "x=$(false): 1\nx=$(exit 5): 5\n\necho $(false): 0\nbare $(exit 4): 4\ntwo substitutions: 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "x=$(false): 1\nx=$(exit 5): 5\n\necho $(false): 0\nbare $(exit 4): 4\ntwo substitutions: 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "x=$(false): 1\nx=$(exit 5): 5\n\necho $(false): 0\nbare $(exit 4): 4\ntwo substitutions: 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "The status of an assignment or of a command without a name is that of its last command substitution"
+  },
+  "095-cmdsub-case-paren": {
+    "dash": {
+      "stdout": "matched\n1 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "matched\n1 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "matched\n1 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A case statement and a loop inside $(...); the (pattern) form with a leading parenthesis works in every shell"
+  },
+  "096-cmdsub-comment-paren": {
+    "dash": {
+      "stdout": "after-comment\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "\necho after-comment)\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "\necho after-comment)\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "A comment inside $(...) may contain ')' without ending the substitution Differs: bash 3.2 ends the substitution at the ')' in the comment (it prints an empty line and the raw text); bash 4.0+ (Ubuntu ships 5.2) prints after-comment like dash"
+  },
+  "097-redir-output": {
+    "dash": {
+      "stdout": "two\ntwo\nthree\nempty file created\nappend also creates the file\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "two\ntwo\nthree\nempty file created\nappend also creates the file\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "two\ntwo\nthree\nempty file created\nappend also creates the file\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "> creates or truncates a file, >> appends; a redirection without a command creates the file"
+  },
+  "098-redir-input": {
+    "dash": {
+      "stdout": "first\nsecond\nfirst\nsecond\nread: first\nread again (the file is opened again): first\nfrom /dev/null: []\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "first\nsecond\nfirst\nsecond\nread: first\nread again (the file is opened again): first\nfrom /dev/null: []\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "first\nsecond\nfirst\nsecond\nread: first\nread again (the file is opened again): first\nfrom /dev/null: []\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "< reads standard input from a file; the redirection may come first; /dev/null reads as empty"
+  },
+  "099-redir-stderr": {
+    "dash": {
+      "stdout": "status 1\ncat: nofile: No such file or directory\n2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "status 1\ncat: nofile: No such file or directory\n2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "status 1\ncat: nofile: No such file or directory\n2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "2> sends standard error to a file, 2>/dev/null discards it, 2>> appends"
+  },
+  "100-redir-dup-order": {
+    "dash": {
+      "stdout": "f1:\nout\nerr\nerr\nf2:\nout\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "f1:\nout\nerr\nerr\nf2:\nout\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "f1:\nout\nerr\nerr\nf2:\nout\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Redirections are processed left to right: '>f 2>&1' sends both streams to f; '2>&1 >f' sends stderr to the old stdout"
+  },
+  "101-redir-to-stderr": {
+    "dash": {
+      "stdout": "merged into stdout\n",
+      "stderr": "to stderr\nalso stderr\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "merged into stdout\n",
+      "stderr": "to stderr\nalso stderr\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "merged into stdout\n",
+      "stderr": "to stderr\nalso stderr\n",
+      "status": 0
+    },
+    "differs": false,
+    "notes": ">&2 and 1>&2 write to standard error; 2>&1 merges standard error into standard output"
+  },
+  "102-redir-close": {
+    "dash": {
+      "stdout": "cat with closed stdout: 1\ncat with closed stderr: 1\nclosed by exec: 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "cat with closed stdout: 1\ncat with closed stderr: 1\nclosed by exec: 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "cat with closed stdout: 1\ncat with closed stderr: 1\nclosed by exec: 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": ">&- closes standard output and 2>&- closes standard error; a utility writing to a closed descriptor fails Note: an external utility (cat) is used on purpose: bash 3.2 has a bug where a built-in echo writing to a closed stdout still shows its text once the descriptor is restored"
+  },
+  "103-redir-fd-numbers": {
+    "dash": {
+      "stdout": "line1 / line2\nto fd 4\nagain\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "line1 / line2\nto fd 4\nagain\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "line1 / line2\nto fd 4\nagain\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Numbered descriptors: exec n<file and n>file open them in the shell; <&n and >&n duplicate them; n<&- and n>&- close them"
+  },
+  "104-redir-save-restore": {
+    "dash": {
+      "stdout": "back on stdout\ngoes to the file\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "back on stdout\ngoes to the file\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "back on stdout\ngoes to the file\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Saving and restoring stdout: exec 3>&1 >file ... exec 1>&3 3>&-"
+  },
+  "105-redir-compound": {
+    "dash": {
+      "stdout": "read: a\nread: b\nread: c\nread: d\nread: e\nread: f\nread: g\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "read: a\nread: b\nread: c\nread: d\nread: e\nread: f\nread: g\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "read: a\nread: b\nread: c\nread: d\nread: e\nread: f\nread: g\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Redirections apply to whole compound commands: { } ( ) if for case while"
+  },
+  "106-redir-function": {
+    "dash": {
+      "stdout": "inside f\ninside f\ng silenced: 0\ng writes to stderr\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "inside f\ninside f\ng silenced: 0\ng writes to stderr\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "inside f\ninside f\ng silenced: 0\ng writes to stderr\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A redirection written after a function body is applied each time the function runs"
+  },
+  "107-redir-multiple": {
+    "dash": {
+      "stdout": "a:[] b:[x]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a:[] b:[x]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a:[] b:[x]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Several output redirections on one command: every file is created, the last one gets the output"
+  },
+  "108-redir-target-expansion": {
+    "dash": {
+      "stdout": "hi\nsub\nstatus 0\nspaced\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "hi\nsub\nstatus 1\nno file named 'a b'\n",
+      "stderr": "t.sh: line 6: $n: ambiguous redirect\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "hi\nsub\nstatus 0\nspaced\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "The redirection target is expanded (parameters, command substitution) but not field split Differs: bash outside POSIX mode splits the word and fails with \"ambiguous redirect\" (status 1); dash and bash --posix create a file named 'a b'"
+  },
+  "109-redir-noclobber": {
+    "dash": {
+      "stdout": "status 2\nthree\nfour\nfive\n",
+      "stderr": "t.sh: 5: cannot create f: File exists\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "status 1\nthree\nfour\nfive\n",
+      "stderr": "t.sh: line 5: f: cannot overwrite existing file\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "status 1\nthree\nfour\nfive\n",
+      "stderr": "t.sh: line 5: f: cannot overwrite existing file\n",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "set -C (noclobber): > refuses to overwrite an existing file, >| overrides it, >> still appends Differs: the refused redirection gives status 2 in dash and 1 in bash (messages differ too)"
+  },
+  "110-redir-readwrite": {
+    "dash": {
+      "stdout": "read [abc]\nabc\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "read [abc]\nabc\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "read [abc]\nabc\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "<> opens a file for reading and writing on the given descriptor (standard input by default)"
+  },
+  "111-redir-errors": {
+    "dash": {
+      "stdout": "input redirection: 2\noutput redirection: 2\nbad descriptor: 2\nend\n",
+      "stderr": "t.sh: 3: cannot open nonexist: No such file\nt.sh: 4: cannot create nodir/f: Directory nonexistent\nt.sh: 5: 5: Bad file descriptor\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "input redirection: 1\noutput redirection: 1\nbad descriptor: 1\nend\n",
+      "stderr": "t.sh: line 3: nonexist: No such file or directory\nt.sh: line 4: nodir/f: No such file or directory\nt.sh: line 5: 5: Bad file descriptor\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "input redirection: 1\noutput redirection: 1\nbad descriptor: 1\nend\n",
+      "stderr": "t.sh: line 3: nonexist: No such file or directory\nt.sh: line 4: nodir/f: No such file or directory\nt.sh: line 5: 5: Bad file descriptor\n",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "A failed redirection on a regular command: the command does not run, the status is non-zero, the script goes on Differs: dash gives status 2 for a failed redirection, bash gives 1 (messages differ too)"
+  },
+  "112-redir-special-builtin-error": {
+    "dash": {
+      "stdout": "status 2\n",
+      "stderr": "t.sh: 3: cannot open nonexist: No such file\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "continued\nstatus 0\n",
+      "stderr": "t.sh: line 3: nonexist: No such file or directory\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "status 1\n",
+      "stderr": "t.sh: line 3: nonexist: No such file or directory\n",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "A failed redirection on a special built-in (':') makes a non-interactive POSIX shell exit; run in a subshell Differs: dash (status 2) and bash --posix (status 1) exit the subshell; bash outside POSIX mode carries on and prints 'continued'"
+  },
+  "113-heredoc-unquoted": {
+    "dash": {
+      "stdout": "x is val, cmd sub, arith 6, braces vals\nescaped $x and `echo no` and a backslash \\ stays one\nquotes stay: 'single' \"double\" \\\"backslash-dq\\\"\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "x is val, cmd sub, arith 6, braces vals\nescaped $x and `echo no` and a backslash \\ stays one\nquotes stay: 'single' \"double\" \\\"backslash-dq\\\"\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "x is val, cmd sub, arith 6, braces vals\nescaped $x and `echo no` and a backslash \\ stays one\nquotes stay: 'single' \"double\" \\\"backslash-dq\\\"\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Unquoted here-document: parameter, command and arithmetic expansion happen; \\$ \\` \\\\ are escapes; quotes are ordinary characters"
+  },
+  "114-heredoc-quoted": {
+    "dash": {
+      "stdout": "single: $x $(echo no) \\$x \\\\\ndouble: $x\nbackslash: $x\npartial: $x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "single: $x $(echo no) \\$x \\\\\ndouble: $x\nbackslash: $x\npartial: $x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "single: $x $(echo no) \\$x \\\\\ndouble: $x\nbackslash: $x\npartial: $x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Quoting any part of the delimiter (<<'EOF', <<\"EOF\", <<\\EOF, <<E\"O\"F) turns off all expansion in the body"
+  },
+  "115-heredoc-tabs": {
+    "dash": {
+      "stdout": "one tab val\ntwo tabs\n    four spaces stay\n  \tspaces then a tab stay\nafter\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "one tab val\ntwo tabs\n    four spaces stay\n  \tspaces then a tab stay\nafter\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "one tab val\ntwo tabs\n    four spaces stay\n  \tspaces then a tab stay\nafter\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "<<- strips leading tab characters (not spaces) from each body line and from the delimiter line"
+  },
+  "116-heredoc-multiple": {
+    "dash": {
+      "stdout": "first\nsecond\non stdin\non fd 3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "first\nsecond\non stdin\non fd 3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "first\nsecond\non stdin\non fd 3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Several here-documents on one line are read in order, also two for one command (stdin and fd 3)"
+  },
+  "117-heredoc-while-read": {
+    "dash": {
+      "stdout": "one=1\ntwo=2\nthree=3\nsum=6\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "one=1\ntwo=2\nthree=3\nsum=6\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "one=1\ntwo=2\nthree=3\nsum=6\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A here-document feeding a while read loop; the loop runs in the current shell, so its variables survive"
+  },
+  "118-heredoc-backslash-newline": {
+    "dash": {
+      "stdout": "joined line\nkept \\\nline\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "joined line\nkept \\\nline\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "joined line\nkept \\\nline\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "In an unquoted here-document backslash-newline joins lines; in a quoted one it is kept"
+  },
+  "119-heredoc-in-compound": {
+    "dash": {
+      "stdout": "from function: arg\nfrom if\ntwo\nin substitution\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "from function: arg\nfrom if\ntwo\nin substitution\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "from function: arg\nfrom if\ntwo\nin substitution\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Here-documents inside a function, an if, a pipeline and a command substitution"
+  },
+  "120-heredoc-delimiter-rules": {
+    "dash": {
+      "stdout": "empty body done\nEND not yet\n END\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "empty body done\nEND not yet\n END\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "empty body done\nEND not yet\n END\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "An empty body; the delimiter must be alone on its line (with other text, or indented in a << here-document, it is part of the body)"
+  },
+  "121-heredoc-body-text": {
+    "dash": {
+      "stdout": "\n  indented # not a comment\n\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "\n  indented # not a comment\n\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "\n  indented # not a comment\n\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Here-document bodies keep blank lines, leading spaces and '#' characters"
+  },
+  "122-pipe-basic": {
+    "dash": {
+      "stdout": "hello\na\nb\ny\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "hello\na\nb\ny\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "hello\na\nb\ny\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A pipeline connects the standard output of each command to the standard input of the next"
+  },
+  "123-pipe-status": {
+    "dash": {
+      "stdout": "0\n1\n3\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "0\n1\n3\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "0\n1\n3\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "The exit status of a pipeline is the status of its last command"
+  },
+  "124-pipe-negation": {
+    "dash": {
+      "stdout": "1\n0\n0\n0\nnegated in if\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1\n0\n0\n0\nnegated in if\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1\n0\n0\n0\nnegated in if\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "! negates the exit status of a whole pipeline"
+  },
+  "125-pipe-subshells": {
+    "dash": {
+      "stdout": "x=1\nv=[unset]\ninside the group: a\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "x=1\nv=[unset]\ninside the group: a\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "x=1\nv=[unset]\ninside the group: a\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Each command of a multi-command pipeline runs in a subshell, so variable changes there do not survive"
+  },
+  "126-pipe-stderr": {
+    "dash": {
+      "stdout": "out\nout2\nerr2\n1\n",
+      "stderr": "err\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "out\nout2\nerr2\n1\n",
+      "stderr": "err\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "out\nout2\nerr2\n1\n",
+      "stderr": "err\n",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Only standard output goes through a pipe, unless 2>&1 is added"
+  },
+  "127-pipe-multiline": {
+    "dash": {
+      "stdout": "a\nand on the next line\nor on the next line\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a\nand on the next line\nor on the next line\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a\nand on the next line\nor on the next line\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A command can continue on the next line after |, && and ||"
+  },
+  "128-list-and-or": {
+    "dash": {
+      "stdout": "yes\nalt\ny\nz\nthird\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "yes\nalt\ny\nz\nthird\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "yes\nalt\ny\nz\nthird\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "&& runs the next command only after success, || only after failure; both have equal precedence and group left to right"
+  },
+  "129-list-and-or-status": {
+    "dash": {
+      "stdout": "1\n0\n1\n3\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1\n0\n1\n3\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1\n0\n1\n3\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "The status of an AND-OR list is that of the last command that actually ran"
+  },
+  "130-list-sequential": {
+    "dash": {
+      "stdout": "a\nb\nafter false: 1\nc\nd\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a\nb\nafter false: 1\nc\nd\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a\nb\nafter false: 1\nc\nd\n0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "';' and newlines both separate commands; a trailing ';' is allowed"
+  },
+  "131-list-async": {
+    "dash": {
+      "stdout": "foreground\nbackground\nafter wait: 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "foreground\nbackground\nafter wait: 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "foreground\nbackground\nafter wait: 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "'&' runs a command asynchronously; wait waits for every background job"
+  },
+  "132-list-wait-status": {
+    "dash": {
+      "stdout": "wait for (exit 3): 3\nwait for false: 1\nplain wait: 0\nunknown pid: 127\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "wait for (exit 3): 3\nwait for false: 1\nplain wait: 0\nunknown pid: 127\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "wait for (exit 3): 3\nwait for false: 1\nplain wait: 0\nunknown pid: 127\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "wait PID returns that job's exit status; wait without operands returns 0; a PID that is not a child gives 127"
+  },
+  "133-list-wait-order": {
+    "dash": {
+      "stdout": "b: 5\na: 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "b: 5\na: 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "b: 5\na: 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Waiting for two background jobs one by one, in a different order from the one they were started in"
+  },
+  "134-list-async-isolation": {
+    "dash": {
+      "stdout": "x=1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "x=1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "x=1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "An asynchronous command runs in a subshell: its assignments do not reach the shell"
+  },
+  "135-group-subshell-vars": {
+    "dash": {
+      "stdout": "inside: 2\noutside: 1\nf is not defined outside\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "inside: 2\noutside: 1\nf is not defined outside\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "inside: 2\noutside: 1\nf is not defined outside\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "( ) runs commands in a subshell: variables and functions set there do not survive"
+  },
+  "136-group-subshell-cd": {
+    "dash": {
+      "stdout": "file created inside d\nstill in the original directory\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "file created inside d\nstill in the original directory\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "file created inside d\nstill in the original directory\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "cd inside ( ) does not change the directory of the shell"
+  },
+  "137-group-subshell-exit": {
+    "dash": {
+      "stdout": "status 4\na\nstatus 0\nstatus 1\nparams in subshell: 3\nparams outside: 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "status 4\na\nstatus 0\nstatus 1\nparams in subshell: 3\nparams outside: 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "status 4\na\nstatus 0\nstatus 1\nparams in subshell: 3\nparams outside: 2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "exit inside ( ) leaves only the subshell, whose status becomes that exit status"
+  },
+  "138-group-brace": {
+    "dash": {
+      "stdout": "in group\nx=2\nb\na\nc\nd\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "in group\nx=2\nb\na\nc\nd\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "in group\nx=2\nb\na\nc\nd\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "{ } groups commands in the current shell: changes stay, and the group can be piped or redirected as a whole"
+  },
+  "139-group-brace-exit": {
+    "dash": {
+      "stdout": "before\nin group\n",
+      "stderr": "",
+      "status": 3
+    },
+    "bash": {
+      "stdout": "before\nin group\n",
+      "stderr": "",
+      "status": 3
+    },
+    "bashPosix": {
+      "stdout": "before\nin group\n",
+      "stderr": "",
+      "status": 3
+    },
+    "differs": false,
+    "notes": "exit inside { } exits the whole script with that status"
+  },
+  "140-group-nesting": {
+    "dash": {
+      "stdout": "a\nb\nc\nd\ne\nf\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a\nb\nc\nd\ne\nf\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a\nb\nc\nd\ne\nf\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Groups and subshells nest"
+  },
+  "141-group-status": {
+    "dash": {
+      "stdout": "1\n0\n0\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1\n0\n0\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1\n0\n0\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "The status of { } and ( ) is that of their last command"
+  },
+  "142-if-basic": {
+    "dash": {
+      "stdout": "one\ntwo\nother\nonly the last command of the condition counts\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "one\ntwo\nother\nonly the last command of the condition counts\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "one\ntwo\nother\nonly the last command of the condition counts\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "if / elif / else / fi run the first branch whose condition list succeeds; the condition is a list (its last status counts)"
+  },
+  "143-if-status": {
+    "dash": {
+      "stdout": "no branch ran: 0\nthen branch: 3\nelse branch: 4\ncondition status seen in else: 5\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "no branch ran: 0\nthen branch: 3\nelse branch: 4\ncondition status seen in else: 5\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "no branch ran: 0\nthen branch: 3\nelse branch: 4\ncondition status seen in else: 5\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "The status of an if is that of the branch that ran, or 0 when no branch ran"
+  },
+  "144-if-nested-oneline": {
+    "dash": {
+      "stdout": "b\nc\ne\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "b\nc\ne\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "b\nc\ne\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "if statements nest and can be written on one line or inside $(...)"
+  },
+  "145-loop-while": {
+    "dash": {
+      "stdout": "i=0\ni=1\ni=2\nstatus after a loop that never ran: 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "i=0\ni=1\ni=2\nstatus after a loop that never ran: 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "i=0\ni=1\ni=2\nstatus after a loop that never ran: 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "while repeats its body while the condition list succeeds"
+  },
+  "146-loop-until": {
+    "dash": {
+      "stdout": "i=0\ni=1\ni=2\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "i=0\ni=1\ni=2\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "i=0\ni=1\ni=2\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "until repeats its body until the condition list succeeds"
+  },
+  "147-loop-break-continue": {
+    "dash": {
+      "stdout": "i=1\ni=3\nw=1\nw=2\nw=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "i=1\ni=3\nw=1\nw=2\nw=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "i=1\ni=3\nw=1\nw=2\nw=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "break leaves the loop, continue goes on with the next iteration"
+  },
+  "148-loop-break-n": {
+    "dash": {
+      "stdout": "1a\n2a\nend i=3 j=a\nbreak 9 left both loops: 1a\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1a\n2a\nend i=3 j=a\nbreak 9 left both loops: 1a\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1a\n2a\nend i=3 j=a\nbreak 9 left both loops: 1a\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "break n and continue n act on the n-th enclosing loop; a too large n means the outermost loop"
+  },
+  "149-loop-for-list": {
+    "dash": {
+      "stdout": "w=one\nw=two\nw=three\nsplit: a\nsplit: b\nsplit: c\nquoted: a b  c\nempty list status 0\nw after the loops: a b  c\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "w=one\nw=two\nw=three\nsplit: a\nsplit: b\nsplit: c\nquoted: a b  c\nempty list status 0\nw after the loops: a b  c\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "w=one\nw=two\nw=three\nsplit: a\nsplit: b\nsplit: c\nquoted: a b  c\nempty list status 0\nw after the loops: a b  c\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "for over a word list; the words are expanded and split first; the variable keeps its last value afterwards"
+  },
+  "150-loop-for-positional": {
+    "dash": {
+      "stdout": "[a b]\n[c]\nno semicolon [a b]\nno semicolon [c]\nf arg [p]\nf arg [q r]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[a b]\n[c]\nno semicolon [a b]\nno semicolon [c]\nf arg [p]\nf arg [q r]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[a b]\n[c]\nno semicolon [a b]\nno semicolon [c]\nf arg [p]\nf arg [q r]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "for without 'in' loops over the positional parameters, as \"$@\" would"
+  },
+  "151-loop-for-cmdsub": {
+    "dash": {
+      "stdout": "w=a\nw=b\nw=c\nsum=10\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "w=a\nw=b\nw=c\nsum=10\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "w=a\nw=b\nw=c\nsum=10\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "for over the output of a command substitution (split into fields)"
+  },
+  "152-loop-status": {
+    "dash": {
+      "stdout": "for: 2\nwhile: 0\nwhile body: 7\nafter break: 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "for: 2\nwhile: 0\nwhile body: 7\nafter break: 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "for: 2\nwhile: 0\nwhile body: 7\nafter break: 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "The status of a loop is that of the last command its body ran, or 0 if the body never ran"
+  },
+  "153-loop-while-read-file": {
+    "dash": {
+      "stdout": "1:alpha\n2:beta\n3:gamma\nlines=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1:alpha\n2:beta\n3:gamma\nlines=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1:alpha\n2:beta\n3:gamma\nlines=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A while read loop reading a file with '< file' after done"
+  },
+  "154-loop-redirect-pipe": {
+    "dash": {
+      "stdout": "1\n2\n3\nx\ny\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1\n2\n3\nx\ny\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1\n2\n3\nx\ny\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A whole loop can be piped or redirected"
+  },
+  "155-case-basic": {
+    "dash": {
+      "stdout": "apple: first\nbanana: second\ncherry: second\nkiwi: default\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "apple: first\nbanana: second\ncherry: second\nkiwi: default\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "apple: first\nbanana: second\ncherry: second\nkiwi: default\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "case runs the commands of the first matching pattern; | separates alternatives, * matches anything"
+  },
+  "156-case-patterns": {
+    "dash": {
+      "stdout": "a: one character\nab: a and one more\nabc: starts with a letter\n7: digit\n-: not a lowercase letter\nx.y: has a dot\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a: one character\nab: a and one more\nabc: starts with a letter\n7: digit\n-: not a lowercase letter\nx.y: has a dot\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a: one character\nab: a and one more\nabc: starts with a letter\n7: digit\n-: not a lowercase letter\nx.y: has a dot\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "case patterns use pattern-matching notation: ? * [...] [!...] and character classes"
+  },
+  "157-case-quoted": {
+    "dash": {
+      "stdout": "[abc] matches $p as a pattern\n[a*] matches \"$p\" literally\n[*] is a literal star\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[abc] matches $p as a pattern\n[a*] matches \"$p\" literally\n[*] is a literal star\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[abc] matches $p as a pattern\n[a*] matches \"$p\" literally\n[*] is a literal star\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Quoted characters in case patterns are literal; a pattern from an unquoted variable is still a pattern"
+  },
+  "158-case-first-match": {
+    "dash": {
+      "stdout": "first\nlast item without ;;\none line, no ;;\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "first\nlast item without ;;\none line, no ;;\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "first\nlast item without ;;\none line, no ;;\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Only the first matching item runs (no fall-through); ';;' may be left out on the last item"
+  },
+  "159-case-status": {
+    "dash": {
+      "stdout": "empty case: 0\nno match: 0\nempty body: 0\nbody status: 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "empty case: 0\nno match: 0\nempty body: 0\nbody status: 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "empty case: 0\nno match: 0\nempty body: 0\nbody status: 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A case with no items or no match has status 0; otherwise it has the status of the last command run"
+  },
+  "160-case-paren-form": {
+    "dash": {
+      "stdout": "matched (a|b)\nsecond line\ninside-substitution\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "matched (a|b)\nsecond line\ninside-substitution\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "matched (a|b)\nsecond line\ninside-substitution\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A pattern may start with '('; bodies can be empty or span several lines"
+  },
+  "161-case-word-expansion": {
+    "dash": {
+      "stdout": "no splitting\nno globbing of the word\npattern from a variable\ntilde expanded in the word\ntilde expanded in the pattern\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "no splitting\nno globbing of the word\npattern from a variable\ntilde expanded in the word\ntilde expanded in the pattern\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "no splitting\nno globbing of the word\npattern from a variable\ntilde expanded in the word\ntilde expanded in the pattern\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "The case word is expanded without field splitting or pathname expansion; patterns are expanded too (also tilde)"
+  },
+  "162-case-special-chars": {
+    "dash": {
+      "stdout": "pipe\nparens\nsemicolon\nspace\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "pipe\nparens\nsemicolon\nspace\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "pipe\nparens\nsemicolon\nspace\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Patterns can match special characters when they are quoted or escaped"
+  },
+  "163-func-basic": {
+    "dash": {
+      "stdout": "f got 3: a b c\nafter: 2 outer1 outer2\ng with the body on its own lines: x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "f got 3: a b c\nafter: 2 outer1 outer2\ng with the body on its own lines: x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "f got 3: a b c\nafter: 2 outer1 outer2\ng with the body on its own lines: x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Functions: definition and call with arguments; $1.. and $# belong to the call and are restored afterwards"
+  },
+  "164-func-return": {
+    "dash": {
+      "stdout": "return 3: 3\nplain return after false: 1\nend of body: 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "return 3: 3\nplain return after false: 1\nend of body: 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "return 3: 3\nplain return after false: 1\nend of body: 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "return n sets the function's status; a plain return, or the end of the body, uses the status of the last command"
+  },
+  "165-func-recursion": {
+    "dash": {
+      "stdout": "120\n13\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "120\n13\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "120\n13\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Recursive functions, using positional parameters and command substitution instead of local variables"
+  },
+  "166-func-override-utility": {
+    "dash": {
+      "stdout": "my cat: file\nreal cat\nafter unset -f\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "my cat: file\nreal cat\nafter unset -f\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "my cat: file\nreal cat\nafter unset -f\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A function can override a utility of the same name; 'command' bypasses functions; unset -f removes the function"
+  },
+  "167-func-global-vars": {
+    "dash": {
+      "stdout": "x=inside y=arg\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "x=inside y=arg\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "x=inside y=arg\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Variables assigned inside a function are global (POSIX has no local variables)"
+  },
+  "168-func-exit": {
+    "dash": {
+      "stdout": "in f\n",
+      "stderr": "",
+      "status": 5
+    },
+    "bash": {
+      "stdout": "in f\n",
+      "stderr": "",
+      "status": 5
+    },
+    "bashPosix": {
+      "stdout": "in f\n",
+      "stderr": "",
+      "status": 5
+    },
+    "differs": false,
+    "notes": "exit inside a function exits the whole script"
+  },
+  "169-func-compound-bodies": {
+    "dash": {
+      "stdout": "subshell body: inner\nx is still outer\nif body: yes\nif body: no\nfor body 1\nfor body 2\ncase body a\ncase body other\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "subshell body: inner\nx is still outer\nif body: yes\nif body: no\nfor body 1\nfor body 2\ncase body a\ncase body other\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "subshell body: inner\nx is still outer\nif body: yes\nif body: no\nfor body 1\nfor body 2\ncase body a\ncase body other\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A function body can be any compound command: ( ) if for case, not only { }"
+  },
+  "170-func-redefine": {
+    "dash": {
+      "stdout": "one\ntwo\ndefinition status: 0\nmade does not exist yet\nmade by mk\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "one\ntwo\ndefinition status: 0\nmade does not exist yet\nmade by mk\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "one\ntwo\ndefinition status: 0\nmade does not exist yet\nmade by mk\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Defining a function again replaces it; a definition has status 0; a function can define another one"
+  },
+  "171-func-nested-params": {
+    "dash": {
+      "stdout": "outer: a b\ninner: x y\ninner after shift: y\nouter again: a b\ntop: top\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "outer: a b\ninner: x y\ninner after shift: y\nouter again: a b\ntop: top\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "outer: a b\ninner: x y\ninner after shift: y\nouter again: a b\ntop: top\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Nested calls each get their own positional parameters; shift inside a function does not affect the caller"
+  },
+  "172-func-return-toplevel": {
+    "dash": {
+      "stdout": "subshell status: 3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "after a top-level return: 1\nsubshell status: 0\n",
+      "stderr": "t.sh: line 4: return: can only `return' from a function or sourced script\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "after a top-level return: 1\nsubshell status: 0\n",
+      "stderr": "t.sh: line 4: return: can only `return' from a function or sourced script\n",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "return outside any function (at the top level of the script) is unspecified by POSIX; run in a subshell Differs: dash treats it like exit (the subshell ends with status 3); bash prints an error, sets status 1 and carries on Note: bash 5 gives status 2 instead of 1, and bash 5 --posix exits the subshell with status 2"
+  },
+  "173-func-unset-f": {
+    "dash": {
+      "stdout": "function f\nvariable\nfunction gone, status 127\nvariable still: variable\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "function f\nvariable\nfunction gone, status 127\nvariable still: variable\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "function f\nvariable\nfunction gone, status 127\nvariable still: variable\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "unset -f removes a function; a variable of the same name is separate and stays"
+  },
+  "174-builtin-colon": {
+    "dash": {
+      "stdout": "status 0\nx=assigned\nn=5\nfile created by ': >'\n",
+      "stderr": "side effect on stderr\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "status 0\nx=assigned\nn=5\nfile created by ': >'\n",
+      "stderr": "side effect on stderr\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "status 0\nx=assigned\nn=5\nfile created by ': >'\n",
+      "stderr": "side effect on stderr\n",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "':' does nothing and succeeds, but its arguments are still expanded, so their side effects happen"
+  },
+  "175-builtin-true-false": {
+    "dash": {
+      "stdout": "0\n1\n0\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "0\n1\n0\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "0\n1\n0\n1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "true and false ignore their arguments and return 0 and 1"
+  },
+  "176-builtin-dot": {
+    "dash": {
+      "stdout": "libvar=from-lib\nlibfn called with arg\nin st.sh\nstatus of '.': 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "libvar=from-lib\nlibfn called with arg\nin st.sh\nstatus of '.': 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "libvar=from-lib\nlibfn called with arg\nin st.sh\nstatus of '.': 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "'.' runs a file in the current shell: variables and functions it defines stay; its status is that of its last command"
+  },
+  "177-builtin-dot-return": {
+    "dash": {
+      "stdout": "one\nstatus 3\nthe script continues\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "one\nstatus 3\nthe script continues\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "one\nstatus 3\nthe script continues\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "return inside a file run with '.' ends that file early with the given status"
+  },
+  "178-builtin-dot-args": {
+    "dash": {
+      "stdout": "in lib: 2 [p1 p2]\nin lib: 2 [p1 p2]\nafter: 2 [p1 p2]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "in lib: 2 [one two]\nin lib: 2 [p1 p2]\nafter: 2 [p1 p2]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "in lib: 2 [one two]\nin lib: 2 [p1 p2]\nafter: 2 [p1 p2]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "Extra arguments to '.' are not specified by POSIX Differs: bash sets the positional parameters to the extra arguments while the file runs and restores them afterwards; dash ignores the extra arguments"
+  },
+  "179-builtin-dot-path": {
+    "dash": {
+      "stdout": "status 2\n",
+      "stderr": "t.sh: 5: .: lib.sh: not found\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "lib.sh was found\ncontinued: 0\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "lib.sh was found\ncontinued: 0\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "'.' with a name that has no '/' searches PATH, not the current directory; not finding the file is an error that exits a POSIX shell Differs: bash outside POSIX mode also looks in the current directory and finds lib.sh; dash prints '.: lib.sh: not found' and exits the subshell with status 2 Note: bash 3.2 --posix also finds lib.sh in the current directory; bash 5 --posix does not ('file not found') and exits the subshell with status 1"
+  },
+  "180-builtin-dot-missing": {
+    "dash": {
+      "stdout": "status 2\n",
+      "stderr": "t.sh: 3: .: cannot open ./nope: No such file\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "continued: 1\nstatus 0\n",
+      "stderr": "t.sh: line 3: ./nope: No such file or directory\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "status 1\n",
+      "stderr": "t.sh: line 3: ./nope: No such file or directory\n",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "'.' with a file that does not exist is an error that exits a non-interactive POSIX shell (a subshell here) Differs: bash outside POSIX mode returns 1 and carries on ('continued: 1'); dash (status 2) and bash --posix (status 1) exit the subshell"
+  },
+  "181-builtin-eval": {
+    "dash": {
+      "stdout": "x=1 y=2\na\nb\ndeep\n1 quoted  text\nempty eval: 0\neval false: 1\ndefined by eval\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "x=1 y=2\na\nb\ndeep\n1 quoted  text\nempty eval: 0\neval false: 1\ndefined by eval\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "x=1 y=2\na\nb\ndeep\n1 quoted  text\nempty eval: 0\neval false: 1\ndefined by eval\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "eval joins its arguments with spaces and runs the result as shell code in the current shell"
+  },
+  "182-builtin-exec": {
+    "dash": {
+      "stdout": "replaced\nstatus of exec false: 1\nexec of a missing command: 127\nthrough fd 3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "replaced\nstatus of exec false: 1\nexec of a missing command: 127\nthrough fd 3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "replaced\nstatus of exec false: 1\nexec of a missing command: 127\nthrough fd 3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "exec with a command replaces the shell (a subshell here); exec with only redirections changes the shell's own descriptors"
+  },
+  "183-builtin-exit": {
+    "dash": {
+      "stdout": "exit 7: 7\nplain exit after false: 1\nplain exit after true: 0\nbefore the final exit\n",
+      "stderr": "",
+      "status": 3
+    },
+    "bash": {
+      "stdout": "exit 7: 7\nplain exit after false: 1\nplain exit after true: 0\nbefore the final exit\n",
+      "stderr": "",
+      "status": 3
+    },
+    "bashPosix": {
+      "stdout": "exit 7: 7\nplain exit after false: 1\nplain exit after true: 0\nbefore the final exit\n",
+      "stderr": "",
+      "status": 3
+    },
+    "differs": false,
+    "notes": "exit n exits with status n; a plain exit uses the status of the last command"
+  },
+  "184-builtin-exit-trap": {
+    "dash": {
+      "stdout": "main\ntrap sees status 4\n",
+      "stderr": "",
+      "status": 4
+    },
+    "bash": {
+      "stdout": "main\ntrap sees status 4\n",
+      "stderr": "",
+      "status": 4
+    },
+    "bashPosix": {
+      "stdout": "main\ntrap sees status 4\n",
+      "stderr": "",
+      "status": 4
+    },
+    "differs": false,
+    "notes": "exit runs the EXIT trap; inside the trap $? is the exit status, and the script keeps that status"
+  },
+  "185-builtin-export": {
+    "dash": {
+      "stdout": "child: A=1 B=[] C=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "child: A=1 B=[] C=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "child: A=1 B=[] C=3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "export marks variables for the environment of child processes; unexported variables are not passed on"
+  },
+  "186-builtin-export-readonly-p": {
+    "dash": {
+      "stdout": "export Q='it'\"'\"'s'\nexport X='1'\nexport Y='a b'\nreadonly R='2'\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "declare -x Q=\"it's\"\ndeclare -x X=\"1\"\ndeclare -x Y=\"a b\"\ndeclare -r R=\"2\"\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "export Q=\"it's\"\nexport X=\"1\"\nexport Y=\"a b\"\nreadonly R=\"2\"\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "export -p and readonly -p list variables in a form the shell can read back Differs: the format differs: dash prints export X='1' and readonly R='2'; bash prints declare -x X=\"1\" and declare -r R=\"2\" (bash --posix: export X=\"1\", readonly R=\"2\")"
+  },
+  "187-builtin-readonly": {
+    "dash": {
+      "stdout": "status 2\nstatus 2\nr=1\n",
+      "stderr": "t.sh: 5: r: is read only\nt.sh: 7: unset: r: is read only\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "status 1\nafter unset: 1\nstatus 0\nr=1\n",
+      "stderr": "t.sh: line 5: r: readonly variable\nt.sh: line 7: unset: r: cannot unset: readonly variable\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "status 1\nafter unset: 1\nstatus 0\nr=1\n",
+      "stderr": "t.sh: line 5: r: readonly variable\nt.sh: line 7: unset: r: cannot unset: readonly variable\n",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "A readonly variable cannot be assigned or unset; trying is an error that exits a non-interactive POSIX shell (subshells here) Differs: dash exits the subshell (status 2); bash outside POSIX mode prints an error, returns 1 and carries on Note: bash --posix exits the subshell on the assignment (status 1) but carries on after the failed unset"
+  },
+  "188-builtin-set-e": {
+    "dash": {
+      "stdout": "before\nfalse | true is fine\n",
+      "stderr": "",
+      "status": 1
+    },
+    "bash": {
+      "stdout": "before\nfalse | true is fine\n",
+      "stderr": "",
+      "status": 1
+    },
+    "bashPosix": {
+      "stdout": "before\nfalse | true is fine\n",
+      "stderr": "",
+      "status": 1
+    },
+    "differs": false,
+    "notes": "set -e: the shell exits as soon as a simple command or pipeline fails; a pipeline's status is its last command's"
+  },
+  "189-builtin-set-e-exceptions": {
+    "dash": {
+      "stdout": "if condition ok\nwhile condition ok\nuntil condition ok\nand-list ok\nor-list ok\nnegation ok\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "if condition ok\nwhile condition ok\nuntil condition ok\nand-list ok\nor-list ok\nnegation ok\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "if condition ok\nwhile condition ok\nuntil condition ok\nand-list ok\nor-list ok\nnegation ok\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "set -e is ignored in if/while/until conditions, for commands before the last one in && and || lists, and for ! pipelines"
+  },
+  "190-builtin-set-e-function": {
+    "dash": {
+      "stdout": "f continues\nf returned 0\nf continues\nf continues\nf ok\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "f continues\nf returned 0\nf continues\nf continues\nf ok\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "f continues\nf returned 0\nf continues\nf continues\nf ok\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "set -e is also ignored inside a function called where -e is ignored (if condition, left of && or ||)"
+  },
+  "191-builtin-set-e-subshell": {
+    "dash": {
+      "stdout": "subshell continues\ngroup continues\n",
+      "stderr": "",
+      "status": 1
+    },
+    "bash": {
+      "stdout": "subshell continues\ngroup continues\n",
+      "stderr": "",
+      "status": 1
+    },
+    "bashPosix": {
+      "stdout": "subshell continues\ngroup continues\n",
+      "stderr": "",
+      "status": 1
+    },
+    "differs": false,
+    "notes": "set -e and ( ) / { }: on the left of || -e is ignored inside them too; a failing subshell elsewhere exits the script"
+  },
+  "192-builtin-set-e-cmdsub": {
+    "dash": {
+      "stdout": "",
+      "stderr": "",
+      "status": 1
+    },
+    "bash": {
+      "stdout": "x=rest of the substitution\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "",
+      "stderr": "",
+      "status": 1
+    },
+    "differs": true,
+    "notes": "set -e inside a command substitution Differs: dash (and bash --posix) keep -e inside $(...), so false ends the substitution and the failed assignment then exits the script with status 1; bash outside POSIX mode turns -e off inside $(...) (unless shopt inherit_errexit, bash 4.4+)"
+  },
+  "193-builtin-set-u": {
+    "dash": {
+      "stdout": "default: none\nparams: 0 [] []\nempty is fine: []\nsubshell status 2\nunset is fine again: []\n",
+      "stderr": "t.sh: 7: u: parameter not set\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "default: none\nparams: 0 [] []\nempty is fine: []\nsubshell status 1\nunset is fine again: []\n",
+      "stderr": "t.sh: line 7: u: unbound variable\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "default: none\nparams: 0 [] []\nempty is fine: []\nsubshell status 1\nunset is fine again: []\n",
+      "stderr": "t.sh: line 7: u: unbound variable\n",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "set -u: expanding an unset variable is an error that exits the shell; ${x-default}, empty variables and $@ / $* are fine Differs: the subshell exits with status 2 in dash and 1 in bash (messages: \"parameter not set\" vs \"unbound variable\")"
+  },
+  "194-builtin-set-long-options": {
+    "dash": {
+      "stdout": "noglob on\nnoglob off\nerrexit on\nnounset on\ncombined -fu\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "noglob on\nnoglob off\nerrexit on\nnounset on\ncombined -fu\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "noglob on\nnoglob off\nerrexit on\nnounset on\ncombined -fu\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "set -o name and set +o name are long forms of the single-letter options; letters can be combined (set -fu)"
+  },
+  "195-builtin-set-x": {
+    "dash": {
+      "stdout": "val two\ndone\n",
+      "stderr": "+ echo val two\n+ : val\n+ set +x\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "val two\ndone\n",
+      "stderr": "+ echo val two\n+ : val\n+ set +x\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "val two\ndone\n",
+      "stderr": "+ echo val two\n+ : val\n+ set +x\n",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "set -x writes each command to stderr after expansion, prefixed with '+ ' (PS4), until set +x"
+  },
+  "196-builtin-trap-exit": {
+    "dash": {
+      "stdout": "main\nthird exit trap, set after the removal\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "main\nthird exit trap, set after the removal\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "main\nthird exit trap, set after the removal\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "trap 'cmds' EXIT runs when the script ends; a later trap replaces it; trap 0 means EXIT; trap - EXIT removes it"
+  },
+  "197-builtin-trap-subshell": {
+    "dash": {
+      "stdout": "subshell does not run the parent trap\nin subshell\nsubshell exit trap\nend of script\nparent exit trap\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "subshell does not run the parent trap\nin subshell\nsubshell exit trap\nend of script\nparent exit trap\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "subshell does not run the parent trap\nin subshell\nsubshell exit trap\nend of script\nparent exit trap\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Traps are reset in subshells: the parent's EXIT trap does not run there, but a subshell can set its own"
+  },
+  "198-builtin-trap-list": {
+    "dash": {
+      "stdout": "trap -- 'echo bye' EXIT\ntrap -- 'echo int' INT\nafter reset\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "trap -- 'echo bye' EXIT\ntrap -- 'echo int' SIGINT\nafter reset\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "trap -- 'echo bye' EXIT\ntrap -- 'echo int' INT\nafter reset\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "trap with no arguments lists the traps in a form that can be reused as input Differs: bash outside POSIX mode writes signal names with the SIG prefix (SIGINT); dash and bash --posix write INT"
+  },
+  "199-builtin-trap-cmdsub": {
+    "dash": {
+      "stdout": "[]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[trap -- 'echo bye' EXIT]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[trap -- 'echo bye' EXIT]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "trap inside $(...) with no arguments may report the parent shell's traps (POSIX allows this special case) Differs: bash lists the parent's EXIT trap from inside the command substitution; dash prints nothing"
+  },
+  "200-builtin-trap-signal": {
+    "dash": {
+      "stdout": "got TERM\nafter kill\ngot USR1\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "got TERM\nafter kill\ngot USR1\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "got TERM\nafter kill\ngot USR1\nend\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A trap on a signal runs when the shell receives that signal (sent to itself with kill)"
+  },
+  "201-builtin-unset": {
+    "dash": {
+      "stdout": "x=[unset]\ny=[unset]\nf removed\nstatus 0\n[unset] [unset]\nfunction v survives\n[unset]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "x=[unset]\ny=[unset]\nf removed\nstatus 0\n[unset] [unset]\nfunction v survives\n[unset]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "x=[unset]\ny=[unset]\nf removed\nstatus 0\n[unset] [unset]\nfunction v survives\n[unset]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "unset removes variables (also with -v) and functions (-f); unsetting a name that is not set is not an error"
+  },
+  "202-builtin-command": {
+    "dash": {
+      "stdout": "f\necho\nif\nstatus 127\nfunction echo\nthe built-in echo\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "f\necho\nif\nstatus 1\nfunction echo\nthe built-in echo\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "f\necho\nif\nstatus 1\nfunction echo\nthe built-in echo\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "command runs a name without looking up functions; command -v shows how a name would be found Differs: command -v of an unknown name returns 127 in dash and 1 in bash"
+  },
+  "203-builtin-cd": {
+    "dash": {
+      "stdout": "the file landed in d/e\nfailed cd: 2\nback where we started\ncd - status 0\ncd - went back to d\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "the file landed in d/e\nfailed cd: 1\nback where we started\ncd - status 0\ncd - went back to d\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "the file landed in d/e\nfailed cd: 1\nback where we started\ncd - status 0\ncd - went back to d\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "cd changes the directory for later commands; a failed cd keeps the old one Differs: a failed cd returns 2 in dash and 1 in bash"
+  },
+  "204-builtin-umask": {
+    "dash": {
+      "stdout": "0027\nu=rwx,g=rx,o=\n0022\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "0027\nu=rwx,g=rx,o=\n0022\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "0027\nu=rwx,g=rx,o=\n0022\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "umask sets and shows the file mode creation mask, in octal and symbolic (-S) form"
+  },
+  "205-builtin-alias": {
+    "dash": {
+      "stdout": "hello from an alias\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "status 127\n",
+      "stderr": "t.sh: line 4: hi: command not found\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "hello from an alias\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "Aliases are expanded in non-interactive POSIX shells too, starting from the line after the alias command Differs: bash outside POSIX mode does not expand aliases in scripts (expand_aliases is off), so 'hi' is not found (status 127)"
+  },
+  "206-read-fields": {
+    "dash": {
+      "stdout": "[one] [two] [three four]\n[only] [] []\n[leading and trailing blanks are removed]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[one] [two] [three four]\n[only] [] []\n[leading and trailing blanks are removed]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[one] [two] [three four]\n[only] [] []\n[leading and trailing blanks are removed]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "read splits a line with IFS: one word per variable, the last variable gets the rest of the line, missing words leave variables empty"
+  },
+  "207-read-ifs": {
+    "dash": {
+      "stdout": "[root] [x] [0] [0:root:/root]\n[x ] [ y,z]\nIFS unchanged: 2 fields\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[root] [x] [0] [0:root:/root]\n[x ] [ y,z]\nIFS unchanged: 2 fields\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[root] [x] [0] [0:root:/root]\n[x ] [ y,z]\nIFS unchanged: 2 fields\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "read with IFS given as a prefix assignment (the shell's own IFS is unchanged); non-blank IFS characters do not trim spaces"
+  },
+  "208-read-ifs-trailing": {
+    "dash": {
+      "stdout": "[x] [y:z:]\n[x] [y]\n[x] [y : z]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[x] [y:z:]\n[x] [y]\n[x] [y : z]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[x] [y:z:]\n[x] [y]\n[x] [y : z]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "read with trailing IFS delimiters: when only one field is left, the last variable gets it without its delimiter; otherwise it gets the rest of the line as it is (only trailing IFS white space is removed)"
+  },
+  "209-read-raw-line": {
+    "dash": {
+      "stdout": "[   spaced \\ line \\\\]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[   spaced \\ line \\\\]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[   spaced \\ line \\\\]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "IFS= read -r keeps a line exactly as it is: leading and trailing blanks and backslashes"
+  },
+  "210-read-backslash": {
+    "dash": {
+      "stdout": "[atb\\c continued]\n[a\\tb\\\\c \\]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[atb\\c continued]\n[a\\tb\\\\c \\]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[atb\\c continued]\n[a\\tb\\\\c \\]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Without -r, read removes a backslash and keeps the next character, and backslash-newline continues the line; with -r backslashes stay"
+  },
+  "211-read-eof": {
+    "dash": {
+      "stdout": "1 [last]\n1 []\nempty line: 0 []\nnext line: 0 [next]\nat the end: 1 []\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1 [last]\n1 []\nempty line: 0 []\nnext line: 0 [next]\nat the end: 1 []\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1 [last]\n1 []\nempty line: 0 []\nnext line: 0 [next]\nat the end: 1 []\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "read returns 1 at end of file; a last line without a newline is still stored but the status is 1; an empty line gives status 0"
+  },
+  "212-read-redirect-file": {
+    "dash": {
+      "stdout": "l1 l1\nl1 l2\nl1 l2 l3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "l1 l1\nl1 l2\nl1 l2 l3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "l1 l1\nl1 l2\nl1 l2 l3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "read < file opens the file each time (always the first line); a { } group or an exec'd descriptor reads on"
+  },
+  "213-read-while-loop": {
+    "dash": {
+      "stdout": "1: first line\n2: second, indented\n3: third \\ with a backslash\ntotal 3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1: first line\n2: second, indented\n3: third \\ with a backslash\ntotal 3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1: first line\n2: second, indented\n3: third \\ with a backslash\ntotal 3\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A while read -r loop over a here-document, numbering the lines"
+  },
+  "214-read-pipe": {
+    "dash": {
+      "stdout": "inside: x-y\noutside: [unset]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "inside: x-y\noutside: [unset]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "inside: x-y\noutside: [unset]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "read at the end of a pipeline runs in a subshell; a { } group on the right side can use the values"
+  },
+  "215-test-zero-one-args": {
+    "dash": {
+      "stdout": "test => 1\ntest abc => 0\ntest \"\" => 1\ntest -n => 0\ntest -z => 0\ntest ! => 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "test => 1\ntest abc => 0\ntest \"\" => 1\ntest -n => 0\ntest -z => 0\ntest ! => 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "test => 1\ntest abc => 0\ntest \"\" => 1\ntest -n => 0\ntest -z => 0\ntest ! => 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "test with no argument is false; with one argument it is true if the argument is not empty, even for '-n', '-z' or '!'"
+  },
+  "216-test-string-unary": {
+    "dash": {
+      "stdout": "-n abc => 0\n-n \"\" => 1\n-z \"\" => 0\n-z abc => 1\n-n \"$e\" => 1\n-z \"$s\" => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "-n abc => 0\n-n \"\" => 1\n-z \"\" => 0\n-z abc => 1\n-n \"$e\" => 1\n-z \"$s\" => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "-n abc => 0\n-n \"\" => 1\n-z \"\" => 0\n-z abc => 1\n-n \"$e\" => 1\n-z \"$s\" => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "test -n (not empty) and -z (empty), with quoted variables"
+  },
+  "217-test-string-binary": {
+    "dash": {
+      "stdout": "abc = abc => 0\nabc = abd => 1\nabc != abd => 0\n\"\" = \"\" => 0\nabc < abd => 0\nb > a => 0\n= = = => 0\n! = ! => 0\n[ ] with a quoted value: true\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "abc = abc => 0\nabc = abd => 1\nabc != abd => 0\n\"\" = \"\" => 0\nabc < abd => 0\nb > a => 0\n= = = => 0\n! = ! => 0\n[ ] with a quoted value: true\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "abc = abc => 0\nabc = abd => 1\nabc != abd => 0\n\"\" = \"\" => 0\nabc < abd => 0\nb > a => 0\n= = = => 0\n! = ! => 0\n[ ] with a quoted value: true\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "String comparisons = != and (POSIX.1-2024) < >; [ is test with a closing ]"
+  },
+  "218-test-integer": {
+    "dash": {
+      "stdout": "1 -eq 1 => 0\n1 -ne 2 => 0\n2 -gt 1 => 0\n2 -ge 2 => 0\n1 -lt 2 => 0\n3 -le 2 => 1\n-5 -lt -3 => 0\n01 -eq 1 => 0\n01 = 1 => 1\n10 -gt 9 => 0\n10 > 9 (string) => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1 -eq 1 => 0\n1 -ne 2 => 0\n2 -gt 1 => 0\n2 -ge 2 => 0\n1 -lt 2 => 0\n3 -le 2 => 1\n-5 -lt -3 => 0\n01 -eq 1 => 0\n01 = 1 => 1\n10 -gt 9 => 0\n10 > 9 (string) => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1 -eq 1 => 0\n1 -ne 2 => 0\n2 -gt 1 => 0\n2 -ge 2 => 0\n1 -lt 2 => 0\n3 -le 2 => 1\n-5 -lt -3 => 0\n01 -eq 1 => 0\n01 = 1 => 1\n10 -gt 9 => 0\n10 > 9 (string) => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Integer comparisons -eq -ne -gt -ge -lt -le, also with negative numbers and leading zeros"
+  },
+  "219-test-file-types": {
+    "dash": {
+      "stdout": "-e full => 0\n-e missing => 1\n-f full => 0\n-f dir => 1\n-d dir => 0\n-d full => 1\n-s full => 0\n-s empty => 1\n-h full => 1\n-L missing => 1\n-c /dev/null => 0\n-b /dev/null => 1\n-p full => 1\n-S full => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "-e full => 0\n-e missing => 1\n-f full => 0\n-f dir => 1\n-d dir => 0\n-d full => 1\n-s full => 0\n-s empty => 1\n-h full => 1\n-L missing => 1\n-c /dev/null => 0\n-b /dev/null => 1\n-p full => 1\n-S full => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "-e full => 0\n-e missing => 1\n-f full => 0\n-f dir => 1\n-d dir => 0\n-d full => 1\n-s full => 0\n-s empty => 1\n-h full => 1\n-L missing => 1\n-c /dev/null => 0\n-b /dev/null => 1\n-p full => 1\n-S full => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "File tests -e -f -d -s -h -L -c -b -p -S on things the script creates"
+  },
+  "220-test-file-permissions": {
+    "dash": {
+      "stdout": "-r f (000) => 1\n-w f (000) => 1\n-r f (400) => 0\n-w f (400) => 1\n-w f (200) => 0\n-x f (200) => 1\n-x f (700) => 0\n-x d (700) => 0\n-u s (4755) => 0\n-u f => 1\n-k k (1777) => 0\n-k d => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "-r f (000) => 1\n-w f (000) => 1\n-r f (400) => 0\n-w f (400) => 1\n-w f (200) => 0\n-x f (200) => 1\n-x f (700) => 0\n-x d (700) => 0\n-u s (4755) => 0\n-u f => 1\n-k k (1777) => 0\n-k d => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "-r f (000) => 1\n-w f (000) => 1\n-r f (400) => 0\n-w f (400) => 1\n-w f (200) => 0\n-x f (200) => 1\n-x f (700) => 0\n-x d (700) => 0\n-u s (4755) => 0\n-u f => 1\n-k k (1777) => 0\n-k d => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "-r -w -x follow the permission bits; -u and -k test the set-user-ID and sticky bits (run as a normal user: root would see different answers)"
+  },
+  "221-test-file-compare": {
+    "dash": {
+      "stdout": "a -ef a => 0\na -ef ./a => 0\na -ef missing => 1\na -nt missing => 1\nmissing -ot a => 1\nmissing -nt a => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a -ef a => 0\na -ef ./a => 0\na -ef missing => 1\na -nt missing => 0\nmissing -ot a => 0\nmissing -nt a => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a -ef a => 0\na -ef ./a => 0\na -ef missing => 1\na -nt missing => 0\nmissing -ot a => 0\nmissing -nt a => 1\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "-ef (same file), and -nt / -ot with one file missing, so that no timing is involved Differs: with a missing file bash says the existing file is newer (a -nt missing and missing -ot a are true), as POSIX.1-2024 specifies; dash says false"
+  },
+  "222-test-logic": {
+    "dash": {
+      "stdout": "! \"\" => 0\n! abc => 1\nx -a \"\" => 1\n\"\" -o x => 0\nx -o \"\" -a \"\" => 0\n( x -o \"\" ) -a \"\" => 1\n! \"\" -a x => 0\n( x ) => 0\n! ( x = y ) => 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "! \"\" => 0\n! abc => 1\nx -a \"\" => 1\n\"\" -o x => 0\nx -o \"\" -a \"\" => 0\n( x -o \"\" ) -a \"\" => 1\n! \"\" -a x => 0\n( x ) => 0\n! ( x = y ) => 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "! \"\" => 0\n! abc => 1\nx -a \"\" => 1\n\"\" -o x => 0\nx -o \"\" -a \"\" => 0\n( x -o \"\" ) -a \"\" => 1\n! \"\" -a x => 0\n( x ) => 0\n! ( x = y ) => 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "! negates, -a (and) binds tighter than -o (or), and \\( \\) groups"
+  },
+  "223-test-errors": {
+    "dash": {
+      "stdout": "1 -eq x => 2\n1 -eq \"\" => 2\na b => 2\nx -gt => 2\n[ without ] => 2\n",
+      "stderr": "t.sh: 2: test: Illegal number: x\nt.sh: 2: test: Illegal number: \nt.sh: 2: test: a: unexpected operator\nt.sh: 2: test: -gt: argument expected\nt.sh: 7: [: missing ]\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "1 -eq x => 2\n1 -eq \"\" => 2\na b => 2\nx -gt => 2\n[ without ] => 2\n",
+      "stderr": "t.sh: line 2: test: x: integer expression expected\nt.sh: line 2: test: : integer expression expected\nt.sh: line 2: test: a: unary operator expected\nt.sh: line 2: test: x: unary operator expected\nt.sh: line 7: [: missing `]'\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "1 -eq x => 2\n1 -eq \"\" => 2\na b => 2\nx -gt => 2\n[ without ] => 2\n",
+      "stderr": "t.sh: line 2: test: x: integer expression expected\nt.sh: line 2: test: : integer expression expected\nt.sh: line 2: test: a: unary operator expected\nt.sh: line 2: test: x: unary operator expected\nt.sh: line 7: [: missing `]'\n",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Errors in test give status 2 and a message on stderr: a bad integer, a missing operand, a missing ]"
+  },
+  "224-printf-s": {
+    "dash": {
+      "stdout": "[hello]\n[  abc][abc  ][ab][    a]\n[a\\nb]\n[%d]\nonetwo\nabc\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[hello]\n[  abc][abc  ][ab][    a]\n[a\\nb]\n[%d]\nonetwo\nabc\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[hello]\n[  abc][abc  ][ab][    a]\n[a\\nb]\n[%d]\nonetwo\nabc\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "printf %s with field width, '-' (left-justify) and precision; arguments are not interpreted; no newline unless asked"
+  },
+  "225-printf-d-i": {
+    "dash": {
+      "stdout": "[42][-7][   42][42   ][00042][007]\n[+5][ 5][0]\n16 8 65 97\n4 7\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[42][-7][   42][42   ][00042][007]\n[+5][ 5][0]\n16 8 65 97\n4 7\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[42][-7][   42][42   ][00042][007]\n[+5][ 5][0]\n16 8 65 97\n4 7\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "printf %d and %i: width, '-' and '0' flags, precision, signs, and octal, hex and 'c character arguments"
+  },
+  "226-printf-u-o-x": {
+    "dash": {
+      "stdout": "[42][10][ff][FF]\n[010][0xff][0XFF][000000ff][ff    ]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[42][10][ff][FF]\n[010][0xff][0XFF][000000ff][ff    ]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[42][10][ff][FF]\n[010][0xff][0XFF][000000ff][ff    ]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "printf %u %o %x %X and the '#' flag"
+  },
+  "227-printf-c": {
+    "dash": {
+      "stdout": "[a][1][x]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[a][1][x]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[a][1][x]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "printf %c prints the first character of its argument"
+  },
+  "228-printf-b": {
+    "dash": {
+      "stdout": "[a\nb]\n[tab\there]\n[back\\slash]\n[octal AB]\nstops here\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "[a\nb]\n[tab\there]\n[back\\slash]\n[octal AB]\nstops here\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "[a\nb]\n[tab\there]\n[back\\slash]\n[octal AB]\nstops here\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "printf %b expands backslash escapes in its argument: \\n \\t \\\\ \\0NNN (octal) and \\c (stop all output)"
+  },
+  "229-printf-escapes": {
+    "dash": {
+      "stdout": "a\tb\\c\nABC 01\n100%\n50%\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a\tb\\c\nABC 01\n100%\n50%\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a\tb\\c\nABC 01\n100%\n50%\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Escapes in the format itself: \\n \\t \\\\ \\NNN (one to three octal digits); %% prints a percent sign"
+  },
+  "230-printf-reuse": {
+    "dash": {
+      "stdout": "a=1\nb=2\nc=\n[|0|]\n1 a\n2 \nno conversion\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a=1\nb=2\nc=\n[|0|]\n1 a\n2 \nno conversion\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "a=1\nb=2\nc=\n[|0|]\n1 a\n2 \nno conversion\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "The format is reused until the arguments run out; missing arguments count as empty strings or zero"
+  },
+  "231-printf-errors": {
+    "dash": {
+      "stdout": "0\nstatus 1\n12\nstatus 1\n3|0\nstatus 1\n",
+      "stderr": "t.sh: 3: printf: abc: expected numeric value\nt.sh: 4: printf: 12abc: not completely converted\nt.sh: 5: printf: x: expected numeric value\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "0\nstatus 1\n0\nstatus 1\n3|0\nstatus 1\n",
+      "stderr": "t.sh: line 3: printf: abc: invalid number\nt.sh: line 4: printf: 12abc: invalid number\nt.sh: line 5: printf: x: invalid number\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "0\nstatus 1\n0\nstatus 1\n3|0\nstatus 1\n",
+      "stderr": "t.sh: line 3: printf: abc: invalid number\nt.sh: line 4: printf: 12abc: invalid number\nt.sh: line 5: printf: x: invalid number\n",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "A non-numeric argument to %d: a message on stderr, the number printed is what could be read (or 0), and the status is 1 Differs: for '12abc' bash 3.2 prints 0; dash prints 12, the value converted before the error, as POSIX requires (bash 5 also prints 12)"
+  },
+  "232-echo-basic": {
+    "dash": {
+      "stdout": "one two three\n\n\n  spaced   end\na  b\n-- a\n-x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "one two three\n\n\n  spaced   end\na  b\n-- a\n-x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "one two three\n\n\n  spaced   end\na  b\n-- a\n-x\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "echo prints its arguments separated by single spaces and adds a newline; '--' and unknown options are printed"
+  },
+  "233-echo-escapes": {
+    "dash": {
+      "stdout": "tab:\there\ntwo\nlines\nback\\slash\nstopafter\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "tab:\\there\ntwo\\nlines\nback\\\\slash\nstop\\cignored\nafter\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "tab:\there\ntwo\nlines\nback\\slash\nstopafter\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "echo with backslashes (a case about echo itself): dash's echo always interprets escapes such as \\t \\n \\c \\\\ Differs: dash's echo follows XSI and interprets backslash escapes; bash's built-in echo prints them literally (unless -e or xpg_echo) Note: on this Mac bash --posix behaves like dash here (Apple builds bash with a UNIX03 echo in POSIX mode); bash --posix on Ubuntu prints the backslashes literally"
+  },
+  "234-echo-n": {
+    "dash": {
+      "stdout": "no newline <- joined\nempty -n\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "no newline <- joined\nempty -n\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "-n no newline\n <- joined\n-n\nempty -n\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "echo -n (a case about echo options): dash and bash both leave out the trailing newline Note: on this Mac bash --posix prints -n as text (UNIX03 echo); bash --posix on Ubuntu treats -n as an option like dash"
+  },
+  "235-echo-e": {
+    "dash": {
+      "stdout": "-e a\tb\n-e\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "a\tb\n\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "-e a\tb\n-e\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "echo -e (a case about echo options): bash takes -e as an option; dash has no options except -n and prints it Differs: dash prints \"-e\" as text (and interprets the escape anyway); bash treats -e as an option that turns on escapes Note: on this Mac bash --posix prints -e as text, like dash"
+  },
+  "236-getopts-basic": {
+    "dash": {
+      "stdout": "opt=a OPTARG=[] OPTIND=2\nopt=b OPTARG=[value] OPTIND=4\nopt=c OPTARG=[] OPTIND=5\noperands: file1 file2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "opt=a OPTARG=[unset] OPTIND=2\nopt=b OPTARG=[value] OPTIND=4\nopt=c OPTARG=[unset] OPTIND=5\noperands: file1 file2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "opt=a OPTARG=[unset] OPTIND=2\nopt=b OPTARG=[value] OPTIND=4\nopt=c OPTARG=[unset] OPTIND=5\noperands: file1 file2\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "getopts parses options one at a time: OPTARG holds an option's argument, OPTIND the index of the next argument Differs: dash sets OPTARG to an empty string for an option without an argument; bash unsets it (POSIX says it shall be unset)"
+  },
+  "237-getopts-grouped": {
+    "dash": {
+      "stdout": "opt=a arg=\nopt=c arg=\nopt=b arg=val\nafter --: -x rest\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "opt=a arg=\nopt=c arg=\nopt=b arg=val\nafter --: -x rest\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "opt=a arg=\nopt=c arg=\nopt=b arg=val\nafter --: -x rest\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Grouped options (-ac), an option argument stuck to its option (-bval), and '--' ending the options"
+  },
+  "238-getopts-invalid": {
+    "dash": {
+      "stdout": "opt=?\nopt=a\nOPTIND=3\n",
+      "stderr": "Illegal option -x\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "opt=?\nopt=a\nOPTIND=3\n",
+      "stderr": "t.sh: illegal option -- x\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "opt=?\nopt=a\nOPTIND=3\n",
+      "stderr": "t.sh: illegal option -- x\n",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "An unknown option sets the variable to '?', and getopts writes a message to stderr; parsing goes on"
+  },
+  "239-getopts-missing-arg": {
+    "dash": {
+      "stdout": "opt=a\nopt=?\nOPTIND=3\n",
+      "stderr": "No arg for -b option\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "opt=a\nopt=?\nOPTIND=3\n",
+      "stderr": "t.sh: option requires an argument -- b\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "opt=a\nopt=?\nOPTIND=3\n",
+      "stderr": "t.sh: option requires an argument -- b\n",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "An option missing its argument sets the variable to '?', and getopts writes a message to stderr"
+  },
+  "240-getopts-silent": {
+    "dash": {
+      "stdout": "opt=? OPTARG=x\nopt=: OPTARG=b\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "opt=? OPTARG=x\nopt=: OPTARG=b\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "opt=? OPTARG=x\nopt=: OPTARG=b\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Silent mode (optstring starting with ':'): no messages; an unknown option gives '?' with OPTARG set to it, a missing argument gives ':'"
+  },
+  "241-getopts-end": {
+    "dash": {
+      "stdout": "opt=a\nstopped at OPTIND=2, opt=?\nopt=a\nOPTIND=3, next argument: -b\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "opt=a\nstopped at OPTIND=2, opt=?\nopt=a\nOPTIND=3, next argument: -b\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "opt=a\nstopped at OPTIND=2, opt=?\nopt=a\nOPTIND=3, next argument: -b\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "Option parsing stops at the first operand or after '--'; at the end the variable is set to '?'"
+  },
+  "242-getopts-reset": {
+    "dash": {
+      "stdout": "x y1 (OPTIND=4)\ny2 x (OPTIND=4)\nexplicit: p \nexplicit: q val\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "x y1 (OPTIND=4)\ny2 x (OPTIND=4)\nexplicit: p \nexplicit: q val\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "x y1 (OPTIND=4)\ny2 x (OPTIND=4)\nexplicit: p \nexplicit: q val\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "OPTIND=1 restarts parsing (here inside a function); getopts can also parse an explicit list instead of \"$@\""
+  },
+  "243-status-not-found": {
+    "dash": {
+      "stdout": "status 127\nsilenced: 127\nmissing path: 127\n",
+      "stderr": "t.sh: 2: nosuchcommand_xyz: not found\nt.sh: 4: ./missing_file: not found\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "status 127\nsilenced: 127\nmissing path: 127\n",
+      "stderr": "t.sh: line 2: nosuchcommand_xyz: command not found\nt.sh: line 4: ./missing_file: No such file or directory\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "status 127\nsilenced: 127\nmissing path: 127\n",
+      "stderr": "t.sh: line 2: nosuchcommand_xyz: command not found\nt.sh: line 4: ./missing_file: No such file or directory\n",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A command that cannot be found gives status 127 and a message on stderr"
+  },
+  "244-status-not-executable": {
+    "dash": {
+      "stdout": "status 126\ndirectory: 126\n",
+      "stderr": "t.sh: 4: ./script: Permission denied\nt.sh: 6: ./dir: Permission denied\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "status 126\ndirectory: 126\n",
+      "stderr": "t.sh: line 4: ./script: Permission denied\nt.sh: line 6: ./dir: is a directory\n",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "status 126\ndirectory: 126\n",
+      "stderr": "t.sh: line 4: ./script: Permission denied\nt.sh: line 6: ./dir: is a directory\n",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A file that exists but cannot be executed gives status 126 (a file without x permission, a directory)"
+  },
+  "245-status-script-without-shebang": {
+    "dash": {
+      "stdout": "child script ran with 2 arguments\nstatus 6\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "child script ran with 2 arguments\nstatus 6\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "child script ran with 2 arguments\nstatus 6\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "An executable file without a #! line is run by a shell when it is executed"
+  },
+  "246-status-exit-values": {
+    "dash": {
+      "stdout": "0 1 2 42 255 \nsh -c 'exit 7': 7\n",
+      "stderr": "",
+      "status": 1
+    },
+    "bash": {
+      "stdout": "0 1 2 42 255 \nsh -c 'exit 7': 7\n",
+      "stderr": "",
+      "status": 1
+    },
+    "bashPosix": {
+      "stdout": "0 1 2 42 255 \nsh -c 'exit 7': 7\n",
+      "stderr": "",
+      "status": 1
+    },
+    "differs": false,
+    "notes": "Exit statuses 0 to 255 pass through unchanged; the status of a script is that of its last command"
+  },
+  "247-status-empty-script": {
+    "dash": {
+      "stdout": "",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A completely empty script (zero bytes) prints nothing and exits with status 0."
+  },
+  "248-status-comments-only": {
+    "dash": {
+      "stdout": "",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "A script with only comments and blank lines prints nothing and exits with status 0"
+  },
+  "249-ext-brace-expansion": {
+    "dash": {
+      "stdout": "{a,b}c x{1..3}\n{a,b} {1..3}\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "ac bc x1 x2 x3\n{a,b} {1..3}\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "ac bc x1 x2 x3\n{a,b} {1..3}\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "Brace expansion ({a,b} and {1..3}) is a bash extension, not POSIX Differs: dash prints the braces as they are; bash (also with --posix) expands them"
+  },
+  "250-ext-double-bracket": {
+    "dash": {
+      "stdout": "status 127\n",
+      "stderr": "t.sh: 3: [[: not found\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "double brackets work\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "double brackets work\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "[[ ]] is a bash keyword; in dash it is only an unknown command name Differs: dash says \"[[: not found\" (status 127); bash evaluates the test"
+  },
+  "251-ext-source": {
+    "dash": {
+      "stdout": "status 127\n",
+      "stderr": "t.sh: 4: source: not found\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "sourced\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "sourced\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "source is a bash synonym for '.'; dash does not have it Differs: dash says \"source: not found\" (status 127); bash runs the file"
+  },
+  "252-ext-arith-command": {
+    "dash": {
+      "stdout": "status 127 x=[unset]\n",
+      "stderr": "t.sh: 3: x: not found\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "status 0 x=[3]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "status 0 x=[3]\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "((expr)) is a bash arithmetic command; dash reads it as two nested subshells running a command named x Differs: dash tries to run a command 'x' (not found, status 127); bash evaluates the expression and sets x"
+  },
+  "253-ext-substring-replace": {
+    "dash": {
+      "stdout": "status 2\nstatus 2\n",
+      "stderr": "t.sh: 4: Bad substitution\nt.sh: 6: Bad substitution\n",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "ell\nstatus 0\nheLlo\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "ell\nstatus 0\nheLlo\nstatus 0\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": true,
+    "notes": "${x:offset:length} and ${x/pattern/string} are bash extensions; dash reports \"Bad substitution\" (run in subshells) Differs: dash fails with \"Bad substitution\" (status 2); bash expands them"
+  },
+  "254-ext-local": {
+    "dash": {
+      "stdout": "inside: inner\noutside: outer\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bash": {
+      "stdout": "inside: inner\noutside: outer\n",
+      "stderr": "",
+      "status": 0
+    },
+    "bashPosix": {
+      "stdout": "inside: inner\noutside: outer\n",
+      "stderr": "",
+      "status": 0
+    },
+    "differs": false,
+    "notes": "local is not in POSIX, but dash and bash both have it: inside a function it makes a variable local"
+  }
+}
