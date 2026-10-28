@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Command line playground</title>
+<style>
+@font-face{font-family:"Inter";src:url("fonts/Inter-Light.woff2") format("woff2");font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:"Inter";src:url("fonts/Inter-Regular.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Inter";src:url("fonts/Inter-Bold.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"JetBrains Mono";src:url("fonts/JetBrainsMono-Regular.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"JetBrains Mono";src:url("fonts/JetBrainsMono-Bold.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+</style>
+<meta name="description" content="A practice terminal for learning the command line. Type real commands and watch the file system tree change as you go. Runs entirely in your browser.">
+<style>
+:root{
+  --bg:#FFFFFF; --panel:#F4F4F5; --ink:#000000; --muted:#6B6B6B; --line:#BDBDBD; --dirbg:#000000; --dirink:#FFFFFF;
+  --box:#FFFFFF; --boxline:#D4D4D8; --red:#FF002E; --pink:#FFF0F3;
+  color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#000000;--panel:#1A1A1A;--ink:#FFFFFF;--muted:#A1A1AA;--line:#52525B;--box:#000000;--boxline:#3F3F46;--pink:#2A0A12;--dirbg:#FFFFFF;--dirink:#000000;color-scheme:dark}
+}
+:root[data-theme="dark"]{--bg:#000000;--panel:#1A1A1A;--ink:#FFFFFF;--muted:#A1A1AA;--line:#52525B;--box:#000000;--boxline:#3F3F46;--pink:#2A0A12;--dirbg:#FFFFFF;--dirink:#000000;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%}
+body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column}
+.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+header{display:flex;align-items:center;gap:14px 20px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--boxline);background:var(--bg)}
+h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.2px}
+h1 .accent{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--red);margin-right:10px;vertical-align:1px}
+.spacer{flex:1}
+.seg{display:inline-flex;border:1px solid var(--boxline);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--ink);padding:8px 14px;font:inherit;font-size:15px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--boxline)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+label.name{font-size:15px;color:var(--muted);display:flex;gap:8px;align-items:center}
+label.name input{font:400 15px "JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;width:10em;padding:7px 10px;border:1px solid var(--boxline);border-radius:8px;background:var(--bg);color:var(--ink)}
+button.reset{font:inherit;font-size:15px;padding:8px 14px;border-radius:8px;border:1px solid var(--boxline);background:var(--bg);color:var(--ink);cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(320px,2fr) 3fr}
+@media (max-width:860px){main{grid-template-columns:1fr;grid-template-rows:minmax(280px,1fr) minmax(320px,1fr)}}
+/* terminal: always dark, like a real one */
+.term{background:#000;color:#E4E4E7;font:400 18px/1.5 "JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;padding:16px 20px 24px;overflow-y:auto;border-left:6px solid var(--red);cursor:text;min-height:0}
+.term .l{white-space:pre-wrap;word-break:break-word;min-height:1.5em}
+.term .note{color:#A1A1AA}
+.term .err{color:#FF99AD}
+.term .u{color:#8AE234;font-weight:700} .term .p{color:#729FCF;font-weight:700}
+.mac .term .u,.mac .term .p{color:#E4E4E7;font-weight:400}
+.term .d{color:#729FCF;font-weight:700} .mac .term .d{color:#E4E4E7}
+.row{white-space:pre-wrap;word-break:break-all;min-height:1.5em}
+.term .cmdl{word-break:break-all}
+.row #typed{color:#FFF}
+#cmd{position:absolute;left:0;bottom:0;width:1px;height:1px;opacity:0;resize:none;overflow:hidden;border:0;padding:0;font:inherit}
+.caret{background:#E4E4E7;color:#000;animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{background:transparent;color:#FFF}}
+.term:not(:focus-within) .caret{animation:none;background:transparent;color:#FFF;outline:1px solid #E4E4E7;outline-offset:-1px}
+@media (prefers-reduced-motion:reduce){.caret{animation:none}}
+/* tree */
+.treepane{display:flex;flex-direction:column;min-height:0;background:var(--bg)}
+#tree{flex:1;min-height:0;padding:10px 12px 6px}
+#tree svg{width:100%;height:100%;display:block}
+.edge{stroke:var(--line);stroke-width:2.5;fill:none}
+.node rect{fill:var(--box);stroke:var(--boxline);stroke-width:2;transform-box:fill-box;transform-origin:center}
+.node.dir rect{fill:var(--dirbg);stroke:var(--dirbg)}
+.node text{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;font-size:18px;fill:var(--ink);dominant-baseline:central;text-anchor:middle}
+.node.dir text{font-weight:700;fill:var(--dirink)}
+.node.here rect{fill:var(--red);stroke:var(--red)}
+.node.here text{fill:#FFFFFF}
+.node.sys rect{fill:var(--bg);stroke:var(--line);stroke-dasharray:6 5}
+.node.sys text{fill:var(--muted)}
+.node.sys.here rect{fill:var(--red);stroke:var(--red);stroke-dasharray:none}
+.node.sys.here text{fill:#FFFFFF}
+.node.new rect{animation:pop .9s ease-out}
+.node.changed rect{animation:ring 1.3s ease-out}
+.node.leaving,.edge.leaving{animation:leave .85s ease-in forwards}
+.node.leaving rect{stroke:var(--red);stroke-dasharray:6 4}
+@keyframes pop{0%{transform:scale(.4);stroke:var(--red);stroke-width:6}60%{transform:scale(1.08);stroke:var(--red);stroke-width:6}100%{transform:scale(1)}}
+@keyframes ring{0%,45%{stroke:var(--red);stroke-width:7}100%{stroke-width:2}}
+@keyframes leave{0%{opacity:1}100%{opacity:0;transform:translateY(10px)}}
+.dot{fill:var(--red);stroke:#FFFFFF;stroke-width:4}
+.node text.perm{font-size:16px;font-weight:400;fill:var(--muted)}
+.node.dir text.perm{fill:var(--dirink);opacity:.75}
+.node.here text.perm{fill:#FFFFFF;opacity:.85}
+.term{position:relative}
+.pager{position:absolute;inset:0;background:#000;color:#E4E4E7;display:flex;flex-direction:column;border-left:6px solid var(--red);z-index:5}
+.pager pre{flex:1;margin:0;padding:16px 20px;overflow:hidden;font:inherit;white-space:pre-wrap;word-break:break-word}
+.pager pre b{color:#FFFFFF}
+.pager .bar{background:#E4E4E7;color:#000;padding:2px 20px;white-space:pre-wrap;word-break:break-word}
+button.toggle{font:inherit;font-size:15px;padding:8px 14px;border-radius:8px;border:1px solid var(--boxline);background:var(--bg);color:var(--ink);cursor:pointer}
+button.toggle[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.status{display:flex;gap:10px 22px;flex-wrap:wrap;align-items:center;padding:12px 20px;border-top:1px solid var(--boxline);font-size:16px}
+.key{display:inline-flex;align-items:center;gap:8px;color:var(--muted)}
+.sw{width:18px;height:14px;border-radius:4px;border:2px solid var(--boxline);background:var(--box)}
+.sw.here{background:var(--red);border-color:var(--red)} .sw.dir{background:var(--dirbg);border-color:var(--dirbg)} .sw.sys{background:var(--bg);border:2px dashed var(--line)}
+#last{margin-left:auto;font-weight:700}
+#last.del{color:var(--red)}
+@media (prefers-reduced-motion:reduce){.node rect,.node.leaving,.edge.leaving{animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="accent" aria-hidden="true"></span>Command line playground</h1>
+  <span class="spacer"></span>
+  <div class="seg" role="group" aria-label="Laptop">
+    <button type="button" data-os="ubuntu" aria-pressed="true">Ubuntu · WSL</button>
+    <button type="button" data-os="mac" aria-pressed="false">Mac</button>
+  </div>
+  <label class="name">Your name <input id="user" value="yourname" spellcheck="false" autocomplete="off" aria-label="Username shown in the prompt"></label>
+  <button type="button" class="toggle" id="perms" aria-pressed="false">Show permissions</button>
+  <button type="button" class="reset" id="reset">Start again</button>
+</header>
+<main>
+  <section class="term" id="term" aria-label="Practice terminal">
+    <div id="out" aria-live="polite"></div>
+    <div class="row" aria-hidden="true"><span id="ps"></span><span id="typed"></span></div>
+    <textarea id="cmd" rows="1" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" aria-label="Type a command"></textarea>
+  </section>
+  <section class="treepane" aria-label="The file system as a tree">
+    <div id="tree"></div>
+    <div class="status">
+      <span class="key"><span class="sw here"></span>You are here</span>
+      <span class="key"><span class="sw dir"></span>Folder</span>
+      <span class="key"><span class="sw"></span>File</span>
+      <span class="key"><span class="sw sys"></span>System folder (look, don’t touch)</span>
+      <span id="last" role="status"></span>
+    </div>
+  </section>
+</main>
+<script>
+/* ---------- manual pages (plain-language, for the commands this terminal supports) ---------- */
+const MAN = {
+ ls:{n:'list what is inside a folder', s:['ls [-a] [-l] [-R] [FILE]...'], d:['Lists the files and folders inside each FILE you name. With no FILE, lists the folder you are in.','Names are listed in alphabetical order; on Ubuntu, folders are shown in colour. Names that start with a dot are hidden unless you use -a.'],
+  o:[['-a','show everything, including hidden names that start with a dot, and the . and .. entries'],['-l','long format: permissions, owner, size and date on one line per entry'],['-R','list each folder, then every folder inside it, all the way down']],
+  e:[['ls','list the folder you are in'],['ls -la ~','everything in your home folder, in detail'],['ls notes | wc -l','count the entries in notes']], see:'cd, pwd, find'},
+ pwd:{n:'print the name of the folder you are in', s:['pwd'], d:['Prints the full, absolute path of your current folder, starting from the root, /.'], e:[['pwd','for example /home/yourname/projects']], see:'cd, ls'},
+ mkdir:{n:'make folders', s:['mkdir [-p] FOLDER...'], d:['Creates each FOLDER. It is an error if the folder already exists, or if the folder it should go in does not exist.'],
+  o:[['-p','make any missing parent folders as well, and do not complain if the folder already exists']], e:[['mkdir notes','make one folder'],['mkdir -p a/b/c','make a, then b inside it, then c inside that']], see:'rmdir, rm'},
+ rmdir:{n:'remove empty folders', s:['rmdir FOLDER...'], d:['Removes each FOLDER, but only if it is empty. To remove a folder and everything in it, see rm -r.'], e:[['rmdir old','remove the empty folder old']], see:'rm, mkdir'},
+ touch:{n:'create an empty file, or update its time', s:['touch FILE...'], d:['If FILE does not exist, creates it, empty. If it does, updates its "last modified" time and leaves the contents alone.'], e:[['touch notes/todo.txt','create an empty file inside notes']], see:'echo, cat'},
+ cp:{n:'copy files and folders', s:['cp [-r] SOURCE DEST'], d:['Copies SOURCE to DEST. If DEST is an existing folder, the copy goes inside it with the same name.','Remember the order: from, then to.'],
+  o:[['-r','copy a folder and everything inside it']], e:[['cp todo.txt copy.txt','make a copy next to the original'],['cp -r notes backup','copy the whole notes folder']], see:'mv, rm'},
+ mv:{n:'move or rename files and folders', s:['mv SOURCE DEST'], d:['Moves SOURCE to DEST. If DEST is an existing folder, SOURCE moves inside it. If not, SOURCE is renamed to DEST.','There is no separate rename command: renaming is moving within the same folder.'],
+  e:[['mv copy.txt done.txt','rename a file'],['mv done.txt archive/','move it into the archive folder']], see:'cp, rm'},
+ rm:{n:'remove files or folders', s:['rm [-i] [-r] [-f] FILE...'], d:['Removes each FILE. There is no bin and no undo: what rm removes is gone.','Folders are only removed with -r.'],
+  o:[['-i','ask before each removal; answer y to remove'],['-r','remove folders and everything inside them'],['-f','never ask, and stay quiet about files that do not exist']],
+  e:[['rm -i done.txt','asks before removing'],['rm -r old','removes old and everything in it']], see:'rmdir, mv'},
+ cat:{n:'print the contents of files', s:['cat [FILE]...'], d:['Prints each FILE, one after another. The name comes from "concatenate": cat can join files together.','With no FILE, cat reads what comes in through a pipe.'],
+  e:[['cat notes/todo.txt','show one file'],['cat a.txt b.txt > both.txt','join two files into a third']], see:'less, head, tail'},
+ less:{n:'read a file one screen at a time', s:['less FILE'], d:['Opens FILE in a viewer you can scroll. The same viewer shows these manual pages.'],
+  o:[['↓  j  Enter','down one line'],['↑  k','up one line'],['space','down one screen'],['b','up one screen'],['g  G','jump to the top or the end'],['q','quit']], e:[['less notes/todo.txt','read a file'],['ls -l | less','scroll through long output']], see:'more, cat, man'},
+ more:{n:'read a file one screen at a time (the older viewer)', s:['more FILE'], d:['The older cousin of less. In this terminal it works exactly like less: scroll with the arrow keys or space, quit with q.'], see:'less, cat'},
+ head:{n:'print the first lines of a file', s:['head [-n NUMBER] [FILE]...'], d:['Prints the first 10 lines of each FILE, or of what comes in through a pipe.'], o:[['-n NUMBER','print the first NUMBER lines instead (head -3 is short for head -n 3)']], e:[['head -n 3 list.txt','the first three lines']], see:'tail, cat'},
+ tail:{n:'print the last lines of a file', s:['tail [-n NUMBER] [FILE]...'], d:['Prints the last 10 lines of each FILE, or of what comes in through a pipe.'], o:[['-n NUMBER','print the last NUMBER lines instead']], e:[['tail -n 2 list.txt','the last two lines']], see:'head, cat'},
+ wc:{n:'count lines, words and characters', s:['wc [-l] [-w] [-c] [FILE]...'], d:['Prints how many lines, words and bytes are in each FILE, or in what comes in through a pipe.'],
+  o:[['-l','lines only'],['-w','words only'],['-c','bytes only']], e:[['wc -l todo.txt','how many lines'],['ls | wc -l','how many entries in this folder']], see:'grep, sort'},
+ grep:{n:'print the lines that match a pattern', s:['grep [-i] [-v] [-n] [-c] PATTERN [FILE]...'], d:['Searches each FILE, or what comes in through a pipe, and prints every line that contains PATTERN.'],
+  o:[['-i','ignore the difference between capitals and small letters'],['-v','print the lines that do NOT match'],['-n','put the line number in front of each match'],['-c','print only how many lines match']],
+  e:[['grep cd todo.txt','lines containing cd'],['ls | grep txt','entries with txt in the name']], see:'find, sort, wc'},
+ sort:{n:'sort lines', s:['sort [-r] [-n] [-u] [FILE]...'], d:['Prints the lines of each FILE, or of what comes in through a pipe, in order.'], o:[['-r','reverse order'],['-n','compare as numbers, so 9 comes before 10'],['-u','print each line only once']],
+  e:[['sort names.txt','alphabetical order'],['sort -n scores.txt','numerical order']], see:'uniq, wc'},
+ uniq:{n:'drop repeated lines', s:['uniq [-c] [FILE]'], d:['Prints the lines of FILE, leaving out a line when it is the same as the one just before it. Use sort first so that equal lines sit together.'], o:[['-c','put the number of repeats in front of each line']],
+  e:[['sort names.txt | uniq -c','how many times each name appears']], see:'sort'},
+ cut:{n:'print selected parts of each line', s:['cut -d DELIMITER -f FIELDS [FILE]...'], d:['Splits each line wherever DELIMITER appears and prints only the FIELDS you ask for, counted from 1.'],
+  o:[['-d DELIMITER','the character that separates the fields, for example , or :'],['-f FIELDS','which fields to print, for example 1 or 1,3']], e:[['cut -d , -f 1 people.csv','the first column of a CSV file']], see:'grep, sort'},
+ find:{n:'search for files in a folder tree', s:['find [FOLDER]... [-name PATTERN] [-type f|d]'], d:['Walks through each FOLDER and everything inside it, printing the path of every entry that matches. With no FOLDER, starts from the current folder, written as .'],
+  o:[['-name PATTERN','only names that match PATTERN; * matches anything, so "*.txt" means every name ending in .txt'],['-type f','only files'],['-type d','only folders']],
+  e:[['find . -name "*.txt"','every .txt file from here down'],['find ~ -type d','every folder in your home']], see:'ls, grep'},
+ echo:{n:'print a line of text', s:['echo [TEXT]...'], d:['Prints its words, separated by spaces, then a new line. With > it writes them into a file instead; with >> it adds them to the end.','Words like $HOME are replaced by their value first, unless they are inside single quotes.'],
+  e:[['echo "Hello"','prints Hello'],['echo "Practise cd every day" > todo.txt','writes the line into todo.txt'],['echo $HOME','prints the path of your home folder']], see:'printf, cat'},
+ printf:{n:'print formatted text', s:['printf FORMAT [ARGUMENT]...'], d:['Prints FORMAT, replacing each %s with the next ARGUMENT and each %d with the next number. \\n starts a new line and \\t is a tab. Unlike echo, printf adds no new line unless you ask for one.'],
+  e:[['printf "%s is %d\\n" Ada 36','prints Ada is 36']], see:'echo'},
+ date:{n:'print the date and time', s:['date'], d:['Prints the current date and time, including the time zone.'], see:'sleep'},
+ whoami:{n:'print your username', s:['whoami'], d:['Prints the name of the user you are logged in as.'], see:'id'},
+ id:{n:'print your user and group numbers', s:['id'], d:['Prints your user number (uid), your main group (gid), and every group you belong to. Groups decide who can open what, alongside the permissions shown by ls -l.'], see:'whoami, chmod, ls'},
+ which:{n:'show where a command lives', s:['which COMMAND...'], d:['Prints the full path of the program that runs when you type COMMAND. Prints nothing for commands built into the shell, like cd.'], e:[['which ls','for example /usr/bin/ls']], see:'man'},
+ chmod:{n:'change who can read, write or run a file', s:['chmod MODE FILE...','chmod [ugoa][+-=][rwx] FILE...'], d:['Every file and folder has three sets of permissions: for its owner (u), its group (g), and everyone else (o). Each set says whether they may read (r), write (w), and run or enter (x). ls -l shows them, for example rw-r--r--.','MODE can be letters, like u+x or go-w, or three digits, one per set, where read is 4, write is 2 and run is 1: so 6 means rw- and 7 means rwx.','Only the owner can change a file\'s permissions.'],
+  o:[['u g o a','owner, group, others, or all three'],['+  -  =','add, remove, or set exactly'],['r w x','read, write, run (for a folder: enter it)']],
+  e:[['chmod 600 secret.txt','only you can read or write it'],['chmod u-w todo.txt','stop yourself writing to it'],['chmod 755 tools','everyone can enter; only you can change it']], see:'ls, id'},
+ ps:{n:'list the programs that are running', s:['ps'], d:['Prints one line for each process started from this terminal: its process ID (PID), the terminal it belongs to, how much processor time it has used, and its command.'], e:[['ps','your shell, any background jobs, and ps itself']], see:'kill, jobs, sleep'},
+ kill:{n:'stop a process', s:['kill [-9] PID...','kill %JOB'], d:['Sends a signal to each process, asking it to stop. Find the PID with ps, or use %1 for job 1 from jobs.'], o:[['-9','stop it immediately, without asking nicely']], e:[['sleep 100 &','start a background job'],['kill %1','stop job 1']], see:'ps, jobs'},
+ sleep:{n:'wait for a number of seconds', s:['sleep SECONDS'], d:['Does nothing for SECONDS seconds, then finishes. Useful for practising with processes: stop it with Ctrl + C, or run it in the background with &.'], e:[['sleep 5','wait five seconds'],['sleep 100 &','wait in the background']], see:'ps, kill, jobs'},
+ env:{n:'print the environment variables', s:['env'], d:['Prints every environment variable as NAME=value. Environment variables are settings your shell carries around and passes to every program it starts, such as HOME, PATH and USER.','Use export to add your own.'], e:[['env','list them all'],['env | grep HOME','find one']], see:'echo, export'},
+ man:{n:'show the manual for a command', s:['man COMMAND'], d:['Opens the manual page for COMMAND. Scroll with the arrow keys or space, and press q to quit.','Commands built into the shell, like cd, have no page of their own: on Ubuntu, use help instead, for example help cd.'], e:[['man ls','the manual for ls'],['man man','this page']], see:'less, help, which'},
+ clear:{n:'clear the terminal screen', s:['clear'], d:['Wipes the screen. Nothing else changes: your files, folder and history are exactly as they were. Ctrl + L does the same.'], see:'history'},
+};
+const BUILTIN = {
+ cd:'cd [DIR]\n    Change the current folder to DIR. With no DIR, go to your home folder.\n    cd -   goes back to the folder you were in before.\n    cd ..  goes up one level.',
+ export:'export NAME=VALUE\n    Set NAME and mark it for the environment, so programs you start can see it.\n    Without =VALUE, marks an existing shell variable.',
+ unset:'unset NAME\n    Remove the variable NAME.',
+ jobs:'jobs\n    List the jobs running in the background, for example after sleep 100 &.',
+ history:'history\n    List the commands you have typed, numbered.',
+ help:'help [COMMAND]\n    Show short help for a command built into the shell, like help cd.',
+};
+(() => {
+const $ = (id) => document.getElementById(id);
+const out = $('out'), cmd = $('cmd'), ps = $('ps'), term = $('term'), treeEl = $('tree');
+const S = { os:'ubuntu', user:'yourname', root:null, home:null, cwd:null, shown:null, keep:null, prev:null,
+  hist:[], hi:0, cont:null, rmAsk:null, asking:null, sleeping:null, id:1, pos:{}, lastTab:'', toldSudo:false,
+  cap:null, err:false, status:0, vars:{}, exported:new Set(), jobs:[], notices:[], pid:1201, pager:null, perms:false };
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const mac = () => S.os === 'mac';
+const SH = () => mac() ? 'zsh' : 'bash';
+
+/* ---------- file system ---------- */
+const mk = (name, dir, text, mode) => ({ id:S.id++, name, dir, kids:dir?[]:null, text:text||'', parent:null, leaving:false, flash:null, open:false, mode: mode ?? (dir ? 0o755 : 0o644) });
+const kids = (n) => n.kids.filter(k => !k.leaving);
+const find = (n, name) => kids(n).find(k => k.name === name);
+function add(dir, node){ dir.kids = dir.kids.filter(k => !k.leaving); node.parent = dir; dir.kids.push(node); dir.kids.sort((a,b) => a.name.localeCompare(b.name)); return node; }
+function detach(node){ const p = node.parent; p.kids = p.kids.filter(k => k !== node); node.parent = null; }
+const inside = (n, anc) => { while (n){ if (n === anc) return true; n = n.parent; } return false; };
+const mine = (n) => inside(n, S.home);
+const can = (n, b) => { const bit = { r:4, w:2, x:1 }[b]; return !!((mine(n) ? n.mode >> 6 : n.mode) & bit); };
+const modeStr = (n) => (n.dir ? 'd' : '-') + [6, 3, 0].map(s => { const v = n.mode >> s & 7; return (v & 4 ? 'r' : '-') + (v & 2 ? 'w' : '-') + (v & 1 ? 'x' : '-'); }).join('');
+function tree(spec, parent){ for (const [name, v] of Object.entries(spec)){ if (typeof v === 'string') add(parent, mk(name, false, v, parent.name === 'bin' ? 0o755 : 0o644)); else tree(v, add(parent, mk(name, true))); } }
+const CMDS = ['cat','chmod','cp','cut','date','echo','env','find','grep','head','id','kill','less','ls','man','mkdir','more','mv','printf','ps','pwd','rm','rmdir','sleep','sort','tail','touch','uniq','wc','which','whoami'];
+function buildRoot(){
+  S.root = mk('', true);
+  const bin = Object.fromEntries(CMDS.concat(['bash', 'sh', 'zsh']).map(c => [c, '\u0000']));
+  if (mac()){
+    tree({ Applications:{ 'Safari.app':{}, 'Terminal.app':{} }, Library:{ Fonts:{}, Preferences:{} }, System:{ Library:{} },
+           Users:{ Shared:{} }, bin, etc:{ hosts:'127.0.0.1\tlocalhost\n', shells:'/bin/bash\n/bin/zsh\n' } }, S.root);
+    return find(S.root, 'Users');
+  }
+  tree({ bin, etc:{ hostname:'laptop\n', hosts:'127.0.0.1\tlocalhost\n', shells:'/bin/sh\n/bin/bash\n' }, home:{},
+         mnt:{ c:{ 'Program Files':{}, Users:{}, Windows:{} } } }, S.root);
+  find(S.root, 'mnt').open = true;
+  return find(S.root, 'home');
+}
+function full(n){ if (n === S.root) return '/'; const a = []; while (n && n !== S.root){ a.unshift(n.name); n = n.parent; } return '/' + a.join('/'); }
+function tilde(n){ if (!mine(n)) return full(n); const a = []; while (n !== S.home){ a.unshift(n.name); n = n.parent; } return '~' + (a.length ? '/' + a.join('/') : ''); }
+function split(p){
+  if (p === undefined || p === '' || p === '~') return { start:S.home, parts:[] };
+  if (p.startsWith('~/')) return { start:S.home, parts:p.slice(2).split('/').filter(Boolean) };
+  if (p.startsWith('/')) return { start:S.root, parts:p.split('/').filter(Boolean) };
+  return { start:S.cwd, parts:p.split('/').filter(Boolean) };
+}
+function walk(start, parts){
+  let cur = start;
+  for (const s of parts){
+    if (s === '.') continue;
+    if (s === '..'){ if (cur.parent) cur = cur.parent; continue; }
+    if (!cur.dir) return { notdir:true };
+    if (!can(cur, 'x')) return { denied:true, at:cur };
+    const k = find(cur, s); if (!k) return { missing:true };
+    cur = k;
+  }
+  return { node:cur };
+}
+const resolve = (p) => { const sp = split(p); return walk(sp.start, sp.parts); };
+function resolveNew(p){
+  const sp = split(p); const parts = sp.parts.slice(); const last = parts.pop();
+  if (!last || last === '.' || last === '..') return { exists:true };
+  const r = walk(sp.start, parts);
+  if (!r.node) return r;
+  if (!r.node.dir) return { notdir:true };
+  if (!can(r.node, 'x')) return { denied:true, at:r.node };
+  return { dir:r.node, name:last, existing:find(r.node, last) };
+}
+const why = (r) => r.denied ? 'Permission denied' : r.notdir ? 'Not a directory' : 'No such file or directory';
+
+/* ---------- output ---------- */
+function line(text, cls){
+  if (cls === 'err') S.err = true;
+  if (!cls && S.cap){ S.cap.push(text); return null; }
+  const d = document.createElement('div'); d.className = 'l' + (cls ? ' ' + cls : ''); d.textContent = text; out.appendChild(d); return d;
+}
+const err = (t) => line(t, 'err');
+function fail(cmdName, gnuVerb, target, msg, node){
+  if (mac()) err(`${cmdName}: ${target}: ${msg}`);
+  else err(gnuVerb ? `${cmdName}: ${gnuVerb} '${target}': ${msg}` : `${cmdName}: ${target}: ${msg}`);
+  if (msg === 'Permission denied' && node && !mine(node)) sudoNote();
+}
+function sudoNote(){
+  if (S.toldSudo) return; S.toldSudo = true;
+  line('(Outside your home folder you can look around, but changing things needs sudo, the administrator’s key. This practice terminal keeps sudo switched off.)', 'note');
+}
+function promptParts(){
+  if (S.cont !== null) return [['', '> ']];
+  if (mac()){ const f = S.cwd === S.home ? '~' : S.cwd === S.root ? '/' : S.cwd.name; return [['u', `${S.user}@MacBook-Air`], ['', ' '], ['p', f], ['', ' % ']]; }
+  return [['u', `${S.user}@laptop`], ['', ':'], ['p', tilde(S.cwd)], ['', '$ ']];
+}
+function fillPrompt(el){ el.textContent = ''; for (const [c, t] of promptParts()){ const s = document.createElement('span'); if (c) s.className = c; s.textContent = t; el.appendChild(s); } }
+function echoInput(text){ const d = document.createElement('div'); d.className = 'l cmdl'; fillPrompt(d); d.appendChild(document.createTextNode(text)); out.appendChild(d); }
+function drawTyped(){
+  const t = $('typed'), v = cmd.value.replace(/\n/g, ' '), i = Math.min(cmd.selectionStart ?? v.length, v.length);
+  t.textContent = ''; t.append(v.slice(0, i));
+  const c = document.createElement('span'); c.className = 'caret'; c.textContent = v[i] || ' '; t.append(c, v.slice(i + 1));
+  t.style.visibility = (S.sleeping && !S.asking) || S.pager ? 'hidden' : 'visible';
+}
+function showPrompt(){
+  if (S.asking){ ps.textContent = S.asking; ps.style.visibility = 'visible'; }
+  else { fillPrompt(ps); ps.style.visibility = S.sleeping ? 'hidden' : 'visible'; }
+  drawTyped(); term.scrollTop = term.scrollHeight;
+}
+function listNames(nodes){
+  if (!nodes.length) return;
+  if (S.cap){ nodes.forEach(n => S.cap.push(n.name)); return; }
+  const d = document.createElement('div'); d.className = 'l';
+  nodes.forEach((n, i) => { if (i) d.appendChild(document.createTextNode('  ')); const s = document.createElement('span'); if (n.dir) s.className = 'd'; s.textContent = n.name; d.appendChild(s); });
+  out.appendChild(d);
+}
+function status(text, del){ const el = $('last'); el.textContent = text; el.className = del ? 'del' : ''; }
+function flash(n, kind){ n.flash = kind; setTimeout(() => { if (n.flash === kind) n.flash = null; }, 1400); }
+function remove(n){
+  n.leaving = true;
+  if (inside(S.cwd, n)){ S.cwd = n.parent; S.shown = n.parent; line(`(You were inside it, so you’re now in ${tilde(n.parent)}.)`, 'note'); }
+  render();
+  setTimeout(() => { if (n.parent && n.leaving){ detach(n); render(); } }, reduce ? 0 : 850);
+}
+
+/* ---------- variables ---------- */
+function getVar(k){
+  if (k === 'HOME') return full(S.home); if (k === 'PWD') return full(S.cwd); if (k === 'OLDPWD') return S.prev ? full(S.prev) : '';
+  if (k === 'USER' || k === 'LOGNAME') return S.user; if (k === 'SHELL') return '/bin/' + SH(); if (k === '?') return String(S.status);
+  if (k === 'PATH') return mac() ? '/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin' : '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
+  if (k === 'LANG') return 'en_US.UTF-8'; if (k === 'TERM') return 'xterm-256color';
+  return S.vars[k] ?? '';
+}
+const ENV_BASE = ['HOME','LANG','LOGNAME','PATH','PWD','SHELL','TERM','USER'];
+
+/* ---------- parsing: quotes, $variables, operators ---------- */
+function tokenize(s){
+  const t = []; let cur = '', q = null, has = false, quoted = false;
+  const push = () => { if (cur || has){ t.push({ v:cur, q:quoted }); } cur = ''; has = false; quoted = false; };
+  for (let i = 0; i < s.length; i++){
+    const c = s[i];
+    if (q === "'"){ if (c === "'") q = null; else cur += c; continue; }
+    if (c === '$' && i + 1 < s.length){
+      let m = /^\{([A-Za-z_]\w*)\}|^([A-Za-z_]\w*|\?)/.exec(s.slice(i + 1));
+      if (m){ cur += getVar(m[1] || m[2]); has = true; i += m[0].length; continue; }
+    }
+    if (q === '"'){ if (c === '"') q = null; else if (c === '\\' && '"\\$'.includes(s[i+1])){ cur += s[++i]; } else cur += c; continue; }
+    if (c === '\\' && i + 1 < s.length){ cur += s[++i]; has = true; quoted = true; continue; }
+    if (c === '"' || c === "'"){ q = c; has = true; quoted = true; continue; }
+    if (c === ' ' || c === '\t' || c === '\n'){ push(); continue; }
+    if (c === '|' || c === '&' || c === '<'){ push(); t.push({ op:c }); continue; }
+    if (c === '>'){ push(); if (s[i+1] === '>'){ t.push({ op:'>>' }); i++; } else t.push({ op:'>' }); continue; }
+    if (c === '~' && !cur && !has && (i + 1 === s.length || s[i+1] === '/' || s[i+1] === ' ')){ cur = '~'; has = true; continue; }
+    cur += c;
+  }
+  if (q) return null;
+  push();
+  return t;
+}
+const globRe = (p) => new RegExp('^' + p.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
+function glob(tok){
+  if (tok.q || !/[*?]/.test(tok.v)) return [tok.v];
+  const i = tok.v.lastIndexOf('/'), dirPart = i >= 0 ? tok.v.slice(0, i + 1) : '', pat = tok.v.slice(i + 1);
+  const r = dirPart ? resolve(dirPart) : { node:S.cwd };
+  if (!r.node || !r.node.dir || /[*?]/.test(dirPart)) return [tok.v];
+  const re = globRe(pat);
+  const m = kids(r.node).filter(k => re.test(k.name) && (pat.startsWith('.') || !k.name.startsWith('.'))).map(k => dirPart + k.name);
+  if (!m.length && mac()){ err(`zsh: no matches found: ${tok.v}`); return null; }
+  return m.length ? m : [tok.v];
+}
+function opts(args){ const f = new Set(), a = []; for (const x of args){ if (x.length > 1 && x[0] === '-' && x !== '--' && !/^-\d+$/.test(x)) [...x.slice(1)].forEach(c => f.add(c)); else if (x !== '--') a.push(x); } return { f, a }; }
+function numOpt(args, def){ let n = def; const a = []; for (let i = 0; i < args.length; i++){ const x = args[i]; if (x === '-n'){ n = parseInt(args[++i], 10); } else if (/^-n\d+$/.test(x)) n = parseInt(x.slice(2), 10); else if (/^-\d+$/.test(x)) n = parseInt(x.slice(1), 10); else a.push(x); } return { n:isNaN(n) ? def : n, a }; }
+/* ---------- reading files and pipes ---------- */
+const toLines = (text) => text ? text.replace(/\n$/, '').split('\n') : [];
+function readFile(t, cmdName){
+  const r = resolve(t);
+  if (!r.node){ fail(cmdName, '', t, why(r), r.at); return null; }
+  if (r.node.dir){ fail(cmdName, mac() && cmdName !== 'cat' ? 'read error' : '', t, 'Is a directory'); return null; }
+  if (!can(r.node, 'r')){ fail(cmdName, '', t, 'Permission denied', r.node); return null; }
+  if (r.node.text === '\u0000'){ line(`(${t} is a program, not text, so ${cmdName} would print gibberish.)`, 'note'); return null; }
+  return toLines(r.node.text);
+}
+function sources(files, input, cmdName){
+  if (!files.length) return [{ name:null, lines:input || [] }];
+  return files.map(f => ({ name:f, lines:readFile(f, cmdName) })).filter(x => x.lines);
+}
+function writeFile(t, text, append){
+  const r = resolveNew(t);
+  if (r.missing || r.notdir || r.denied){ err(mac() ? `zsh: ${why(r).toLowerCase()}: ${t}` : `bash: ${t}: ${why(r)}`); if (r.denied && r.at && !mine(r.at)) sudoNote(); return false; }
+  if (r.existing && r.existing.dir){ err(mac() ? `zsh: is a directory: ${t}` : `bash: ${t}: Is a directory`); return false; }
+  const target = r.existing || r.dir;
+  if (!can(target, 'w') || (!r.existing && !can(r.dir, 'w'))){ err(mac() ? `zsh: permission denied: ${t}` : `bash: ${t}: Permission denied`); if (!mine(target)) sudoNote(); return false; }
+  let n = r.existing;
+  if (!n){ n = add(r.dir, mk(r.name, false)); flash(n, 'new'); } else flash(n, 'changed');
+  n.text = append ? n.text + text : text;
+  status(`${append ? 'Added to' : 'Wrote to'} ${tilde(n)}`);
+  return true;
+}
+
+/* ---------- commands ---------- */
+const C = {};
+C.help = (args) => {
+  if (args[0]){ const b = BUILTIN[args[0]]; if (b) return b.split('\n').forEach(x => line(x)); return err(mac() ? `help: no help found for ${args[0]}` : `bash: help: no help topics match \`${args[0]}'.  Try \`help help' or \`man -k ${args[0]}' or \`info ${args[0]}'.`); }
+  line('Commands you can use here (man COMMAND explains each one):', 'note');
+  [['Find your way','pwd  ls  cd  find  which'],['Files and folders','mkdir  touch  cp  mv  rm  rmdir'],['Read and write','cat  less  head  tail  echo  printf  >  >>  <'],
+   ['Work with text','grep  sort  uniq  wc  cut  |'],['Permissions','chmod  id  whoami  ls -l'],['Processes','sleep  sleep 100 &  jobs  ps  kill  Ctrl + C'],
+   ['Settings','echo $HOME  env  export  unset'],['Everything else','man  help  date  clear  history']].forEach(([a, b]) => line(`  ${a.padEnd(20)}${b}`));
+  line('You can look anywhere, but only change things inside your home folder. Tab finishes names; ↑ brings back earlier commands.', 'note');
+};
+C.pwd = () => line(full(S.cwd));
+C.clear = () => { out.textContent = ''; };
+C.whoami = () => line(S.user);
+C.id = () => line(mac() ? `uid=501(${S.user}) gid=20(staff) groups=20(staff),80(admin)` : `uid=1000(${S.user}) gid=1000(${S.user}) groups=1000(${S.user}),27(sudo)`);
+C.date = () => {
+  const d = new Date(), p = (x) => String(x).padStart(2, '0');
+  const tz = -d.getTimezoneOffset() === 180 ? 'EAT' : (Intl.DateTimeFormat('en-US', { timeZoneName:'short' }).formatToParts(d).find(x => x.type === 'timeZoneName') || {}).value || 'UTC';
+  const day = d.toLocaleDateString('en-US', { weekday:'short' }), mon = d.toLocaleDateString('en-US', { month:'short' });
+  line(`${day} ${mon} ${mac() ? p(d.getDate()) : String(d.getDate()).padStart(2, ' ')} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())} ${tz} ${d.getFullYear()}`);
+};
+C.history = () => S.hist.forEach((h, i) => line(`${String(i + 1).padStart(5)}  ${h}`));
+C.exit = () => line('(This practice terminal stays open. Use Start again to reset everything.)', 'note');
+C.sudo = () => { line('sudo is switched off in this practice terminal. You can look around outside your home folder, but not change anything there.', 'note'); S.toldSudo = true; };
+C.cd = (args) => {
+  let t = args[0];
+  if (t === '-'){ if (!S.prev){ err(mac() ? 'cd: no previous folder' : 'bash: cd: OLDPWD not set'); return; } t = full(S.prev); line(t); }
+  const r = resolve(t);
+  const bad = (m) => err(mac() ? `cd: ${m.toLowerCase()}: ${t}` : `bash: cd: ${t}: ${m}`);
+  if (!r.node) return bad(why(r));
+  if (!r.node.dir) return bad('Not a directory');
+  if (!can(r.node, 'x')) return bad('Permission denied');
+  if (r.node !== S.cwd){ S.prev = S.cwd; const from = S.cwd; S.cwd = r.node; travel(from, r.node); }
+};
+const owner = (n) => mine(n) ? S.user : 'root';
+const group = (n) => mine(n) ? (mac() ? 'staff' : S.user) : (mac() ? 'wheel' : 'root');
+const size = (n) => n.dir ? (mac() ? 64 + 32 * kids(n).length : 4096) : (n.text === '\u0000' ? 35328 : new Blob([n.text]).size);
+function row(n, name){ return `${modeStr(n)}  1 ${owner(n).padEnd(9)} ${group(n).padEnd(9)} ${String(size(n)).padStart(6)} Oct 28 09:15 ${name}`; }
+function shownKids(n, f){ let k = kids(n); if (!f.has('a')) k = k.filter(x => !x.name.startsWith('.')); return k; }
+function lsDir(n, f, label){
+  if (!can(n, 'r')){ err(mac() ? `ls: ${label}: Permission denied` : `ls: cannot open directory '${label}': Permission denied`); return false; }
+  const k = shownKids(n, f);
+  if (f.has('l')){
+    line(`total ${k.length * 4}`);
+    if (f.has('a')){ line(row(n, '.')); line(row(n.parent || n, '..')); }
+    k.forEach(x => line(row(x, x.name)));
+  } else listNames((f.has('a') ? [{ name:'.', dir:true }, { name:'..', dir:true }] : []).concat(k));
+  return true;
+}
+function lsR(n, f, label, first){
+  if (!first) line(''); line(label + ':');
+  if (!lsDir(n, f, label)) return;
+  shownKids(n, f).filter(k => k.dir).forEach(k => lsR(k, f, (label.endsWith('/') ? label : label + '/') + k.name, false));
+}
+C.ls = (args) => {
+  const { f, a } = opts(args); const targets = a.length ? a : ['.'];
+  const files = [], dirs = [];
+  targets.forEach(t => { const r = resolve(t); if (!r.node) fail('ls', 'cannot access', t, why(r)); else (r.node.dir ? dirs : files).push([t, r.node]); });
+  files.forEach(([t, n]) => line(f.has('l') ? row(n, t) : t));
+  dirs.forEach(([t, n], i) => {
+    if (f.has('R')) return lsR(n, f, t, i === 0 && !files.length);
+    if (targets.length > 1){ if (i || files.length) line(''); line(t + ':'); }
+    lsDir(n, f, t);
+  });
+};
+C.mkdir = (args) => {
+  const { f, a } = opts(args);
+  if (!a.length) return err(mac() ? 'usage: mkdir [-pv] [-m mode] directory_name ...' : 'mkdir: missing operand');
+  for (const t of a){
+    if (f.has('p')){
+      const sp = split(t); let cur = sp.start, ok = true;
+      for (const s of sp.parts){
+        if (s === '.') continue;
+        if (s === '..'){ if (cur.parent) cur = cur.parent; continue; }
+        let k = find(cur, s);
+        if (k && !k.dir){ fail('mkdir', 'cannot create directory', t, 'Not a directory'); ok = false; break; }
+        if (!k){ if (!can(cur, 'w') || !can(cur, 'x')){ fail('mkdir', 'cannot create directory', t, 'Permission denied', cur); ok = false; break; } k = add(cur, mk(s, true)); flash(k, 'new'); }
+        cur = k;
+      }
+      if (ok) status(`Created ${tilde(cur)}/`);
+      continue;
+    }
+    const r = resolveNew(t);
+    if (r.missing || r.notdir || r.denied){ fail('mkdir', 'cannot create directory', t, why(r), r.at); continue; }
+    if (r.exists || r.existing){ fail('mkdir', 'cannot create directory', t, 'File exists'); continue; }
+    if (!can(r.dir, 'w')){ fail('mkdir', 'cannot create directory', t, 'Permission denied', r.dir); continue; }
+    const n = add(r.dir, mk(r.name, true)); flash(n, 'new'); status(`Created ${tilde(n)}/`);
+  }
+  render();
+};
+C.touch = (args) => {
+  if (!args.length) return err(mac() ? 'usage: touch [-A [-][[hh]mm]SS] [-acfhm] [-r file] [-t [[CC]YY]MMDDhhmm[.SS]] file ...' : 'touch: missing file operand');
+  for (const t of args){
+    const r = resolveNew(t);
+    if (r.missing || r.notdir || r.denied){ fail('touch', 'cannot touch', t, why(r), r.at); continue; }
+    if (r.exists) continue;
+    if (r.existing){ if (!can(r.existing, 'w')){ fail('touch', 'cannot touch', t, 'Permission denied', r.existing); continue; } flash(r.existing, 'changed'); status(`Touched ${tilde(r.existing)}`); continue; }
+    if (!can(r.dir, 'w')){ fail('touch', 'cannot touch', t, 'Permission denied', r.dir); continue; }
+    const n = add(r.dir, mk(r.name, false)); flash(n, 'new'); status(`Created ${tilde(n)}`);
+  }
+  render();
+};
+C.echo = (args) => { const n = args[0] === '-n'; line((n ? args.slice(1) : args).join(' ')); };
+C.printf = (args) => {
+  if (!args.length) return err(mac() ? 'usage: printf format [arguments ...]' : 'printf: usage: printf [-v var] format [arguments]');
+  const fmt = args[0].replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\\\/g, '\\'); let rest = args.slice(1), o = '';
+  do { let used = 0; o += fmt.replace(/%([sd%])/g, (m, c) => c === '%' ? '%' : (used++, c === 'd' ? String(parseInt(rest[used - 1], 10) || 0) : (rest[used - 1] ?? ''))); rest = rest.slice(used); if (!used) break; } while (rest.length);
+  o.replace(/\n$/, '').split('\n').forEach(x => line(x));
+};
+C.cat = (args, input) => {
+  if (!args.length && !input) return line('(cat with nothing after it waits for you to type. Here, give it a file name, or pipe something into it.)', 'note');
+  sources(args, input, 'cat').forEach(s => s.lines.forEach(x => line(x)));
+};
+C.head = (args, input) => { const { n, a } = numOpt(args, 10); const src = sources(a, input, 'head'); src.forEach((s, i) => { if (src.length > 1){ if (i) line(''); line(`==> ${s.name} <==`); } s.lines.slice(0, n).forEach(x => line(x)); }); };
+C.tail = (args, input) => { const { n, a } = numOpt(args, 10); const src = sources(a, input, 'tail'); src.forEach((s, i) => { if (src.length > 1){ if (i) line(''); line(`==> ${s.name} <==`); } s.lines.slice(Math.max(0, s.lines.length - n)).forEach(x => line(x)); }); };
+C.wc = (args, input) => {
+  const { f, a } = opts(args); const pick = f.size ? f : new Set(['l', 'w', 'c']); const rows = [];
+  sources(a, input, 'wc').forEach(s => { const text = s.lines.length ? s.lines.join('\n') + '\n' : ''; rows.push({ l:s.lines.length, w:text.split(/\s+/).filter(Boolean).length, c:new Blob([text]).size, name:s.name }); });
+  if (rows.length > 1) rows.push({ l:rows.reduce((x, r) => x + r.l, 0), w:rows.reduce((x, r) => x + r.w, 0), c:rows.reduce((x, r) => x + r.c, 0), name:'total' });
+  const keys = ['l', 'w', 'c'].filter(k => pick.has(k));
+  const w = mac() ? 8 : (a.length || keys.length === 1 ? Math.max(1, ...rows.flatMap(r => keys.map(k => String(r[k]).length))) : 7);
+  rows.forEach(r => line(['l', 'w', 'c'].filter(k => pick.has(k)).map(k => String(r[k]).padStart(w)).join(mac() ? '' : ' ') + (r.name ? ' ' + r.name : '')));
+};
+C.grep = (args, input) => {
+  const { f, a } = opts(args);
+  if (!a.length) return err(mac() ? 'usage: grep [-cinv] pattern [file ...]' : 'Usage: grep [OPTION]... PATTERNS [FILE]...');
+  const [pat, ...files] = a; let re;
+  try { re = new RegExp(pat, f.has('i') ? 'i' : ''); } catch { re = new RegExp(pat.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), f.has('i') ? 'i' : ''); }
+  const src = sources(files, input, 'grep'); let found = 0;
+  src.forEach(s => {
+    let c = 0;
+    s.lines.forEach((x, i) => { if (re.test(x) !== f.has('v')){ c++; found++; if (!f.has('c')) line((src.length > 1 ? s.name + ':' : '') + (f.has('n') ? (i + 1) + ':' : '') + x); } });
+    if (f.has('c')) line((src.length > 1 ? s.name + ':' : '') + c);
+  });
+  if (!found) S.err = true;
+};
+C.sort = (args, input) => {
+  const { f, a } = opts(args); let all = sources(a, input, 'sort').flatMap(s => s.lines);
+  all.sort(f.has('n') ? (x, y) => (parseFloat(x) || 0) - (parseFloat(y) || 0) : (x, y) => x.localeCompare(y));
+  if (f.has('r')) all.reverse(); if (f.has('u')) all = all.filter((x, i) => i === 0 || x !== all[i - 1]);
+  all.forEach(x => line(x));
+};
+C.uniq = (args, input) => {
+  const { f, a } = opts(args); const lines = sources(a.slice(0, 1), input, 'uniq').flatMap(s => s.lines); const o = [];
+  lines.forEach(x => { if (o.length && o[o.length - 1][0] === x) o[o.length - 1][1]++; else o.push([x, 1]); });
+  o.forEach(([x, c]) => line(f.has('c') ? `${String(c).padStart(mac() ? 4 : 7)} ${x}` : x));
+};
+C.cut = (args, input) => {
+  let d = '\t', fl = null; const files = [];
+  for (let i = 0; i < args.length; i++){ const x = args[i];
+    if (x === '-d') d = args[++i] ?? '\t'; else if (x.startsWith('-d')) d = x.slice(2);
+    else if (x === '-f') fl = args[++i]; else if (x.startsWith('-f')) fl = x.slice(2); else files.push(x); }
+  if (!fl) return err(mac() ? 'usage: cut -d delimiter -f list [file ...]' : 'cut: you must specify a list of bytes, characters, or fields');
+  const want = new Set(); fl.split(',').forEach(p => { const [s, e] = p.split('-').map(Number); for (let k = s || 1; k <= (p.includes('-') ? (e || 99) : s); k++) want.add(k); });
+  sources(files, input, 'cut').forEach(s => s.lines.forEach(x => { const parts = x.split(d); line(parts.length === 1 ? x : parts.filter((_, i) => want.has(i + 1)).join(d)); }));
+};
+C.find = (args) => {
+  const starts = [], tests = [];
+  for (let i = 0; i < args.length; i++){ const x = args[i]; if (x === '-name') tests.push(['name', globRe(args[++i] || '')]); else if (x === '-type') tests.push(['type', args[++i]]); else if (x.startsWith('-')) return err(`find: unknown predicate \`${x}'`); else starts.push(x); }
+  if (!starts.length) starts.push('.');
+  const ok = (n) => tests.every(([k, v]) => k === 'name' ? v.test(n === S.root ? '/' : n.name) : (v === 'd' ? n.dir : !n.dir));
+  const go = (n, p) => {
+    if (ok(n)) line(p);
+    if (!n.dir) return;
+    if (!can(n, 'r') || !can(n, 'x')){ err(`find: ‘${p}’: Permission denied`); return; }
+    kids(n).forEach(k => go(k, (p.endsWith('/') ? p : p + '/') + k.name));
+  };
+  starts.forEach(t => { const r = resolve(t); if (!r.node) return err(mac() ? `find: ${t}: ${why(r)}` : `find: ‘${t}’: ${why(r)}`); go(r.node, t); });
+};
+C.which = (args) => {
+  args.forEach(c => {
+    if (BUILTIN[c]){ if (mac()) line(`${c}: shell built-in command`); else S.err = true; return; }
+    if (CMDS.includes(c) || ['bash', 'sh', 'zsh'].includes(c)) line(mac() ? (['ls','cat','cp','mv','rm','mkdir','rmdir','pwd','echo','date','sleep','chmod','ps','kill'].includes(c) ? '/bin/' : '/usr/bin/') + c : '/usr/bin/' + c);
+    else if (mac()) err(`${c} not found`); else S.err = true;
+  });
+};
+function clone(n){ const c = mk(n.name, n.dir, n.text, n.mode); if (n.dir) kids(n).forEach(k => add(c, clone(k))); return c; }
+function dest(src, t, cmdName, verb){
+  const r = resolve(t);
+  if (r.node && r.node.dir) return { dir:r.node, name:src.name, existing:find(r.node, src.name), path:(t.endsWith('/') ? t : t + '/') + src.name };
+  const n = resolveNew(t);
+  if (n.missing || n.notdir || n.denied){ fail(cmdName, verb, t, why(n), n.at); return null; }
+  if (n.exists){ fail(cmdName, verb, t, 'File exists'); return null; }
+  n.path = t; return n;
+}
+C.cp = (args) => {
+  const { f, a } = opts(args);
+  if (a.length < 2) return err(mac() ? 'usage: cp [-R] source_file target_file' : `cp: missing destination file operand after '${a[0] || ''}'`);
+  const [s, t] = a, r = resolve(s);
+  if (!r.node) return fail('cp', 'cannot stat', s, why(r), r.at);
+  if (r.node.dir && !f.has('r') && !f.has('R')) return err(mac() ? `cp: ${s} is a directory (not copied).` : `cp: -r not specified; omitting directory '${s}'`);
+  if (!can(r.node, 'r')) return fail('cp', 'cannot open', s, 'Permission denied', r.node);
+  const d = dest(r.node, t, 'cp', 'cannot create regular file'); if (!d) return;
+  if (!can(d.dir, 'w')) return fail('cp', r.node.dir ? 'cannot create directory' : 'cannot create regular file', d.path, 'Permission denied', d.dir);
+  if (r.node.dir && inside(d.dir, r.node)) return err(`cp: cannot copy a directory, '${s}', into itself, '${d.path}'`);
+  if (d.existing){ if (d.existing.dir || r.node.dir) return err(`cp: cannot overwrite '${t}'`); d.existing.text = r.node.text; flash(d.existing, 'changed'); status(`Copied over ${tilde(d.existing)}`); return render(); }
+  const c = clone(r.node); c.name = d.name; if (c.text === '\u0000') c.mode = 0o755; add(d.dir, c); flash(c, 'new'); status(`Copied to ${tilde(c)}${c.dir ? '/' : ''}`); render();
+};
+C.mv = (args) => {
+  const { a } = opts(args);
+  if (a.length < 2) return err(mac() ? 'usage: mv source target' : `mv: missing destination file operand after '${a[0] || ''}'`);
+  const [s, t] = a, r = resolve(s);
+  if (!r.node) return fail('mv', 'cannot stat', s, why(r), r.at);
+  const deny = (to) => { err(mac() ? `mv: rename ${s} to ${to}: Permission denied` : `mv: cannot move '${s}' to '${to}': Permission denied`); if (!mine(r.node) || !mine(d && d.dir || r.node)) sudoNote(); };
+  let d = null;
+  if (r.node === S.home || r.node === S.root || !can(r.node.parent, 'w')) return deny(t);
+  d = dest(r.node, t, 'mv', 'cannot move'); if (!d) return;
+  if (!can(d.dir, 'w')) return deny(d.path);
+  if (r.node.dir && inside(d.dir, r.node)) return err(`mv: cannot move '${s}' to a subdirectory of itself, '${d.path}'`);
+  if (d.existing === r.node) return;
+  if (d.existing){ if (d.existing.dir) return err(`mv: cannot overwrite directory '${t}'`); detach(d.existing); }
+  const renamed = r.node.parent === d.dir;
+  detach(r.node); r.node.name = d.name; add(d.dir, r.node); flash(r.node, 'new');
+  status(renamed ? `Renamed to ${tilde(r.node)}` : `Moved to ${tilde(r.node)}`); render();
+};
+C.rm = (args) => {
+  const { f, a } = opts(args);
+  if (!a.length) return err(mac() ? 'usage: rm [-f | -i] [-dIPRrvWx] file ...' : 'rm: missing operand');
+  const queue = [];
+  for (const t of a){
+    const r = resolve(t);
+    if (!r.node){ if (!f.has('f')) fail('rm', 'cannot remove', t, why(r), r.at); continue; }
+    if (r.node === S.root){ err(mac() ? 'rm: "/" may not be removed' : "rm: it is dangerous to operate recursively on '/'"); continue; }
+    if (r.node.dir && !f.has('r') && !f.has('R')){ fail('rm', 'cannot remove', t, 'Is a directory'); continue; }
+    if (r.node === S.home){ err('rm: refusing to remove your home folder in this practice terminal'); continue; }
+    if (!can(r.node.parent, 'w')){ fail('rm', 'cannot remove', t, 'Permission denied', r.node); continue; }
+    const protectedFile = !r.node.dir && !can(r.node, 'w') && !f.has('f');
+    queue.push([t, r.node, protectedFile]);
+  }
+  const ask = queue.filter(q => f.has('i') || q[2]);
+  queue.filter(q => !(f.has('i') || q[2])).forEach(([t, n]) => { remove(n); status(`Deleted ${tilde(n)}${n.dir ? '/' : ''}`, true); });
+  if (ask.length){ S.rmAsk = ask; askNext(); }
+};
+function askNext(){
+  const [t, n, prot] = S.rmAsk[0];
+  const kind = n.dir ? 'directory' : (n.text ? 'regular file' : 'regular empty file');
+  S.asking = mac() ? (prot ? `override ${modeStr(n).slice(1)}  ${S.user}/staff for ${t}? ` : `remove ${t}? `) : `rm: remove ${prot ? 'write-protected ' : ''}${kind} '${t}'? `;
+  showPrompt();
+}
+C.rmdir = (args) => {
+  if (!args.length) return err(mac() ? 'usage: rmdir [-p] directory ...' : 'rmdir: missing operand');
+  for (const t of args){
+    const r = resolve(t);
+    if (!r.node){ fail('rmdir', 'failed to remove', t, why(r), r.at); continue; }
+    if (!r.node.dir){ fail('rmdir', 'failed to remove', t, 'Not a directory'); continue; }
+    if (kids(r.node).length){ fail('rmdir', 'failed to remove', t, 'Directory not empty'); continue; }
+    if (r.node === S.home){ err('rmdir: refusing to remove your home folder in this practice terminal'); continue; }
+    if (!can(r.node.parent, 'w')){ fail('rmdir', 'failed to remove', t, 'Permission denied', r.node); continue; }
+    remove(r.node); status(`Deleted ${tilde(r.node)}/`, true);
+  }
+};
+C.chmod = (args) => {
+  const rec = args[0] === '-R'; const a = rec ? args.slice(1) : args;
+  if (a.length < 2) return err(mac() ? 'usage: chmod [-R] mode file ...' : `chmod: missing operand${a.length ? ` after '${a[0]}'` : ''}`);
+  const [m, ...files] = a;
+  const apply = (n) => {
+    if (/^[0-7]{3,4}$/.test(m)) return parseInt(m, 8) & 0o777;
+    let mode = n.mode;
+    for (const cl of m.split(',')){
+      const x = /^([ugoa]*)([+\-=])([rwx]*)$/.exec(cl); if (!x) return null;
+      const who = (x[1] || 'a').replace('a', 'ugo'); let bits = 0;
+      for (const w of who){ const sh = { u:6, g:3, o:0 }[w]; for (const p of x[3]) bits |= { r:4, w:2, x:1 }[p] << sh; if (x[2] === '=') mode &= ~(7 << sh); }
+      mode = x[2] === '-' ? mode & ~bits : mode | bits;
+    }
+    return mode;
+  };
+  for (const t of files){
+    const r = resolve(t);
+    if (!r.node){ fail('chmod', 'cannot access', t, why(r), r.at); continue; }
+    if (!mine(r.node)){ err(mac() ? `chmod: Unable to change file mode on ${t}: Operation not permitted` : `chmod: changing permissions of '${t}': Operation not permitted`); continue; }
+    const each = (n) => { const v = apply(n); if (v === null) return false; n.mode = v; flash(n, 'changed'); if (rec && n.dir) kids(n).forEach(each); return true; };
+    if (!each(r.node)) return err(mac() ? `chmod: Invalid file mode: ${m}` : `chmod: invalid mode: ‘${m}’`);
+    status(`${tilde(r.node)} is now ${modeStr(r.node).slice(1)}`);
+  }
+  render();
+};
+C.sleep = (args, input, bg) => {
+  const s = Math.min(parseFloat(args[0]) || 0, 3600);
+  if (!(s > 0)) return err(mac() ? 'usage: sleep seconds' : 'sleep: missing operand');
+  if (bg){
+    const n = (S.jobs.length ? Math.max(...S.jobs.map(j => j.n)) : 0) + 1, pid = S.pid++;
+    const j = { n, pid, cmd:`sleep ${args[0]}`, state:'Running' };
+    j.timer = setTimeout(() => { j.state = 'Done'; S.notices.push(j); }, s * 1000);
+    S.jobs.push(j); line(`[${n}] ${pid}`);
+    return;
+  }
+  S.sleeping = setTimeout(() => { S.sleeping = null; showPrompt(); }, s * 1000);
+};
+C.jobs = () => S.jobs.filter(j => j.state === 'Running').forEach((j, i, all) => {
+  const mark = i === all.length - 1 ? '+' : (i === all.length - 2 ? '-' : ' ');
+  line(mac() ? `[${j.n}]  ${mark} running    ${j.cmd}` : `[${j.n}]${mark}  Running                 ${j.cmd} &`);
+});
+C.ps = () => {
+  const run = S.jobs.filter(j => j.state === 'Running');
+  if (mac()){ line('  PID TTY           TIME CMD'); line(' 1001 ttys000    0:00.04 -zsh'); run.forEach(j => line(` ${j.pid} ttys000    0:00.00 ${j.cmd}`)); return; }
+  line('    PID TTY          TIME CMD'); line('   1001 pts/0    00:00:00 bash');
+  run.forEach(j => line(`   ${j.pid} pts/0    00:00:00 sleep`)); line(`   ${S.pid++} pts/0    00:00:00 ps`);
+};
+C.kill = (args) => {
+  const a = args.filter(x => !/^-(9|15|KILL|TERM|s)$/.test(x));
+  if (!a.length) return err(mac() ? 'kill: not enough arguments' : 'kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]');
+  a.forEach(t => {
+    const j = t.startsWith('%') ? S.jobs.find(x => x.n === parseInt(t.slice(1), 10) && x.state === 'Running') : S.jobs.find(x => x.pid === parseInt(t, 10) && x.state === 'Running');
+    if (t === '1001' || t === '$$') return line('(That’s the shell itself. This practice terminal won’t stop it.)', 'note');
+    if (!j) return err(t.startsWith('%') ? (mac() ? `kill: ${t}: no such job` : `bash: kill: ${t}: no such job`) : (mac() ? `kill: kill ${t} failed: no such process` : `bash: kill: (${t}) - No such process`));
+    clearTimeout(j.timer); j.state = 'Terminated'; S.notices.push(j);
+  });
+};
+C.env = () => { ENV_BASE.forEach(k => line(`${k}=${getVar(k)}`)); [...S.exported].forEach(k => line(`${k}=${S.vars[k] ?? ''}`)); };
+C.export = (args) => {
+  if (!args.length) return C.env();
+  args.forEach(x => { const m = /^([A-Za-z_]\w*)(=(.*))?$/s.exec(x); if (!m) return err(mac() ? `export: not valid in this context: ${x}` : `bash: export: \`${x}': not a valid identifier`); if (m[2] !== undefined) S.vars[m[1]] = m[3]; if (!ENV_BASE.includes(m[1])) S.exported.add(m[1]); });
+};
+C.unset = (args) => args.forEach(x => { delete S.vars[x]; S.exported.delete(x); });
+C.man = (args) => {
+  const c = args[0];
+  if (!c) return err(mac() ? 'usage: man [-adho] [-t | -w] [-M manpath] [-P pager] [-S mansect] [-m arch[:machine]] [-p [eprtv]] [mansect] page ...' : 'What manual page do you want?\nFor example, try \'man man\'.');
+  if (MAN[c]) return openPager(manLines(c), `Manual page ${c}(1)`);
+  if (BUILTIN[c]){
+    if (mac()) return openPager(builtinLines(), 'Manual page builtin(1)');
+    err(`No manual entry for ${c}`); line(`(${c} is built into the shell, so it has no page of its own. Try help ${c}.)`, 'note'); return;
+  }
+  err(`No manual entry for ${c}`);
+};
+C.less = (args, input) => {
+  if (!args.length){ if (input) return openPager(input.map(t => ({ t })), 'standard input'); return err(mac() ? 'Missing filename ("less --help" for help)' : 'Missing filename ("less --help" for help)'); }
+  const l = readFile(args[0], 'less'); if (l) openPager(l.map(t => ({ t })), args[0]);
+};
+C.more = C.less;
+/* ---------- the manual / less viewer ---------- */
+const meas = document.createElement('canvas').getContext('2d');
+function cols(){ meas.font = getComputedStyle(term).font; const w = meas.measureText('0000000000').width / 10 || 11; return Math.max(36, Math.floor((term.clientWidth - 46) / w)); }
+function wrap(text, indent, width, hang){
+  const o = []; let cur = '';
+  const pad = () => ' '.repeat(o.length ? (hang ?? indent) : indent);
+  for (const w of text.split(/\s+/)){ if (!w) continue; if ((pad() + cur + (cur ? ' ' : '') + w).length > width && cur){ o.push(pad() + cur); cur = w; } else cur += (cur ? ' ' : '') + w; }
+  if (cur) o.push(pad() + cur); return o;
+}
+function headerLine(name, W){
+  const tag = name.toUpperCase() + '(1)', mid = mac() ? 'General Commands Manual' : 'User Commands';
+  const gap = Math.max(1, W - tag.length * 2 - mid.length); const l = Math.floor(gap / 2);
+  return tag + ' '.repeat(l) + mid + ' '.repeat(gap - l) + tag;
+}
+function manLines(c){
+  const m = MAN[c], W = cols(), L = [], add = (t, b) => L.push({ t, b }), sec = (t) => { add(''); add(t, true); };
+  add(headerLine(c, W)); sec('NAME'); wrap(`${c} - ${m.n}`, 7, W).forEach(x => add(x));
+  sec('SYNOPSIS'); m.s.forEach(x => wrap(x, 7, W, 7 + x.split(' ')[0].length + 1).forEach(y => add(y, true)));
+  sec('DESCRIPTION'); m.d.forEach((p, i) => { if (i) add(''); wrap(p, 7, W).forEach(x => add(x)); });
+  if (m.o){ sec('OPTIONS'); m.o.forEach(([o, d], i) => { if (i) add(''); wrap(o, 7, W, 11).forEach(x => add(x, true)); wrap(d, 11, W).forEach(x => add(x)); }); }
+  if (m.e){ sec('EXAMPLES'); m.e.forEach(([e, d], i) => { if (i) add(''); wrap(e, 7, W, 11).forEach(x => add(x, true)); wrap(d, 11, W).forEach(x => add(x)); }); }
+  if (m.see){ sec('SEE ALSO'); wrap(m.see.split(', ').map(x => x + '(1)').join(', '), 7, W).forEach(x => add(x)); }
+  add(''); const foot = 'Command line playground', tag = c.toUpperCase() + '(1)'; add(foot + ' '.repeat(Math.max(1, W - foot.length - tag.length)) + tag);
+  return L;
+}
+function builtinLines(){
+  const W = cols(), L = [], add = (t, b) => L.push({ t, b }); add(headerLine('builtin', W)); add(''); add('NAME', true);
+  wrap('builtin, ' + Object.keys(BUILTIN).join(', ') + ' - shell built-in commands', 7, W).forEach(x => add(x)); add(''); add('DESCRIPTION', true);
+  wrap('These commands are built into the shell itself rather than being separate programs, which is why they have no manual page of their own. Each one in short:', 7, W).forEach(x => add(x));
+  Object.values(BUILTIN).forEach(b => { add(''); b.split('\n').forEach((x, i) => i ? wrap(x.trim(), 11, W).forEach(y => add(y)) : wrap(x, 7, W, 11).forEach(y => add(y, true))); });
+  return L;
+}
+function openPager(lines, label){
+  const el = document.createElement('div'); el.className = 'pager'; el.setAttribute('role', 'document');
+  const pre = document.createElement('pre'), bar = document.createElement('div'); bar.className = 'bar';
+  el.append(pre, bar); term.appendChild(el);
+  S.pager = { lines, top:0, label, el, pre, bar, man:label.startsWith('Manual') }; pagerDraw();
+}
+function pagerRows(){ const p = S.pager; return Math.max(3, Math.floor(p.pre.clientHeight / (parseFloat(getComputedStyle(p.pre).lineHeight) || 27)) - 1); }
+function pagerDraw(){
+  const p = S.pager, rows = pagerRows(), max = Math.max(0, p.lines.length - rows);
+  p.top = Math.max(0, Math.min(p.top, max)); p.pre.textContent = '';
+  p.lines.slice(p.top, p.top + rows).forEach(l => { const s = document.createElement(l.b ? 'b' : 'span'); s.textContent = l.t + '\n'; p.pre.appendChild(s); });
+  const end = p.top >= max;
+  p.bar.textContent = p.man ? ` ${p.label} line ${p.top + 1}${end ? ' (END)' : ''} (press q to quit)` : (end ? ' (END)  press q to quit' : ` ${p.label}  lines ${p.top + 1}-${Math.min(p.lines.length, p.top + rows)}/${p.lines.length}`);
+}
+function pagerKey(e){
+  const p = S.pager, rows = pagerRows(), k = e.key; e.preventDefault();
+  if (k === 'q' || k === 'Q' || (e.ctrlKey && k === 'c')){ p.el.remove(); S.pager = null; cmd.value = ''; showPrompt(); return; }
+  if (k === 'ArrowDown' || k === 'j' || k === 'Enter' || k === 'e') p.top++;
+  else if (k === 'ArrowUp' || k === 'k' || k === 'y') p.top--;
+  else if (k === ' ' || k === 'f' || k === 'PageDown') p.top += rows;
+  else if (k === 'b' || k === 'PageUp') p.top -= rows;
+  else if (k === 'g' || k === 'Home') p.top = 0;
+  else if (k === 'G' || k === 'End') p.top = p.lines.length;
+  pagerDraw();
+}
+
+/* ---------- running a command line: pipes, redirection, background ---------- */
+const TOOLS = { tree:'tree', nano:'nano', vim:'vim', git:'git', python:'python3', python3:'python3' };
+function run(text){
+  const toks = tokenize(text);
+  if (toks === null){ S.cont = text; return; }
+  if (!toks.length) return;
+  let bg = false; if (toks[toks.length - 1].op === '&'){ bg = true; toks.pop(); }
+  const stages = [[]]; toks.forEach(t => t.op === '|' ? stages.push([]) : stages[stages.length - 1].push(t));
+  S.err = false; let input = null;
+  for (let si = 0; si < stages.length; si++){
+    const st = stages[si], words = []; let inFile = null, outFile = null, append = false, bad = false;
+    for (let i = 0; i < st.length; i++){
+      const t = st[i];
+      if (t.op === '<' || t.op === '>' || t.op === '>>'){ const f = st[i + 1]; if (!f || f.op){ bad = true; break; } i++; if (t.op === '<') inFile = f.v; else { outFile = f.v; append = t.op === '>>'; } }
+      else if (!t.op) words.push(t);
+    }
+    if (bad || (!words.length && !outFile && stages.length > 1)){ err(mac() ? 'zsh: parse error near `\\n\'' : "bash: syntax error near unexpected token `newline'"); S.status = 2; return; }
+    const argv = [];
+    for (const w of words){ const g = glob(w); if (!g){ S.status = 1; return; } argv.push(...g); }
+    if (argv.length === 1 && /^[A-Za-z_]\w*=/.test(argv[0]) && !outFile){ const i = argv[0].indexOf('='); S.vars[argv[0].slice(0, i)] = argv[0].slice(i + 1); continue; }
+    if (inFile){ const l = readFile(inFile, SH()); if (!l){ S.status = 1; return; } input = l; }
+    const last = si === stages.length - 1;
+    S.cap = (!last || outFile) ? [] : null;
+    if (argv.length){
+      const [name, ...args] = argv;
+      if (C[name]) C[name](args, input, bg && last);
+      else if (TOOLS[name] && !mac()){ err(`Command '${name}' not found, but can be installed with:`); err(''); err(`sudo apt install ${TOOLS[name]}`); }
+      else err(mac() ? `zsh: command not found: ${name}` : `${name}: command not found`);
+    }
+    const produced = S.cap || []; S.cap = null;
+    if (outFile){ writeFile(outFile, produced.length ? produced.join('\n') + '\n' : '', append); input = []; }
+    else input = produced;
+  }
+  S.status = S.err ? 1 : 0;
+  render();
+}
+function notices(){
+  S.notices.forEach(j => line(mac() ? `[${j.n}]  + ${j.state === 'Done' ? 'done      ' : 'terminated'} ${j.cmd}` : `[${j.n}]+  ${j.state.padEnd(24)}${j.cmd}`));
+  S.jobs = S.jobs.filter(j => !S.notices.includes(j)); S.notices = [];
+}
+
+/* ---------- input handling ---------- */
+function submit(){
+  const v = cmd.value; cmd.value = '';
+  if (S.asking){
+    line(S.asking + v); S.asking = null;
+    const [t, n] = S.rmAsk.shift();
+    if (/^y(es)?$/i.test(v.trim())){ remove(n); status(`Deleted ${tilde(n)}${n.dir ? '/' : ''}`, true); }
+    if (S.rmAsk.length) askNext(); else { S.rmAsk = null; showPrompt(); }
+    return;
+  }
+  if (S.sleeping) return;
+  echoInput(v);
+  if (S.cont !== null){ const all = S.cont + '\n' + v; S.cont = null; run(all); }
+  else { if (v.trim()) S.hist.push(v); S.hi = S.hist.length; run(v); }
+  if (!S.pager){ notices(); showPrompt(); }
+}
+function complete(){
+  const v = cmd.value, i = v.lastIndexOf(' ') + 1, word = v.slice(i);
+  if (!v.slice(0, i).trim()){ const c = [...new Set(CMDS.concat(Object.keys(BUILTIN), ['clear', 'history']))].filter(x => x.startsWith(word)).sort(); if (c.length === 1) cmd.value = c[0] + ' '; else if (c.length && S.lastTab === v){ echoInput(v); line(c.join('  ')); showPrompt(); } S.lastTab = v; return; }
+  const slash = word.lastIndexOf('/'), dirPart = slash >= 0 ? word.slice(0, slash + 1) : '', part = word.slice(slash + 1);
+  const r = dirPart ? resolve(dirPart) : { node:S.cwd };
+  if (!r.node || !r.node.dir) return;
+  const c = kids(r.node).filter(k => k.name.startsWith(part) && (part.startsWith('.') || !k.name.startsWith('.')));
+  if (!c.length) return;
+  const esc = (x) => x.replace(/ /g, '\\ ');
+  if (c.length === 1){ cmd.value = v.slice(0, i) + dirPart + esc(c[0].name) + (c[0].dir ? '/' : ' '); return; }
+  let p = c[0].name; for (const k of c) while (!k.name.startsWith(p)) p = p.slice(0, -1);
+  if (p.length > part.length){ cmd.value = v.slice(0, i) + dirPart + esc(p); return; }
+  if (S.lastTab === v){ echoInput(v); listNames(c); showPrompt(); }
+  S.lastTab = v;
+}
+cmd.addEventListener('keydown', (e) => {
+  if (S.pager) return pagerKey(e);
+  if (e.key !== 'Tab') S.lastTab = '';
+  if (e.key === 'Enter'){ e.preventDefault(); submit(); }
+  else if (e.key === 'Tab'){ e.preventDefault(); complete(); }
+  else if (e.key === 'ArrowUp'){ e.preventDefault(); if (S.hi > 0){ S.hi--; cmd.value = S.hist[S.hi]; } }
+  else if (e.key === 'ArrowDown'){ e.preventDefault(); if (S.hi < S.hist.length - 1){ S.hi++; cmd.value = S.hist[S.hi]; } else { S.hi = S.hist.length; cmd.value = ''; } }
+  else if (e.ctrlKey && (e.key === 'c' || e.key === 'C')){
+    e.preventDefault();
+    if (S.sleeping){ clearTimeout(S.sleeping); S.sleeping = null; line('^C'); }
+    else if (S.asking){ line(S.asking + '^C'); S.asking = null; S.rmAsk = null; }
+    else { echoInput(cmd.value + '^C'); S.cont = null; }
+    cmd.value = ''; showPrompt();
+  }
+  else if (e.ctrlKey && (e.key === 'l' || e.key === 'L')){ e.preventDefault(); out.textContent = ''; showPrompt(); }
+});
+term.addEventListener('click', () => { if (!getSelection().toString()) cmd.focus({ preventScroll:true }); });
+['input', 'keyup', 'select', 'focus', 'blur'].forEach(ev => cmd.addEventListener(ev, () => drawTyped()));
+cmd.addEventListener('keydown', () => setTimeout(drawTyped, 0));
+
+/* ---------- tree drawing ---------- */
+const NS = 'http://www.w3.org/2000/svg', GAP = 12, PAD = 20;
+let BOX_H = 46, LEVEL = 96;
+const label = (n) => n === S.root ? '/' : n === S.home ? S.user : n.name + (n.dir ? '/' : '');
+const isOpen = (n) => n.dir && (mine(n) || inside(S.home, n) || inside(S.cwd, n) || (S.keep && inside(S.keep, n)) || n.open);
+const drawn = (n) => isOpen(n) ? n.kids : [];
+function width(n){
+  meas.font = `${n.dir && mine(n) ? 700 : 400} 18px "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace`;
+  let w = meas.measureText(label(n)).width;
+  if (S.perms){ meas.font = '400 16px "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace'; w = Math.max(w, meas.measureText(modeStr(n).slice(1)).width); }
+  return Math.ceil(w) + 26;
+}
+function lay(n, depth){ n._bw = width(n); n._d = depth; const k = drawn(n); k.forEach(c => lay(c, depth + 1)); n._sum = k.reduce((a, c) => a + c._w, 0); n._w = Math.max(n._bw + GAP, n._sum); }
+function place(n, x0, top){ n._x = x0 + n._w / 2; n._y = top + n._d * LEVEL; let x = x0 + (n._w - n._sum) / 2; drawn(n).forEach(c => { place(c, x, top); x += c._w; }); }
+function el(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+let dotEl = null, anim = null, dotAt = null;
+function render(){
+  BOX_H = S.perms ? 66 : 46; LEVEL = S.perms ? 116 : 96;
+  const root = S.root; lay(root, 0);
+  let maxD = 0; (function md(n){ maxD = Math.max(maxD, n._d); drawn(n).forEach(md); })(root);
+  const cw = treeEl.clientWidth - 24, ch = treeEl.clientHeight - 16;
+  const contentW = Math.max(root._w, 260) + PAD * 2, contentH = maxD * LEVEL + BOX_H + PAD * 2;
+  const W = Math.max(contentW, cw / 1.3), H = Math.max(contentH, ch / 1.3);
+  place(root, (W - root._w) / 2, PAD);
+  const svg = el('svg', { viewBox:`0 0 ${W} ${H}`, preserveAspectRatio:'xMidYMin meet', role:'img', 'aria-label':'The file system as a tree' });
+  S.pos = {};
+  (function edges(n){ drawn(n).forEach(c => { const mid = n._y + BOX_H + (LEVEL - BOX_H) / 2;
+      el('path', { class:'edge' + (c.leaving ? ' leaving' : ''), d:`M${n._x} ${n._y + BOX_H} V${mid} H${c._x} V${c._y}` }, svg); edges(c); }); })(root);
+  (function nodes(n){
+    const cls = ['node', n.dir ? 'dir' : 'file'];
+    if (!mine(n)) cls.push('sys');
+    if (n === S.shown && !n.leaving) cls.push('here');
+    if (n.flash) cls.push(n.flash);
+    if (n.leaving) cls.push('leaving');
+    const g = el('g', { class:cls.join(' ') }, svg);
+    el('rect', { x:n._x - n._bw / 2, y:n._y, width:n._bw, height:BOX_H, rx:10 }, g);
+    el('text', { x:n._x, y:n._y + (S.perms ? 22 : BOX_H / 2) }, g).textContent = label(n);
+    if (S.perms) el('text', { class:'perm', x:n._x, y:n._y + 47 }, g).textContent = modeStr(n).slice(1);
+    S.pos[n.id] = { x:n._x, y:n._y };
+    drawn(n).forEach(nodes);
+  })(root);
+  dotEl = el('circle', { class:'dot', r:13, cx:dotAt ? dotAt[0] : -50, cy:dotAt ? dotAt[1] : -50, visibility:anim && dotAt ? 'visible' : 'hidden' }, svg);
+  treeEl.replaceChildren(svg);
+}
+function travel(from, to){
+  S.keep = from; S.shown = null; render();
+  const up = [], down = []; let a = from;
+  while (!inside(to, a)){ up.push(a); a = a.parent; }
+  let b = to; while (b !== a){ down.unshift(b); b = b.parent; }
+  const leg = (p, k) => { const P = S.pos[p.id], K = S.pos[k.id]; const mid = P.y + BOX_H + (LEVEL - BOX_H) / 2; return [[P.x, P.y + BOX_H / 2], [P.x, mid], [K.x, mid], [K.x, K.y + BOX_H / 2]]; };
+  const pts = [[S.pos[from.id].x, S.pos[from.id].y + BOX_H / 2]], stops = new Set();
+  up.forEach(n => { pts.push(...leg(n.parent, n).reverse().slice(1)); stops.add(pts.length - 1); });
+  let prev = a; down.forEach(n => { pts.push(...leg(prev, n).slice(1)); stops.add(pts.length - 1); prev = n; });
+  const finish = () => { anim = null; dotAt = null; S.keep = null; S.shown = to; render(); };
+  if (reduce || pts.length < 2) return finish();
+  if (anim) cancelAnimationFrame(anim);
+  dotEl.setAttribute('visibility', 'visible');
+  // the same on-screen speed for every move, long or short, with a short pause at each folder passed on the way
+  const svgEl = treeEl.querySelector('svg'), vb = svgEl.viewBox.baseVal;
+  const scale = Math.min(svgEl.clientWidth / vb.width, svgEl.clientHeight / vb.height) || 1;
+  const PX_PER_SEC = 160, PAUSE = 525, plan = [];
+  for (let i = 1; i < pts.length; i++){
+    const d = Math.hypot(pts[i][0] - pts[i-1][0], pts[i][1] - pts[i-1][1]);
+    if (d) plan.push({ A:pts[i-1], B:pts[i], ms:d * scale / PX_PER_SEC * 1000 });
+    if (stops.has(i) && i < pts.length - 1) plan.push({ A:pts[i], B:pts[i], ms:PAUSE });
+  }
+  const dur = plan.reduce((t, p) => t + p.ms, 0), t0 = performance.now();
+  const step = (now) => {
+    let t = Math.min(now - t0, dur), i = 0;
+    while (i < plan.length - 1 && t > plan[i].ms){ t -= plan[i].ms; i++; }
+    const p = plan[i], f = p.ms ? Math.min(1, t / p.ms) : 1;
+    dotAt = [p.A[0] + (p.B[0] - p.A[0]) * f, p.A[1] + (p.B[1] - p.A[1]) * f];
+    dotEl.setAttribute('cx', dotAt[0]); dotEl.setAttribute('cy', dotAt[1]); dotEl.setAttribute('visibility', 'visible');
+    if (now - t0 < dur) anim = requestAnimationFrame(step); else finish();
+  };
+  anim = requestAnimationFrame(step);
+}
+
+/* ---------- controls ---------- */
+function greet(){ line('A practice terminal. Type a command and press Enter, and the tree on the right shows every change as it happens. You can look anywhere, but only change things inside your home folder. Type help for the commands, or man ls to read a manual.', 'note'); }
+function rebuild(keepHome){
+  const parentOfHomes = buildRoot();
+  if (!keepHome){ S.home = mk(S.user, true); add(S.home, mk('projects', true)); }
+  S.home.name = S.user; add(parentOfHomes, S.home);
+}
+function reset(){
+  S.id = 1; S.home = null; rebuild(false);
+  S.cwd = S.shown = S.home; S.prev = null; S.cont = null; S.asking = null; S.rmAsk = null; S.toldSudo = false;
+  S.vars = {}; S.exported = new Set(); S.status = 0;
+  S.jobs.forEach(j => clearTimeout(j.timer)); S.jobs = []; S.notices = [];
+  if (S.sleeping){ clearTimeout(S.sleeping); S.sleeping = null; }
+  if (S.pager){ S.pager.el.remove(); S.pager = null; }
+  out.textContent = ''; greet(); status(''); render(); showPrompt();
+}
+document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+  if (S.os === b.dataset.os) return;
+  S.os = b.dataset.os; document.body.classList.toggle('mac', mac());
+  document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  const wasHome = mine(S.cwd);
+  if (S.home.parent) detach(S.home);
+  rebuild(true);
+  if (!wasHome){ S.cwd = S.shown = S.home; }
+  S.prev = null;
+  render(); showPrompt(); cmd.focus();
+}));
+$('perms').addEventListener('click', (e) => { S.perms = !S.perms; e.currentTarget.setAttribute('aria-pressed', String(S.perms)); render(); cmd.focus(); });
+$('user').addEventListener('input', (e) => {
+  const v = e.target.value.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '') || 'yourname';
+  S.user = v; if (S.home){ S.home.name = v; S.home.parent.kids.sort((a,b) => a.name.localeCompare(b.name)); } render(); showPrompt();
+});
+$('reset').addEventListener('click', () => { reset(); cmd.focus(); });
+addEventListener('resize', () => { render(); if (S.pager) pagerDraw(); });
+reset(); cmd.focus();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
+})();
+</script>
+
+
+</body>
+</html>
