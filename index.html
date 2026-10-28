@@ -14,15 +14,15 @@
 <meta name="description" content="A practice terminal for learning the command line. Type real commands and watch the file system tree change as you go. Runs entirely in your browser.">
 <style>
 :root{
-  --bg:#FFFFFF; --panel:#F4F4F5; --ink:#000000; --muted:#6B6B6B; --line:#BDBDBD; --dirbg:#000000; --dirink:#FFFFFF;
+  --bg:#FFFFFF; --panel:#F4F4F5; --ink:#000000; --muted:#6B6B6B; --line:#BDBDBD; --dirbg:#000000; --dirink:#FFFFFF; --fileline:#3F3F46; --fold:#D4D4D8; --sysbg:#E4E4E7; --sysline:#A1A1AA; --sysink:#52525B;
   --box:#FFFFFF; --boxline:#D4D4D8; --red:#FF002E; --pink:#FFF0F3;
   color-scheme:light; box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){--bg:#000000;--panel:#1A1A1A;--ink:#FFFFFF;--muted:#A1A1AA;--line:#52525B;--box:#000000;--boxline:#3F3F46;--pink:#2A0A12;--dirbg:#FFFFFF;--dirink:#000000;color-scheme:dark}
+  :root:not([data-theme="light"]){--bg:#000000;--panel:#1A1A1A;--ink:#FFFFFF;--muted:#A1A1AA;--line:#52525B;--box:#000000;--boxline:#3F3F46;--pink:#2A0A12;--dirbg:#FFFFFF;--dirink:#000000;--fileline:#D4D4D8;--fold:#52525B;--sysbg:#27272A;--sysline:#71717A;--sysink:#A1A1AA;color-scheme:dark}
 }
-:root[data-theme="dark"]{--bg:#000000;--panel:#1A1A1A;--ink:#FFFFFF;--muted:#A1A1AA;--line:#52525B;--box:#000000;--boxline:#3F3F46;--pink:#2A0A12;--dirbg:#FFFFFF;--dirink:#000000;color-scheme:dark}
+:root[data-theme="dark"]{--bg:#000000;--panel:#1A1A1A;--ink:#FFFFFF;--muted:#A1A1AA;--line:#52525B;--box:#000000;--boxline:#3F3F46;--pink:#2A0A12;--dirbg:#FFFFFF;--dirink:#000000;--fileline:#D4D4D8;--fold:#52525B;--sysbg:#27272A;--sysline:#71717A;--sysink:#A1A1AA;color-scheme:dark}
 *,*::before,*::after{box-sizing:inherit}
 html{height:100%}
 body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column}
@@ -64,12 +64,16 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(320px,2fr) 3f
 .edge{stroke:var(--line);stroke-width:2.5;fill:none}
 .node rect{fill:var(--box);stroke:var(--boxline);stroke-width:2;transform-box:fill-box;transform-origin:center}
 .node.dir rect{fill:var(--dirbg);stroke:var(--dirbg)}
+.node.file rect{stroke:var(--fileline)}
+.node .fold{fill:var(--fold);stroke:var(--fileline);stroke-width:2;stroke-linejoin:round}
 .node text{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;font-size:18px;fill:var(--ink);dominant-baseline:central;text-anchor:middle}
 .node.dir text{font-weight:700;fill:var(--dirink)}
 .node.here rect{fill:var(--red);stroke:var(--red)}
 .node.here text{fill:#FFFFFF}
-.node.sys rect{fill:var(--bg);stroke:var(--line);stroke-dasharray:6 5}
-.node.sys text{fill:var(--muted)}
+.node.sys rect{fill:var(--sysbg);stroke:var(--sysline);stroke-dasharray:6 5}
+.node.sys text{fill:var(--sysink)}
+.node.sys .fold{stroke:var(--sysline)}
+.node.here .fold{fill:#FFFFFF;stroke:var(--red)}
 .node.sys.here rect{fill:var(--red);stroke:var(--red);stroke-dasharray:none}
 .node.sys.here text{fill:#FFFFFF}
 .node.new rect{animation:pop .9s ease-out}
@@ -92,8 +96,8 @@ button.toggle{font:inherit;font-size:15px;padding:8px 14px;border-radius:8px;bor
 button.toggle[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .status{display:flex;gap:10px 22px;flex-wrap:wrap;align-items:center;padding:12px 20px;border-top:1px solid var(--boxline);font-size:16px}
 .key{display:inline-flex;align-items:center;gap:8px;color:var(--muted)}
-.sw{width:18px;height:14px;border-radius:4px;border:2px solid var(--boxline);background:var(--box)}
-.sw.here{background:var(--red);border-color:var(--red)} .sw.dir{background:var(--dirbg);border-color:var(--dirbg)} .sw.sys{background:var(--bg);border:2px dashed var(--line)}
+.sw{width:18px;height:14px;border-radius:4px;border:2px solid var(--fileline);background:linear-gradient(225deg,var(--fold) 0 5px,var(--box) 5px)}
+.sw.here{background:var(--red);border-color:var(--red)} .sw.dir{background:var(--dirbg);border-color:var(--dirbg)} .sw.sys{background:var(--sysbg);border:2px dashed var(--sysline)}
 #last{margin-left:auto;font-weight:700}
 #last.del{color:var(--red)}
 @media (prefers-reduced-motion:reduce){.node rect,.node.leaving,.edge.leaving{animation:none!important}}
@@ -123,7 +127,7 @@ button.toggle[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
       <span class="key"><span class="sw here"></span>You are here</span>
       <span class="key"><span class="sw dir"></span>Folder</span>
       <span class="key"><span class="sw"></span>File</span>
-      <span class="key"><span class="sw sys"></span>System folder (look, don’t touch)</span>
+      <span class="key"><span class="sw sys"></span>System (look, don’t touch)</span>
       <span id="last" role="status"></span>
     </div>
   </section>
@@ -898,6 +902,7 @@ function render(){
     if (n.leaving) cls.push('leaving');
     const g = el('g', { class:cls.join(' ') }, svg);
     el('rect', { x:n._x - n._bw / 2, y:n._y, width:n._bw, height:BOX_H, rx:10 }, g);
+    if (!n.dir){ const R2 = n._x + n._bw / 2, F = 14; el('path', { class:'fold', d:`M${R2 - F} ${n._y} V${n._y + F} H${R2} Z` }, g); }
     el('text', { x:n._x, y:n._y + (S.perms ? 22 : BOX_H / 2) }, g).textContent = label(n);
     if (S.perms) el('text', { class:'perm', x:n._x, y:n._y + 47 }, g).textContent = modeStr(n).slice(1);
     S.pos[n.id] = { x:n._x, y:n._y };
