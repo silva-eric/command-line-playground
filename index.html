@@ -86,6 +86,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(320px,2fr) 3f
 @keyframes ring{0%,45%{stroke:var(--red);stroke-width:7}100%{stroke-width:2}}
 @keyframes leave{0%{opacity:1}100%{opacity:0;transform:translateY(10px)}}
 .dot{fill:var(--red);stroke:#FFFFFF;stroke-width:4}
+.trail{fill:none;stroke:var(--red);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
 .node text.perm{font-size:16px;font-weight:400;fill:var(--muted)}
 .node.dir text.perm{fill:var(--dirink);opacity:.75}
 .node.here text.perm{fill:#FFFFFF;opacity:.85}
@@ -932,6 +933,11 @@ function lay(n, depth){ n._bw = width(n); n._d = depth; const k = drawn(n); k.fo
 function place(n, x0, top){ n._x = x0 + n._w / 2; n._y = top + n._d * LEVEL; let x = x0 + (n._w - n._sum) / 2; drawn(n).forEach(c => { place(c, x, top); x += c._w; }); }
 function el(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
 let dotEl = null, anim = null, dotAt = null;
+// the red line left behind the dot: it stays for TRAIL_HOLD ms after the dot arrives, then fades over TRAIL_FADE ms
+let trail = null, trailEl = null, fadeAnim = null;
+const TRAIL_HOLD = 1000, TRAIL_FADE = 800;
+const trailD = (pts) => 'M' + pts.map(p => p.join(' ')).join(' L');
+const trailOpacity = (now) => trail.end ? Math.max(0, Math.min(1, 1 - (now - trail.end - TRAIL_HOLD) / TRAIL_FADE)) : 1;
 function render(){
   BOX_H = S.perms ? 66 : 46; LEVEL = S.perms ? 116 : 96;
   const root = S.root; lay(root, 0);
@@ -944,6 +950,7 @@ function render(){
   S.pos = {};
   (function edges(n){ drawn(n).forEach(c => { const mid = n._y + BOX_H + (LEVEL - BOX_H) / 2;
       el('path', { class:'edge' + (c.leaving ? ' leaving' : ''), d:`M${n._x} ${n._y + BOX_H} V${mid} H${c._x} V${c._y}` }, svg); edges(c); }); })(root);
+  const trailG = el('g', {}, svg);
   (function nodes(n){
     const cls = ['node', n.dir ? 'dir' : 'file'];
     if (!mine(n)) cls.push('sys');
@@ -959,11 +966,14 @@ function render(){
     S.pos[n.id] = { x:n._x, y:n._y };
     drawn(n).forEach(nodes);
   })(root);
+  if (trail && trail.end){ const r = route(trail.from, trail.to); if (!r){ trail = null; S.keep = null; return render(); } trail.pts = r.pts; }
+  trailEl = trail ? el('path', { class:'trail', d:trailD(trail.pts), opacity:trailOpacity(performance.now()) }, trailG) : null;
   dotEl = el('circle', { class:'dot', r:13, cx:dotAt ? dotAt[0] : -50, cy:dotAt ? dotAt[1] : -50, visibility:anim && dotAt ? 'visible' : 'hidden' }, svg);
   treeEl.replaceChildren(svg);
 }
-function travel(from, to){
-  S.keep = from; S.shown = null; render();
+// the way along the tree lines from one folder to another: up to the folder they share, then down; null if either is not drawn
+function route(from, to){
+  if (!S.pos[from.id] || !S.pos[to.id]) return null;
   const up = [], down = []; let a = from;
   while (!inside(to, a)){ up.push(a); a = a.parent; }
   let b = to; while (b !== a){ down.unshift(b); b = b.parent; }
@@ -971,7 +981,21 @@ function travel(from, to){
   const pts = [[S.pos[from.id].x, S.pos[from.id].y + BOX_H / 2]], stops = new Set();
   up.forEach(n => { pts.push(...leg(n.parent, n).reverse().slice(1)); stops.add(pts.length - 1); });
   let prev = a; down.forEach(n => { pts.push(...leg(prev, n).slice(1)); stops.add(pts.length - 1); prev = n; });
-  const finish = () => { anim = null; dotAt = null; S.keep = null; S.shown = to; render(); };
+  return { pts, stops };
+}
+function fade(now){
+  if (!trail) return;
+  const o = trailOpacity(now);
+  if (o <= 0){ trail = null; S.keep = null; render(); return; }
+  if (trailEl) trailEl.setAttribute('opacity', o);
+  fadeAnim = requestAnimationFrame(fade);
+}
+function travel(from, to){
+  cancelAnimationFrame(fadeAnim); trail = null;
+  S.keep = from; S.shown = null; render();
+  const { pts, stops } = route(from, to) || { pts:[], stops:new Set() };
+  // the folders opened for the trip stay open until the line has faded, so it stays on the tree lines
+  const finish = () => { anim = null; dotAt = null; S.shown = to; if (trail) trail.end = performance.now(); else S.keep = null; render(); if (trail) fadeAnim = requestAnimationFrame(fade); };
   if (reduce || pts.length < 2) return finish();
   if (anim) cancelAnimationFrame(anim);
   dotEl.setAttribute('visibility', 'visible');
@@ -985,12 +1009,14 @@ function travel(from, to){
     if (stops.has(i) && i < pts.length - 1) plan.push({ A:pts[i], B:pts[i], ms:PAUSE });
   }
   const dur = plan.reduce((t, p) => t + p.ms, 0), t0 = performance.now();
+  trail = { from, to, pts:[pts[0]], end:0 };
   const step = (now) => {
     let t = Math.min(now - t0, dur), i = 0;
     while (i < plan.length - 1 && t > plan[i].ms){ t -= plan[i].ms; i++; }
     const p = plan[i], f = p.ms ? Math.min(1, t / p.ms) : 1;
     dotAt = [p.A[0] + (p.B[0] - p.A[0]) * f, p.A[1] + (p.B[1] - p.A[1]) * f];
     dotEl.setAttribute('cx', dotAt[0]); dotEl.setAttribute('cy', dotAt[1]); dotEl.setAttribute('visibility', 'visible');
+    trail.pts = plan.slice(0, i + 1).map(q => q.A).concat([dotAt]); if (trailEl) trailEl.setAttribute('d', trailD(trail.pts));
     if (now - t0 < dur) anim = requestAnimationFrame(step); else finish();
   };
   anim = requestAnimationFrame(step);

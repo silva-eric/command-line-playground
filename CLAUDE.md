@@ -26,7 +26,7 @@ Deploy = commit and push to `main`; Pages rebuilds in about a minute. Keep it a 
 - **Brand (Reduzer)**: red `#FF002E`, black, white, greys only. Fonts Inter + JetBrains Mono; weights 300/400/700 only (no 600/800). British spelling, typographic apostrophes and quotes in UI text (straight quotes only in code).
 - **Text must wrap, never be hidden**: the command line wraps at the window edge like a real terminal (`word-break: break-all`); prose notes wrap by word; the man pager wraps with hanging indents.
 - **Tree styling** (three kinds must be obviously different): every box has an icon before its name, a filled folder for folders and an outlined page with a turned-down corner for files (the legend uses the same icons); your folders = solid black (white in dark mode); files = darker outline; system folders/files = grey fill, grey text and icon, dashed outline; current folder = solid red with a white icon.
-- **Dot animation**: constant on-screen speed `PX_PER_SEC = 160` with `PAUSE = 525` ms at each folder passed (owner asked for "50% slower" than 240/350). Never compress long routes into a fixed duration.
+- **Dot animation**: constant on-screen speed `PX_PER_SEC = 160` with `PAUSE = 525` ms at each folder passed (owner asked for "50% slower" than 240/350). Never compress long routes into a fixed duration. A red trail line grows behind the dot along the route, stays for `TRAIL_HOLD = 1000` ms after it arrives, then fades over `TRAIL_FADE = 800` ms.
 - Switching Ubuntu · WSL / Mac must **not** print anything in the terminal.
 - `sudo` is always off. You can look anywhere; you can only change things inside your home folder.
 
@@ -50,7 +50,8 @@ Deploy = commit and push to `main`; Pages rebuilds in about a minute. Keep it a 
 **Input**: a visually hidden `<textarea id="cmd">` holds the text; `drawTyped()` mirrors it after the prompt with a blinking block cursor so long commands wrap. Tab completes commands and paths, ↑/↓ give history, Ctrl + C cancels, Ctrl + L clears.
 
 **Tree**: `render()` rebuilds the SVG each time. `lay()`/`place()` give a tidy top-down layout. `isOpen()` expands everything inside home, plus the folders on the way to home, to `cwd`, and to `S.keep` (during travel), plus `mnt`. `BOX_H`/`LEVEL` grow when *Show permissions* is on (mode string under each label). Flash classes: `new` (pop), `changed` (ring), `leaving` (fade 850 ms, then detach).
-- `travel(from, to)` walks up to the shared ancestor and then down, along the elbow lines. `dotAt` keeps the dot's position so a re-render mid-animation (run() always re-renders) doesn't hide it. A bug where the dot vanished came from exactly this.
+- `travel(from, to)` walks up to the shared ancestor and then down, along the elbow lines (`route()` gives the points). `dotAt` keeps the dot's position so a re-render mid-animation (run() always re-renders) doesn't hide it. A bug where the dot vanished came from exactly this.
+- `trail` holds the red line: its points while the dot moves, then `route()` is recomputed on each render while it fades, so it stays on the lines if the layout changes. `S.keep` is only cleared when the trail has gone, so the folders opened for the trip stay open under it. Reduced motion: no dot, no trail.
 - Redraws again on `document.fonts.ready` so box widths are measured with the real font.
 
 ## Testing
@@ -61,6 +62,7 @@ Tests were run with Playwright (Chromium) against the file, in both themes (`col
 - `sleep 100 &` gives `[1] 1201`; `kill %1` gives `[1]+  Terminated              sleep 100`.
 - `touch /etc/x`, `rm /bin/ls` give Permission denied plus the one-time sudo note.
 - Dot visible mid-move: sample `#tree circle.dot` visibility and position every 100 ms after a `cd`.
+- Trail: `#tree path.trail` grows while the dot moves, ends at the dot, keeps opacity 1 for about 1 s after arrival, then fades and is removed.
 - No page errors and no external requests (apart from none at all on the Pages build).
 
 ## Known limitations and ideas
