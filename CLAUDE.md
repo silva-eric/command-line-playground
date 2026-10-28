@@ -27,7 +27,7 @@ Deploy = commit and push to `main`; Pages rebuilds in about a minute. Keep it a 
 - Placeholder username is `yourname` (the deck uses `<yourname>`). There's an editable "Your name" field.
 - **Brand (Reduzer)**: red `#FF002E`, black, white, greys only. Fonts Inter + JetBrains Mono; weights 300/400/700 only (no 600/800). British spelling, typographic apostrophes and quotes in UI text (straight quotes only in code).
 - **Text must wrap, never be hidden**: the command line wraps at the window edge like a real terminal (`word-break: break-all`); prose notes wrap by word; the man pager wraps with hanging indents.
-- **Tree styling** (three kinds must be obviously different): your folders = solid black (white in dark mode); files = page shape with a folded top-right corner and darker outline; system folders/files = grey fill, grey text, dashed outline; current folder = solid red.
+- **Tree styling** (three kinds must be obviously different): every box has an icon before its name, a filled folder for folders and an outlined page with a turned-down corner for files (the legend uses the same icons); your folders = solid black (white in dark mode); files = darker outline; system folders/files = grey fill, grey text and icon, dashed outline; current folder = solid red with a white icon.
 - **Dot animation**: constant on-screen speed `PX_PER_SEC = 160` with `PAUSE = 525` ms at each folder passed (owner asked for "50% slower" than 240/350). Never compress long routes into a fixed duration.
 - Switching Ubuntu · WSL / Mac must **not** print anything in the terminal.
 - `sudo` is always off. You can look anywhere; you can only change things inside your home folder.
