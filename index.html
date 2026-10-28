@@ -104,6 +104,18 @@ button.toggle[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .ico{flex:none;overflow:visible} .ico.dir{fill:var(--dirbg)} .ico.file{fill:none;stroke:var(--ink);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
 #last{margin-left:auto;font-weight:700}
 #last.del{color:var(--red)}
+.term .pct{background:#E4E4E7;color:#000}
+.term.full{overflow:hidden}
+.editor{position:absolute;inset:0;background:#000;color:#E4E4E7;display:flex;flex-direction:column;border-left:6px solid var(--red);z-index:6}
+.editor .ebar{display:flex;justify-content:space-between;gap:12px;background:#E4E4E7;color:#000;padding:0 12px;white-space:pre-wrap}
+.editor textarea{flex:1;min-height:0;margin:0;padding:6px 20px;border:0;outline:none;resize:none;background:#000;color:#E4E4E7;font:inherit;tab-size:8;white-space:pre-wrap;word-break:break-word;caret-color:#E4E4E7}
+.editor .ehelp{flex:1;margin:0;padding:6px 20px;overflow:auto;font:inherit;white-space:pre-wrap;word-break:break-word}
+.editor .emsg{min-height:1.5em;text-align:center;padding:0 12px}
+.editor .emsg>span{background:#E4E4E7;color:#000}
+.editor .eask{display:flex;text-align:left;background:#E4E4E7;color:#000;white-space:pre}
+.editor .eask input{flex:1;min-width:0;border:0;outline:none;background:transparent;color:inherit;font:inherit;padding:0}
+.editor .ekeys{display:grid;grid-template-columns:repeat(auto-fill,minmax(15ch,1fr));padding:0 12px 4px;white-space:pre}
+.editor .ekeys b{background:#E4E4E7;color:#000;font-weight:400}
 @media (prefers-reduced-motion:reduce){.node rect,.node.leaving,.edge.leaving{animation:none!important}}
 </style>
 </head>
@@ -194,6 +206,21 @@ const MAN = {
  sleep:{n:'wait for a number of seconds', s:['sleep SECONDS'], d:['Does nothing for SECONDS seconds, then finishes. Useful for practising with processes: stop it with Ctrl + C, or run it in the background with &.'], e:[['sleep 5','wait five seconds'],['sleep 100 &','wait in the background']], see:'ps, kill, jobs'},
  env:{n:'print the environment variables', s:['env'], d:['Prints every environment variable as NAME=value. Environment variables are settings your shell carries around and passes to every program it starts, such as HOME, PATH and USER.','Use export to add your own.'], e:[['env','list them all'],['env | grep HOME','find one']], see:'echo, export'},
  man:{n:'show the manual for a command', s:['man COMMAND'], d:['Opens the manual page for COMMAND. Scroll with the arrow keys or space, and press q to quit.','Commands built into the shell, like cd, have no page of their own: on Ubuntu, use help instead, for example help cd.'], e:[['man ls','the manual for ls'],['man man','this page']], see:'less, help, which'},
+ nano:{n:'edit a text file in the terminal', s:['nano [FILE]'], d:['Opens FILE for editing, or a new, empty file. Type to change the text; the arrow keys move the cursor. The two lines at the bottom list the shortcuts: ^ means Ctrl, so ^O is Ctrl + O.','Save with Ctrl + O (then Enter to keep the name), and leave with Ctrl + X. If you leave with changes that are not saved, nano asks whether to save them: press Y or N.','On a Mac, the nano you get is a version of the older editor pico, with the same main shortcuts.'],
+  o:[['^O','write out: save the file'],['^X','exit; asks first if there are changes that are not saved'],['^K  ^U','cut the line the cursor is on, and paste it back'],['^W','search for text'],['^C','show where the cursor is']], e:[['nano hello.sh','write a script'],['nano notes/todo.txt','edit a file in another folder']], see:'cat, less'},
+ bash:{n:'the Bash shell: run commands from a script', s:['bash [-x] [-e] SCRIPT [ARGUMENT]...','bash -c COMMANDS'], d:['Reads the commands in SCRIPT and runs them, one line after another, in a new shell. The script gets each ARGUMENT as $1, $2 and so on, and its own name as $0.','The new shell starts in the same folder and sees your exported variables (see export), but not your other variables or functions, and a cd inside the script does not move you.','Another way to run a script is to make it executable with chmod +x and type its path, such as ./hello.sh. Its first line, #!/bin/bash, says which shell runs it.'],
+  o:[['-c COMMANDS','run COMMANDS instead of a file'],['-x','show each command, after expansion, before it runs: a good way to find mistakes'],['-e','stop at the first command that fails'],['-n','only check the script for mistakes in its grammar']], e:[['bash hello.sh','run a script'],['bash -x hello.sh Ada','run it, and watch each step'],['chmod +x hello.sh; ./hello.sh','run it as a program']], see:'sh, chmod, export'},
+ sh:{n:'the POSIX shell: run commands from a script', s:['sh [-x] [-e] SCRIPT [ARGUMENT]...','sh -c COMMANDS'], d:['Like bash, but strictly POSIX: the shell language that every Unix-like system understands. On Ubuntu, sh is dash, a small, fast shell without the extras bash adds, such as {1..5} or [[ ]]. On a Mac, sh is bash in its POSIX mode.','A script that starts with #!/bin/sh should stick to POSIX features, so that it runs the same everywhere.'],
+  o:[['-c COMMANDS','run COMMANDS instead of a file'],['-x','show each command before it runs'],['-e','stop at the first command that fails']], e:[['sh hello.sh','run a script with sh'],['sh -c \'echo $0\'','run one command line']], see:'bash, dash'},
+ dash:{n:'the Debian Almquist shell, which is sh on Ubuntu', s:['dash SCRIPT [ARGUMENT]...'], d:['The small POSIX shell that Ubuntu uses as /bin/sh. It runs scripts quickly, and only knows POSIX features.'], see:'sh, bash'},
+ test:{n:'check files and compare values', s:['test EXPRESSION','[ EXPRESSION ]'], d:['Checks EXPRESSION and finishes with status 0 (true) or 1 (false), so that if and while can use it. [ is another name for test; it needs a ] at the end, with spaces around both.','Numbers are compared with letters (-eq, -lt) and text with symbols (=, !=). Put variables in double quotes, so that an empty one still counts.'],
+  o:[['-e FILE','FILE exists'],['-f FILE  -d FILE','FILE is a regular file, or a folder'],['-r -w -x FILE','you may read, write, or run FILE'],['-s FILE','FILE is not empty'],['-z TEXT  -n TEXT','TEXT is empty, or not empty'],['A = B  A != B','the texts are the same, or different'],['X -eq Y','the numbers are equal; also -ne -lt -le -gt -ge'],['! EXPR','not EXPR; -a means and, -o means or']],
+  e:[['[ -f notes.txt ] && echo found','only if the file exists'],['if [ "$n" -gt 10 ]; then echo big; fi','compare a number']], see:'sh, expr'},
+ seq:{n:'print a sequence of numbers', s:['seq [-w] [-s SEPARATOR] [FIRST [STEP]] LAST'], d:['Prints the numbers from FIRST (1 if you leave it out) to LAST, going up by STEP (1 if you leave it out), one per line.'], o:[['-w','give every number the same width, with zeros in front'],['-s SEPARATOR','put SEPARATOR between the numbers instead of a new line']], e:[['seq 5','1 to 5'],['seq 0 10 50','0, 10, 20 ... 50'],['for i in $(seq 3); do echo $i; done','use it in a loop']], see:'expr'},
+ basename:{n:'strip the folders from a path', s:['basename PATH [SUFFIX]'], d:['Prints the last part of PATH, the name after the last /. With SUFFIX, also takes SUFFIX off the end.'], e:[['basename /home/yourname/notes.txt','notes.txt'],['basename notes.txt .txt','notes']], see:'dirname'},
+ dirname:{n:'strip the last name from a path', s:['dirname PATH'], d:['Prints PATH without its last part: the folder it is in. A name with no / gives . (the folder you are in).'], e:[['dirname /home/yourname/notes.txt','/home/yourname']], see:'basename'},
+ expr:{n:'work out an expression', s:['expr ARGUMENT...'], d:['Works out a small calculation or comparison, and prints the result. Every number and operator is its own argument, with spaces between them. Write * as \\*, or the shell expands it into file names.','Shells today do the same with $(( )), for example echo $((2 + 3)).'],
+  o:[['A + B  A - B','add, subtract; also \\* / % to multiply, divide, and get the remainder'],['A = B  A \\< B','compare: prints 1 for true, 0 for false'],['TEXT : REGEX','how many characters at the start of TEXT match REGEX']], e:[['expr 2 + 3','prints 5'],['i=$(expr $i + 1)','add 1 to i, the old way']], see:'test, seq'},
  clear:{n:'clear the terminal screen', s:['clear'], d:['Wipes the screen. Nothing else changes: your files, folder and history are exactly as they were. Ctrl + L does the same.'], see:'history'},
 };
 const BUILTIN = {
@@ -203,19 +230,54 @@ const BUILTIN = {
  jobs:'jobs\n    List the jobs running in the background, for example after sleep 100 &.',
  history:'history\n    List the commands you have typed, numbered.',
  help:'help [COMMAND]\n    Show short help for a command built into the shell, like help cd.',
+ read:'read [-r] [-p PROMPT] NAME...\n    Read one line, from the keyboard or from a file or pipe, into the variable NAME.\n    With several names, the line is split at spaces, and the last name gets the rest.\n    -r keeps backslashes as they are. -p PROMPT shows PROMPT first (bash).',
+ source:'source FILE\n    Run the commands in FILE in this shell, so its variables, functions and cd stay. The same as . FILE.',
+ '.':'. FILE\n    Run the commands in FILE in this shell. With no / in FILE, sh looks for it on $PATH, so write ./FILE.',
+ eval:'eval [ARGUMENT]...\n    Join the arguments into one command line, and run it.',
+ exec:'exec [COMMAND [ARGUMENT]...]\n    Replace the shell with COMMAND. With only redirections, they apply to the rest of the script.',
+ exit:'exit [N]\n    Leave the shell, or the script, with status N.',
+ return:'return [N]\n    Leave a function, or a file run with source, with status N.',
+ break:'break [N]\n    Leave the loop you are in (or N loops).',
+ continue:'continue [N]\n    Skip to the next round of the loop.',
+ shift:'shift [N]\n    Drop the first N arguments: $2 becomes $1, and so on.',
+ set:'set [-eux] [-o OPTION] [--] [ARGUMENT]...\n    Turn shell options on (-) or off (+), or replace the arguments $1, $2 ...\n    -e stops a script at the first command that fails, -u makes unset variables an error,\n    -x shows each command before it runs.',
+ local:'local NAME[=VALUE]...\n    Make a variable that only exists while the function runs.',
+ readonly:'readonly NAME[=VALUE]...\n    Make a variable that can no longer be changed.',
+ trap:'trap COMMANDS SIGNAL...\n    Run COMMANDS when the shell gets SIGNAL: EXIT when it finishes, INT for Ctrl + C.\n    trap - SIGNAL goes back to normal.',
+ wait:'wait [PID | %JOB]...\n    Wait until jobs in the background have finished.',
+ getopts:'getopts OPTSTRING NAME [ARGUMENT]...\n    Read the options a script was given, one each time: -a -b ... A letter followed by : in\n    OPTSTRING takes a value, which ends up in $OPTARG.',
+ test:'test EXPRESSION\n    Check files and compare text or numbers; [ EXPRESSION ] is the same. See man test.',
+ true:'true\n    Do nothing, successfully: status 0.',
+ false:'false\n    Do nothing, unsuccessfully: status 1.',
+ type:'type NAME...\n    Say what NAME is: a keyword, a built-in command, a function, or a program and where it is.',
+ command:'command [-v] NAME [ARGUMENT]...\n    Run NAME, skipping a function with the same name. -v prints where NAME is found.',
+ alias:'alias [NAME=VALUE]...\n    Make NAME a short way of typing VALUE. With nothing after it, list the aliases.',
+ if:'if COMMANDS; then COMMANDS; [elif COMMANDS; then COMMANDS;]... [else COMMANDS;] fi\n    Run the commands after then if the first COMMANDS succeed (status 0).',
+ for:'for NAME [in WORDS ...]; do COMMANDS; done\n    Run COMMANDS once for each word, with NAME set to it. Without in, use the arguments $1 $2 ...',
+ while:'while COMMANDS; do COMMANDS; done\n    Repeat the commands after do for as long as the first COMMANDS succeed.',
+ until:'until COMMANDS; do COMMANDS; done\n    Repeat the commands after do until the first COMMANDS succeed.',
+ case:'case WORD in PATTERN [| PATTERN]...) COMMANDS ;; ... esac\n    Run the commands of the first PATTERN that matches WORD. * matches anything.',
+ function:'NAME () { COMMANDS; }\n    Define a function. After this, NAME runs COMMANDS, with its arguments in $1 $2 ...',
 };
 (() => {
 const $ = (id) => document.getElementById(id);
 const out = $('out'), cmd = $('cmd'), ps = $('ps'), term = $('term'), treeEl = $('tree');
-const S = { os:'ubuntu', user:'yourname', root:null, home:null, cwd:null, shown:null, keep:null, prev:null,
-  hist:[], hi:0, cont:null, rmAsk:null, asking:null, sleeping:null, id:1, pos:{}, lastTab:'', toldSudo:false,
-  cap:null, err:false, status:0, vars:{}, exported:new Set(), jobs:[], notices:[], pid:1201, pager:null, perms:false };
+const S = { os:'ubuntu', user:'yourname', root:null, home:null, shown:null, keep:null,
+  hist:[], hi:0, cont:null, ctx:[], asking:null, inputJob:null, id:1, pos:{}, lastTab:'', toldSudo:false, toldStdin:false,
+  err:false, jobs:[], notices:[], joiners:new Set(), pid:1201, lastBg:0, fg:null, pager:null, editor:null, perms:false };
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mac = () => S.os === 'mac';
 const SH = () => mac() ? 'zsh' : 'bash';
+const ENV_BASE = ['HOME','LANG','LOGNAME','PATH','PWD','SHELL','TERM','USER'];
+// the shell's own state: its folder, variables, functions and options. Subshells and scripts work on copies
+const newEnv = () => ({ cwd:null, prev:null, vars:{}, exported:new Set(ENV_BASE), status:0, args:[], arg0:null, funcs:{}, opts:{}, ro:new Set(), traps:{}, aliases:{},
+  sh:null, script:null, line:0, inter:true, id:0, loop:0, fn:0, src:0, cond:0, lvl:0, local:null, optpos:0 });
+let E = newEnv(), MAIN = E;
+['cwd', 'prev', 'vars', 'exported', 'status'].forEach(k => Object.defineProperty(S, k, { get:() => E[k], set:(v) => { E[k] = v; } }));
+const flav = () => E.sh || SH();   // bash, zsh or dash: whose rules the running shell follows
 
 /* ---------- file system ---------- */
-const mk = (name, dir, text, mode) => ({ id:S.id++, name, dir, kids:dir?[]:null, text:text||'', parent:null, leaving:false, flash:null, open:false, mode: mode ?? (dir ? 0o755 : 0o644) });
+const mk = (name, dir, text, mode) => ({ id:S.id++, name, dir, kids:dir?[]:null, text:text||'', parent:null, leaving:false, flash:null, open:false, mode: mode ?? (dir ? 0o777 : 0o666) & ~(E.umask ?? 0o022) });
 const kids = (n) => n.kids.filter(k => !k.leaving);
 const find = (n, name) => kids(n).find(k => k.name === name);
 function add(dir, node){ dir.kids = dir.kids.filter(k => !k.leaving); node.parent = dir; dir.kids.push(node); dir.kids.sort((a,b) => a.name.localeCompare(b.name)); return node; }
@@ -223,12 +285,12 @@ function detach(node){ const p = node.parent; p.kids = p.kids.filter(k => k !== 
 const inside = (n, anc) => { while (n){ if (n === anc) return true; n = n.parent; } return false; };
 const mine = (n) => inside(n, S.home);
 const can = (n, b) => { const bit = { r:4, w:2, x:1 }[b]; return !!((mine(n) ? n.mode >> 6 : n.mode) & bit); };
-const modeStr = (n) => (n.dir ? 'd' : '-') + [6, 3, 0].map(s => { const v = n.mode >> s & 7; return (v & 4 ? 'r' : '-') + (v & 2 ? 'w' : '-') + (v & 1 ? 'x' : '-'); }).join('');
+const modeStr = (n) => (n.dir ? 'd' : '-') + [6, 3, 0].map((s, i) => { const v = n.mode >> s & 7, sp = n.mode & (0o4000 >> i); return (v & 4 ? 'r' : '-') + (v & 2 ? 'w' : '-') + (sp ? (v & 1 ? 'sst'[i] : 'SST'[i]) : v & 1 ? 'x' : '-'); }).join('');
 function tree(spec, parent){ for (const [name, v] of Object.entries(spec)){ if (typeof v === 'string') add(parent, mk(name, false, v, parent.name === 'bin' ? 0o755 : 0o644)); else tree(v, add(parent, mk(name, true))); } }
-const CMDS = ['cat','chmod','cp','cut','date','echo','env','find','grep','head','id','kill','less','ls','man','mkdir','more','mv','printf','ps','pwd','rm','rmdir','sleep','sort','tail','touch','tree','uniq','wc','which','whoami'];
+const CMDS = ['basename','cat','chmod','cp','cut','date','dirname','echo','env','expr','find','grep','head','id','kill','less','ls','man','mkdir','more','mv','nano','printf','ps','pwd','rm','rmdir','seq','sleep','sort','tail','touch','tree','uniq','wc','which','whoami'];
 function buildRoot(){
   S.root = mk('', true);
-  const bin = Object.fromEntries(CMDS.concat(['bash', 'sh', 'zsh']).map(c => [c, '\u0000']));
+  const bin = Object.fromEntries(CMDS.concat(['bash', 'dash', 'sh', 'test', 'true', 'false'], mac() ? ['zsh'] : []).map(c => [c, '\u0000' + c]));
   if (mac()){
     tree({ Applications:{ 'Safari.app':{}, 'Terminal.app':{} }, Library:{ Fonts:{}, Preferences:{} }, System:{ Library:{} },
            Users:{ Shared:{} }, bin, etc:{ hosts:'127.0.0.1\tlocalhost\n', shells:'/bin/bash\n/bin/zsh\n' } }, S.root);
@@ -271,12 +333,34 @@ function resolveNew(p){
 }
 const why = (r) => r.denied ? 'Permission denied' : r.notdir ? 'Not a directory' : 'No such file or directory';
 
-/* ---------- output ---------- */
+/* ---------- output: the terminal, pipes and files all take text ---------- */
+// the terminal keeps its last line open until a newline arrives, like a real one
+const TERM = { tty:true, open:null,
+  write(t, cls = ''){ this.put(t, cls === 'err' ? '' : cls); },   // as standard output, even an error message is ordinary text (after 2>&1)
+  put(t, cls = ''){
+    const segs = String(t).split('\n');
+    segs.forEach((p, i) => {
+      const done = i < segs.length - 1;
+      if (!done && !p) return;
+      if (!this.open || this.open.cls !== cls){ const d = document.createElement('div'); d.className = 'l' + (cls ? ' ' + cls : ''); d.cls = cls; out.appendChild(d); this.open = d; }
+      this.open.textContent += p;
+      if (done) this.open = null;
+    });
+    if (out.childElementCount > 5000) for (let i = 0; i < 500; i++) out.firstChild.remove();
+  } };
+const ERRT = { tty:true, write(t){ TERM.put(t, 'err'); } };   // the terminal as standard error: red
+class BadFd {}
+const NUL = { tty:false, write(){} }, CLOSED = { tty:false, write(){ throw new BadFd(); } };   // /dev/null, and a closed descriptor
+const buffer = () => ({ tty:false, buf:'', write(t){ this.buf += t; } });
+const stream = (text) => ({ text, pos:0 });
+const TIO = { fd:{ 0:null, 1:TERM, 2:ERRT } };   // stdin null = the keyboard
+let IO = TIO, CUR = null;
 function line(text, cls){
-  if (cls === 'err') S.err = true;
-  if (!cls && S.cap){ S.cap.push(text); return null; }
-  const d = document.createElement('div'); d.className = 'l' + (cls ? ' ' + cls : ''); d.textContent = text; out.appendChild(d); return d;
+  if (cls === 'err' || cls === 'trace'){ if (cls === 'err') S.err = true; try { IO.fd[2].write(text + '\n', 'err'); } catch (ex){ if (!(ex instanceof BadFd)) throw ex; } return; }   // with stderr closed, messages just get lost
+  if (cls){ TERM.open = null; TERM.put(text + '\n', cls); return; }
+  IO.fd[1].write(text + '\n');
 }
+const out1 = (t) => IO.fd[1].write(t);
 const err = (t) => line(t, 'err');
 function fail(cmdName, gnuVerb, target, msg, node){
   if (mac()) err(`${cmdName}: ${target}: ${msg}`);
@@ -287,27 +371,34 @@ function sudoNote(){
   if (S.toldSudo) return; S.toldSudo = true;
   line('(Outside your home folder you can look around, but changing things needs sudo, the administrator’s key. This practice terminal keeps sudo switched off.)', 'note');
 }
+// output that didn't end with a newline: zsh marks it with an inverse %, bash just starts the prompt on a new line
+function endLine(){
+  if (!TERM.open) return;
+  if (mac()){ const s = document.createElement('span'); s.className = 'pct'; s.textContent = '%'; TERM.open.appendChild(s); }
+  TERM.open = null;
+}
 function promptParts(){
-  if (S.cont !== null) return [['', '> ']];
+  if (S.cont !== null) return [['', (SH() === 'zsh' ? S.ctx.filter(c => c[0] !== '\0').join(' ') : '') + '> ']];
   if (mac()){ const f = S.cwd === S.home ? '~' : S.cwd === S.root ? '/' : S.cwd.name; return [['u', `${S.user}@MacBook-Air`], ['', ' '], ['p', f], ['', ' % ']]; }
   return [['u', `${S.user}@laptop`], ['', ':'], ['p', tilde(S.cwd)], ['', '$ ']];
 }
 function fillPrompt(el){ el.textContent = ''; for (const [c, t] of promptParts()){ const s = document.createElement('span'); if (c) s.className = c; s.textContent = t; el.appendChild(s); } }
-function echoInput(text){ const d = document.createElement('div'); d.className = 'l cmdl'; fillPrompt(d); d.appendChild(document.createTextNode(text)); out.appendChild(d); }
+function echoInput(text){ TERM.open = null; const d = document.createElement('div'); d.className = 'l cmdl'; fillPrompt(d); d.appendChild(document.createTextNode(text)); out.appendChild(d); }
 function drawTyped(){
   const t = $('typed'), v = cmd.value.replace(/\n/g, ' '), i = Math.min(cmd.selectionStart ?? v.length, v.length);
   t.textContent = ''; t.append(v.slice(0, i));
   const c = document.createElement('span'); c.className = 'caret'; c.textContent = v[i] || ' '; t.append(c, v.slice(i + 1));
-  t.style.visibility = (S.sleeping && !S.asking) || S.pager ? 'hidden' : 'visible';
+  t.style.visibility = (S.fg && S.asking === null) || S.pager || S.editor ? 'hidden' : 'visible';
 }
 function showPrompt(){
-  if (S.asking){ ps.textContent = S.asking; ps.style.visibility = 'visible'; }
-  else { fillPrompt(ps); ps.style.visibility = S.sleeping ? 'hidden' : 'visible'; }
+  if (S.asking !== null){ ps.textContent = S.asking; ps.style.visibility = 'visible'; }
+  else { if (!S.fg) endLine(); fillPrompt(ps); ps.style.visibility = S.fg ? 'hidden' : 'visible'; }
   drawTyped(); term.scrollTop = term.scrollHeight;
 }
 function listNames(nodes){
   if (!nodes.length) return;
-  if (S.cap){ nodes.forEach(n => S.cap.push(n.name)); return; }
+  if (!IO.fd[1].tty){ nodes.forEach(n => line(n.name)); return; }
+  TERM.open = null;
   const d = document.createElement('div'); d.className = 'l';
   nodes.forEach((n, i) => { if (i) d.appendChild(document.createTextNode('  ')); const s = document.createElement('span'); if (n.dir) s.className = 'd'; s.textContent = n.name; d.appendChild(s); });
   out.appendChild(d);
@@ -317,96 +408,913 @@ function flash(n, kind){ n.flash = kind; setTimeout(() => { if (n.flash === kind
 function remove(n){
   n.leaving = true;
   if (inside(S.cwd, n)){ S.cwd = n.parent; S.shown = n.parent; line(`(You were inside it, so you’re now in ${tilde(n.parent)}.)`, 'note'); }
-  render();
+  paint();
   setTimeout(() => { if (n.parent && n.leaving){ detach(n); render(); } }, reduce ? 0 : 850);
 }
 
 /* ---------- variables ---------- */
+const DEF = { HOME:() => full(S.home), USER:() => S.user, LOGNAME:() => S.user, SHELL:() => '/bin/' + SH(), LANG:() => 'en_US.UTF-8', TERM:() => 'xterm-256color',
+  PATH:() => mac() ? '/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin' : '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+  IFS:() => ' \t\n', PS2:() => '> ', PS4:() => '+ ', OPTIND:() => '1', PPID:() => '1000' };
 function getVar(k){
-  if (k === 'HOME') return full(S.home); if (k === 'PWD') return full(S.cwd); if (k === 'OLDPWD') return S.prev ? full(S.prev) : '';
-  if (k === 'USER' || k === 'LOGNAME') return S.user; if (k === 'SHELL') return '/bin/' + SH(); if (k === '?') return String(S.status);
-  if (k === 'PATH') return mac() ? '/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin' : '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
-  if (k === 'LANG') return 'en_US.UTF-8'; if (k === 'TERM') return 'xterm-256color';
-  return S.vars[k] ?? '';
-}
-const ENV_BASE = ['HOME','LANG','LOGNAME','PATH','PWD','SHELL','TERM','USER'];
-
-/* ---------- parsing: quotes, $variables, operators ---------- */
-function tokenize(s){
-  const t = []; let cur = '', q = null, has = false, quoted = false;
-  const push = () => { if (cur || has){ t.push({ v:cur, q:quoted }); } cur = ''; has = false; quoted = false; };
-  for (let i = 0; i < s.length; i++){
-    const c = s[i];
-    if (q === "'"){ if (c === "'") q = null; else cur += c; continue; }
-    if (c === '$' && i + 1 < s.length){
-      let m = /^\{([A-Za-z_]\w*)\}|^([A-Za-z_]\w*|\?)/.exec(s.slice(i + 1));
-      if (m){ cur += getVar(m[1] || m[2]); has = true; i += m[0].length; continue; }
-    }
-    if (q === '"'){ if (c === '"') q = null; else if (c === '\\' && '"\\$'.includes(s[i+1])){ cur += s[++i]; } else cur += c; continue; }
-    if (c === '\\' && i + 1 < s.length){ cur += s[++i]; has = true; quoted = true; continue; }
-    if (c === '"' || c === "'"){ q = c; has = true; quoted = true; continue; }
-    if (c === ' ' || c === '\t' || c === '\n'){ push(); continue; }
-    if (c === '|' || c === '&' || c === '<'){ push(); t.push({ op:c }); continue; }
-    if (c === '>'){ push(); if (s[i+1] === '>'){ t.push({ op:'>>' }); i++; } else t.push({ op:'>' }); continue; }
-    if (c === '~' && !cur && !has && (i + 1 === s.length || s[i+1] === '/' || s[i+1] === ' ')){ cur = '~'; has = true; continue; }
-    cur += c;
+  if (/^\d+$/.test(k)) return +k === 0 ? (E.arg0 ?? SH()) : (E.args[k - 1] ?? '');
+  switch (k){
+    case '?': return String(E.status);
+    case '#': return String(E.args.length);
+    case '@': case '*': return E.args.join(' ');
+    case '$': return String(E.pid || 1001);
+    case '!': return S.lastBg ? String(S.lastBg) : '';
+    case '-': return flags();
+    case 'LINENO': return String(E.line || 1);
+    case 'RANDOM': if (flav() !== 'dash') return String(Math.floor(Math.random() * 32768)); break;
   }
-  if (q) return null;
-  push();
-  return t;
+  if (k in E.vars) return E.vars[k] ?? '';
+  if (k === 'PWD') return full(S.cwd);
+  if (k === 'OLDPWD') return S.prev ? full(S.prev) : '';
+  return DEF[k] ? DEF[k]() : '';
 }
-const globRe = (p) => new RegExp('^' + p.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
-function glob(tok){
-  if (tok.q || !/[*?]/.test(tok.v)) return [tok.v];
-  const i = tok.v.lastIndexOf('/'), dirPart = i >= 0 ? tok.v.slice(0, i + 1) : '', pat = tok.v.slice(i + 1);
-  const r = dirPart ? resolve(dirPart) : { node:S.cwd };
-  if (!r.node || !r.node.dir || /[*?]/.test(dirPart)) return [tok.v];
-  const re = globRe(pat);
-  const m = kids(r.node).filter(k => re.test(k.name) && (pat.startsWith('.') || !k.name.startsWith('.'))).map(k => dirPart + k.name);
-  if (!m.length && mac()){ err(`zsh: no matches found: ${tok.v}`); return null; }
-  return m.length ? m : [tok.v];
+function isSet(k){
+  if (/^\d+$/.test(k)) return +k === 0 || +k <= E.args.length;
+  if (k === '@' || k === '*') return E.args.length > 0;
+  if (k === '!') return !!S.lastBg;
+  if (k.length === 1 && '?#$-'.includes(k)) return true;
+  if (k in E.vars) return E.vars[k] !== undefined;
+  return !!DEF[k] || k === 'PWD' || k === 'LINENO' || (k === 'OLDPWD' && !!S.prev) || (k === 'RANDOM' && flav() !== 'dash');
+}
+function setVar(k, v){
+  if (E.ro.has(k)){ err(flav() === 'dash' ? `${who()}: ${k}: is read only` : flav() === 'zsh' ? `${whoz()}read-only variable: ${k}` : `${who()}: ${k}: readonly variable`); return false; }
+  E.vars[k] = v; if (E.opts.a) E.exported.add(k); if (k === 'OPTIND') E.optpos = 0;
+  return true;
+}
+// $- : the shell's option letters, in each shell's own order
+function flags(){
+  const o = E.opts, f = flav(), on = (s) => s.split('').filter(c => o[c]).join('');
+  if (f === 'zsh') return '569X' + on('efnuvx') + (E.inter ? 'ilms' : '');
+  if (f === 'dash') return on('aefnuvx') + (E.inter ? 'is' : '');
+  return 'abefhimnuvxBHcs'.split('').filter(c => c === 'h' || c === 'B' || o[c] || (E.inter && 'imHs'.includes(c)) || (c === 'c' && E.script && E.script.c)).join('');
+}
+// how the shell names itself in its own messages: "bash", "./t.sh: line 3" (bash), "t.sh: 3" (dash), "t.sh:3" (zsh)
+function who(){
+  const f = flav(), s = E.script;
+  if (!s) return f === 'dash' ? `sh: ${E.line || 1}` : f;
+  return f === 'bash' ? `${s.name}: line ${E.line}` : f === 'dash' ? `${s.name}: ${E.line}` : `${s.name}:${E.line}`;
+}
+const whoz = () => E.script ? `${E.script.name}:${E.line}: ` : 'zsh: ';
+
+/* ---------- the shell language: words and operators, then commands (the POSIX grammar) ---------- */
+class Incomplete { constructor(ctx){ this.ctx = ctx; } }          // the input stops in the middle of something: ask for more
+class SynErr { constructor(tok, msg){ this.tok = tok; this.msg = msg; } }
+class Ctl { constructor(kind, n){ this.kind = kind; this.n = n; } }  // break, continue, return, exit
+class ExpErr { constructor(msg, fatal){ this.msg = msg; this.fatal = fatal; } }
+const count = (s, c) => s.split(c).length - 1;
+// splits source text into words and operators; words keep their quoting, so expansions can happen when the command runs
+function Lexer(s, sh, inter){ Object.assign(this, { s, sh, inter, i:0, line:1, hd:[] }); }
+const OPS = ['&&', '||', ';;', '<<-', '<<<', '&>>', '<<', '>>', '<&', '>&', '<>', '>|', '&>', '|', '&', ';', '<', '>', '(', ')'];
+const BASH_OPS = new Set(['<<<', '&>', '&>>']);
+Lexer.prototype.next = function(){
+  const s = this.s;
+  for (;;){
+    const c = s[this.i];
+    if (c === ' ' || c === '\t'){ this.i++; continue; }
+    if (c === '\\' && s[this.i + 1] === '\n'){ this.i += 2; this.line++; continue; }
+    if (c === '#' && !(this.inter && this.sh === 'zsh')){ while (this.i < s.length && s[this.i] !== '\n') this.i++; continue; }
+    break;
+  }
+  const pos = this.i, line = this.line;
+  if (pos >= s.length){ if (this.hd.length) this.heredocs(); return { t:'eof', pos, end:pos, line }; }
+  const c = s[pos];
+  if (c === '\n'){ this.i++; this.line++; if (this.hd.length) this.heredocs(); return { t:'op', v:'\n', pos, end:pos + 1, line }; }
+  if (c === '(' && s[pos + 1] === '(' && this.sh !== 'dash'){
+    const j = this.close2(pos + 2);
+    if (j === -2) throw new Incomplete(['math']);
+    if (j >= 0){ this.i = j + 2; return { t:'arith', src:s.slice(pos + 2, j), pos, end:this.i, line }; }
+  }
+  const m = /^\d+(?=[<>])/.exec(s.slice(pos, pos + 4)), fd = m ? +m[0] : undefined;
+  const at = m ? pos + m[0].length : pos;
+  let j = at, view = ''; const ends = [];   // the next characters, read through backslash-newlines (they can split an operator)
+  while (view.length < 3 && j < s.length){ if (s[j] === '\\' && s[j + 1] === '\n'){ j += 2; continue; } view += s[j]; ends.push(++j); }
+  for (const op of OPS){
+    if (view.startsWith(op) && !(this.sh === 'dash' && BASH_OPS.has(op))){ const e = ends[op.length - 1]; this.line += count(s.slice(at, e), '\n'); this.i = e; return { t:'op', v:op, fd, pos, end:e, line }; }
+  }
+  return this.word(pos, line);
+};
+Lexer.prototype.word = function(pos, line){
+  const s = this.s, parts = []; let lit = '';
+  const flush = () => { if (lit){ parts.push({ k:'L', v:lit }); lit = ''; } };
+  while (this.i < s.length){
+    const c = s[this.i];
+    if (' \t\n;&|<>()'.includes(c)) break;
+    if (c === '\\'){
+      if (s[this.i + 1] === '\n'){ this.i += 2; this.line++; continue; }
+      if (this.i + 1 >= s.length){ if (this.inter) throw new Incomplete([]); this.i++; break; }
+      flush(); parts.push({ k:'L', v:s[this.i + 1], q:1 }); this.i += 2; continue;
+    }
+    if (c === "'"){
+      flush(); const j = s.indexOf("'", this.i + 1); if (j < 0) throw Object.assign(new Incomplete(['quote']), { line:this.line });
+      const v = s.slice(this.i + 1, j); this.line += count(v, '\n'); parts.push({ k:'L', v, q:1 }); this.i = j + 1; continue;
+    }
+    if (c === '"'){ flush(); this.i++; parts.push(...this.dq()); continue; }
+    if (c === '$'){ const p = this.dollar(0); if (p){ flush(); parts.push(p); continue; } }
+    if (c === '`'){ flush(); parts.push(this.bq(0)); continue; }
+    lit += c; this.i++;
+  }
+  flush();
+  return { t:'w', parts, raw:s.slice(pos, this.i), pos, end:this.i, line };
+};
+Lexer.prototype.dq = function(){
+  const s = this.s, parts = [], l0 = this.line; let lit = '';
+  const flush = () => { if (lit){ parts.push({ k:'L', v:lit, q:1 }); lit = ''; } };
+  for (;;){
+    if (this.i >= s.length) throw Object.assign(new Incomplete(['dquote']), { line:l0 });
+    const c = s[this.i];
+    if (c === '"'){ this.i++; break; }
+    if (c === '\\' && this.i + 1 < s.length){
+      const n = s[this.i + 1];
+      if (n === '\n'){ this.i += 2; this.line++; continue; }
+      if ('$`"\\'.includes(n)){ lit += n; this.i += 2; continue; }
+    }
+    if (c === '$'){ const p = this.dollar(1); if (p){ flush(); parts.push(p); continue; } }
+    if (c === '`'){ flush(); parts.push(this.bq(1)); continue; }
+    if (c === '\n') this.line++;
+    lit += c; this.i++;
+  }
+  flush();
+  if (!parts.length) parts.push({ k:'L', v:'', q:1 });
+  return parts;
+};
+Lexer.prototype.close2 = function(j){   // the end of $(( or ((: the first ) of )), -1 if it is not arithmetic, -2 at the end of the input
+  const s = this.s; let d = 0;
+  for (; j < s.length; j++){ const c = s[j]; if (c === '(') d++; else if (c === ')'){ if (d) d--; else return s[j + 1] === ')' ? j : -1; } }
+  return -2;
+};
+Lexer.prototype.dollar = function(q){
+  const s = this.s, i = this.i, n = s[i + 1];
+  if (n === '('){
+    if (s[i + 2] === '('){
+      const j = this.close2(i + 3);
+      if (j === -2) throw new Incomplete(['math']);
+      if (j >= 0){ const src = s.slice(i + 3, j); this.line += count(src, '\n'); this.i = j + 2; return { k:'A', src, q }; }
+    }
+    const sub = new Lexer(s, this.sh, this.inter); sub.i = i + 2; sub.line = this.line;
+    const p = new Parser(sub); let body;
+    try { body = p.substList(); } catch (ex){ if (ex instanceof Incomplete && ex.line === undefined) ex.line = this.line; throw ex; }
+    this.i = sub.i; this.line = sub.line;
+    return { k:'C', body, q };
+  }
+  if (n === '{') return this.brace(q);
+  let m;
+  if (n && (m = /^[A-Za-z_]\w*/.exec(s.slice(i + 1)))){ this.i += 1 + m[0].length; return { k:'P', name:m[0], q }; }
+  if (n && /[0-9@*#?$!-]/.test(n)){ this.i += 2; return { k:'P', name:n, q }; }
+  return null;
+};
+const PNAME = /^(?:[A-Za-z_]\w*|\d+|[@*#?$!-])/;
+Lexer.prototype.brace = function(q){
+  const s = this.s; let i = this.i + 2, m;
+  if (s[i] === '#' && (m = PNAME.exec(s.slice(i + 1))) && s[i + 1 + m[0].length] === '}'){ this.i = i + 2 + m[0].length; return { k:'P', name:m[0], op:'len', q }; }
+  m = PNAME.exec(s.slice(i));
+  if (!m){ this.i = i; this.bword(q); return { k:'P', name:'', op:'bad', raw:s.slice(i - 2, this.i), q }; }
+  const name = m[0]; i += name.length;
+  const o = /^(?::[-=+?]|[-=+?]|%%|%|##|#|\/\/|\/#|\/%|\/|\^\^|\^|,,|,|:)/.exec(s.slice(i)), op = o ? o[0] : '';
+  i += op.length;
+  if (!op && s[i] === '}'){ this.i = i + 1; return { k:'P', name, q }; }
+  // the patterns of # % / stay patterns inside double quotes; only quotes inside the braces quote them
+  this.i = i; const start = i, word = this.bword(/^(?:#|##|%|%%)$/.test(op) || op[0] === '/' ? 0 : q);
+  return { k:'P', name, op:op || 'bad', word, raw:s.slice(start - name.length - op.length - 2, this.i), q };
+};
+Lexer.prototype.bword = function(q){   // the word inside ${...}, up to the matching }
+  const s = this.s, parts = []; let lit = '';
+  const flush = () => { if (lit){ parts.push({ k:'L', v:lit, q }); lit = ''; } };
+  for (;;){
+    if (this.i >= s.length) throw new Incomplete(['braceparam']);
+    const c = s[this.i];
+    if (c === '}'){ this.i++; break; }
+    if (c === '\\' && this.i + 1 < s.length){ flush(); parts.push({ k:'L', v:s[this.i + 1], q:1 }); this.i += 2; continue; }
+    if (c === "'" && !q){ flush(); const j = s.indexOf("'", this.i + 1); if (j < 0) throw new Incomplete(['quote']); parts.push({ k:'L', v:s.slice(this.i + 1, j), q:1 }); this.i = j + 1; continue; }
+    if (c === '"'){ flush(); this.i++; parts.push(...this.dq()); continue; }
+    if (c === '$'){ const p = this.dollar(q); if (p){ flush(); parts.push(p); continue; } }
+    if (c === '`'){ flush(); parts.push(this.bq(q)); continue; }
+    if (c === '\n') this.line++;
+    lit += c; this.i++;
+  }
+  flush(); return parts;
+};
+Lexer.prototype.bq = function(q){   // `command`: backslash keeps only \$ \` \\ (and \" inside double quotes)
+  const s = this.s, l0 = this.line; let j = this.i + 1, src = '';
+  for (;;){
+    if (j >= s.length) throw Object.assign(new Incomplete(['bquote']), { line:l0 });
+    const c = s[j];
+    if (c === '`') break;
+    if (c === '\\' && j + 1 < s.length && ('$`\\'.includes(s[j + 1]) || (q && s[j + 1] === '"'))){ src += s[j + 1]; j += 2; continue; }
+    if (c === '\n') this.line++;
+    src += c; j++;
+  }
+  this.i = j + 1;
+  return { k:'C', src, q };
+};
+Lexer.prototype.heredocs = function(){   // the bodies of << here-documents start on the line after the command
+  const s = this.s;
+  for (const h of this.hd.splice(0)){
+    let body = '';
+    for (;;){
+      if (this.i >= s.length){ if (this.inter) throw new Incomplete(['heredoc']); h.eof = true; break; }
+      let e = s.indexOf('\n', this.i); if (e < 0) e = s.length;
+      let ln = s.slice(this.i, e); this.i = Math.min(e + 1, s.length); this.line++;
+      if (h.strip) ln = ln.replace(/^\t+/, '');
+      if (ln === h.delim) break;
+      body += ln + '\n';
+    }
+    h.parts = h.quoted ? [{ k:'L', v:body, q:1 }] : dqParts(body, this.sh);
+  }
+};
+// text where only $, ` and \ are special: here-document bodies and the inside of $(( ))
+function dqParts(text, sh){
+  const l = new Lexer(text, sh, false), parts = []; let lit = '';
+  const flush = () => { if (lit){ parts.push({ k:'L', v:lit, q:1 }); lit = ''; } };
+  while (l.i < text.length){
+    const c = text[l.i];
+    if (c === '\\' && l.i + 1 < text.length && '$`\\\n'.includes(text[l.i + 1])){ if (text[l.i + 1] !== '\n') lit += text[l.i + 1]; l.i += 2; continue; }
+    if (c === '$'){ const p = l.dollar(1); if (p){ flush(); parts.push(p); continue; } }
+    if (c === '`'){ flush(); parts.push(l.bq(1)); continue; }
+    lit += c; l.i++;
+  }
+  flush(); return parts;
+}
+
+// builds commands from the words and operators
+function Parser(lx){ Object.assign(this, { lx, la:[], ctx:[], last:0 }); }
+Parser.prototype.peek = function(k = 0){
+  while (this.la.length <= k){ try { this.la.push(this.lx.next()); } catch (ex){ if (ex instanceof Incomplete) ex.ctx = this.ctx.concat(ex.ctx); throw ex; } }
+  return this.la[k];
+};
+Parser.prototype.take = function(){ const t = this.peek(); this.la.shift(); this.last = t.end; return t; };
+Parser.prototype.plain = (t) => t.t === 'w' && t.parts.length === 1 && t.parts[0].k === 'L' && !t.parts[0].q;
+Parser.prototype.is = function(w){ const t = this.peek(); return this.plain(t) && t.raw === w; };
+Parser.prototype.isOp = function(v){ const t = this.peek(); return t.t === 'op' && t.v === v; };
+Parser.prototype.bad = function(t){ if (t.t === 'eof') throw new Incomplete(this.ctx.slice()); const e = new SynErr(t); e.ctx = this.ctx.slice(); throw e; };
+Parser.prototype.expect = function(w){ if (this.is(w)) return this.take(); this.bad(this.peek()); };
+Parser.prototype.nl = function(){ while (this.isOp('\n')) this.take(); };
+const ENDS = new Set(['then', 'else', 'elif', 'fi', 'do', 'done', 'esac', '}']);
+const REDIR = new Set(['<', '>', '>>', '<<', '<<-', '<<<', '<&', '>&', '<>', '>|', '&>', '&>>']);
+Parser.prototype.atEnd = function(){ const t = this.peek(); return t.t === 'eof' || (t.t === 'op' && (t.v === ')' || t.v === ';;')) || (this.plain(t) && ENDS.has(t.raw)); };
+Parser.prototype.command1 = function(){   // the next complete command (one line at the top level), or null at the end
+  this.nl();
+  if (this.peek().t === 'eof') return null;
+  const node = this.list(false), t = this.peek();
+  if (t.t === 'op' && t.v === '\n') this.take(); else if (t.t !== 'eof') this.bad(t);
+  return node;
+};
+Parser.prototype.list = function(inner){
+  const items = [];
+  for (;;){
+    if (inner){ this.nl(); if (this.atEnd()) break; }
+    const pos = this.peek().pos, node = this.andOr(), text = this.lx.s.slice(pos, this.last).trim(), t = this.peek();
+    if (t.t === 'op' && (t.v === ';' || t.v === '&')){
+      this.take(); items.push({ node, bg:t.v === '&', text });
+      if (!inner){ const n = this.peek(); if (n.t === 'eof' || (n.t === 'op' && n.v === '\n')) break; }
+      continue;
+    }
+    items.push({ node, bg:false, text });
+    if (inner && t.t === 'op' && t.v === '\n') continue;
+    break;
+  }
+  if (!items.length) this.bad(this.peek());
+  return { t:'list', items };
+};
+Parser.prototype.andOr = function(){
+  const first = this.pipeline(), rest = [];
+  while (this.isOp('&&') || this.isOp('||')){
+    const op = this.take().v; this.ctx.push(op === '&&' ? 'cmdand' : 'cmdor'); this.nl();
+    rest.push({ op, node:this.pipeline() }); this.ctx.pop();
+  }
+  return rest.length ? { t:'andor', first, rest } : first;
+};
+Parser.prototype.pipeline = function(){
+  let neg = false;
+  if (this.is('!')){ this.take(); neg = true; }
+  const cmds = [this.command()];
+  while (this.isOp('|')){ this.take(); this.ctx.push('pipe'); this.nl(); cmds.push(this.command()); this.ctx.pop(); }
+  return cmds.length > 1 || neg ? { t:'pipe', cmds, neg } : cmds[0];
+};
+Parser.prototype.command = function(){
+  const t = this.peek(), sh = this.lx.sh;
+  if (t.t === 'eof') this.bad(t);
+  if (t.t === 'arith'){ this.take(); return this.redirs({ t:'arith', src:t.src, line:t.line }); }
+  if (t.t === 'op'){ if (t.v === '(') return this.redirs(this.subshell()); if (!REDIR.has(t.v)) this.bad(t); return this.simple(); }
+  if (this.plain(t)){
+    const w = t.raw;
+    if (w === 'if') return this.redirs(this.ifc());
+    if (w === 'while' || w === 'until') return this.redirs(this.whilec(w));
+    if (w === 'for') return this.redirs(this.forc());
+    if (w === 'case') return this.redirs(this.casec());
+    if (w === '{') return this.redirs(this.group());
+    if (ENDS.has(w)) this.bad(t);
+    if (sh !== 'dash' && w === 'function') return this.fnkw();
+    if (sh !== 'dash' && w === '[[') return this.redirs(this.dbrack());
+  }
+  return this.simple();
+};
+function assignOf(t){
+  const p = t.parts[0];
+  if (!p || p.k !== 'L' || p.q) return null;
+  const m = /^([A-Za-z_]\w*)(\+?)=/.exec(p.v); if (!m) return null;
+  const rest = p.v.slice(m[0].length);
+  return { name:m[1], add:!!m[2], value:{ parts:(rest ? [{ k:'L', v:rest }] : []).concat(t.parts.slice(1)), assign:true } };
+}
+Parser.prototype.simple = function(){
+  const node = { t:'cmd', assigns:[], words:[], redirs:[], line:this.peek().line };
+  for (;;){
+    const t = this.peek();
+    if (t.t === 'op' && REDIR.has(t.v)){ node.redirs.push(this.redir()); continue; }
+    if (t.t !== 'w') break;
+    if (!node.words.length){
+      const a = assignOf(t); if (a && (this.lx.sh !== 'dash' || !a.add)){ this.take(); node.assigns.push(a); continue; }
+      const al = E.aliases[t.raw];
+      if (al !== undefined && this.plain(t) && !(t.al && t.al.has(t.raw)) && (flav() !== 'bash' || E.inter)){ this.take(); this.alias(t, al); continue; }
+    }
+    this.take();
+    if (!node.words.length && !node.assigns.length && !node.redirs.length && this.isOp('(')) return this.funcdef(t);
+    node.words.push(t);
+  }
+  if (!node.words.length && !node.assigns.length && !node.redirs.length) this.bad(this.peek());
+  return node;
+};
+Parser.prototype.alias = function(t, val){   // the alias's text takes the word's place
+  const l = new Lexer(val, this.lx.sh, this.lx.inter), al = new Set([...(t.al || []), t.raw]), toks = [];
+  for (let x = l.next(); x.t !== 'eof'; x = l.next()){ x.al = al; x.pos = t.pos; x.end = t.end; x.line = t.line; toks.push(x); }
+  this.la.unshift(...toks);
+};
+Parser.prototype.redir = function(){
+  const t = this.take(), r = { op:t.v, fd:t.fd ?? (t.v[0] === '<' ? 0 : 1) };
+  const w = this.peek();
+  if (w.t !== 'w') this.bad(w);
+  this.take();
+  if (t.v === '<<' || t.v === '<<-'){ r.hd = { delim:w.raw.replace(/["'\\]/g, ''), quoted:/["'\\]/.test(w.raw), strip:t.v === '<<-', parts:null }; this.lx.hd.push(r.hd); }
+  else r.word = w;
+  return r;
+};
+Parser.prototype.redirs = function(node){
+  for (let t = this.peek(); t.t === 'op' && REDIR.has(t.v); t = this.peek()) (node.redirs = node.redirs || []).push(this.redir());
+  return node;
+};
+Parser.prototype.subshell = function(){
+  const line = this.take().line; this.ctx.push('subsh');
+  const body = this.list(true); if (!this.isOp(')')) this.bad(this.peek());
+  this.take(); this.ctx.pop(); return { t:'sub', body, line };
+};
+Parser.prototype.substList = function(){   // the commands inside $( ), up to the closing )
+  this.ctx.push('cmdsubst'); this.nl();
+  const body = this.isOp(')') ? { t:'list', items:[] } : this.list(true);
+  if (!this.isOp(')')) this.bad(this.peek());
+  this.take(); this.ctx.pop(); return body;
+};
+Parser.prototype.group = function(){
+  const line = this.take().line; this.ctx.push('cursh');
+  const body = this.list(true); this.expect('}'); this.ctx.pop(); return { t:'group', body, line };
+};
+Parser.prototype.ifc = function(){
+  const line = this.take().line, clauses = []; let els = null;
+  const at = (c) => { this.ctx[this.ctx.length - 1] = c; };
+  this.ctx.push('if');
+  const cond = this.list(true); this.expect('then'); at('then');
+  clauses.push({ cond, body:this.list(true) });
+  for (;;){
+    if (this.is('elif')){ this.take(); at('elif'); const c = this.list(true); this.expect('then'); at('then'); clauses.push({ cond:c, body:this.list(true) }); continue; }
+    if (this.is('else')){ this.take(); at('else'); els = this.list(true); }
+    this.expect('fi'); break;
+  }
+  this.ctx.pop(); return { t:'if', clauses, els, line };
+};
+Parser.prototype.whilec = function(w){
+  const line = this.take().line; this.ctx.push(w);
+  const cond = this.list(true), body = this.doGroup(); this.ctx.pop();
+  return { t:'while', until:w === 'until', cond, body, line };
+};
+Parser.prototype.doGroup = function(){ this.expect('do'); this.ctx.push('\0do'); const b = this.list(true); this.expect('done'); this.ctx.pop(); return b; };   // \0do: inside do ... done (only dash's messages show it)
+Parser.prototype.forc = function(){
+  const line = this.take().line; this.ctx.push('for');
+  if (this.peek().t === 'arith'){
+    const a = this.take(), [init = '', cond = '', step = ''] = a.src.split(';');
+    this.nl(); if (this.isOp(';')) this.take(); this.nl();
+    const body = this.doGroup(); this.ctx.pop(); return { t:'cfor', init, cond, step, body, line };
+  }
+  const n = this.take(); let badName = false;
+  if (n.t !== 'w') this.bad(n);
+  if (!/^[A-Za-z_]\w*$/.test(n.raw)){ if (this.lx.sh === 'dash') throw new SynErr(n, 'Bad for loop variable'); badName = true; }   // bash says so when the loop runs
+  let words = null; this.nl();
+  if (this.is('in')){
+    this.take(); words = [];
+    while (this.peek().t === 'w') words.push(this.take());
+    if (this.isOp(';') || this.isOp('\n')) this.take(); else this.bad(this.peek());
+  } else if (this.isOp(';')) this.take();
+  this.nl(); const body = this.doGroup(); this.ctx.pop();
+  return { t:'for', name:n.raw, words, body, line, badName };
+};
+Parser.prototype.casec = function(){
+  const line = this.take().line; this.ctx.push('case');
+  const w = this.take(); if (w.t !== 'w') this.bad(w);
+  this.nl(); this.expect('in'); const items = [];
+  for (;;){
+    this.nl();
+    if (this.is('esac')){ this.take(); break; }
+    if (this.isOp('(')) this.take();
+    const pats = [];
+    for (;;){ const p = this.take(); if (p.t !== 'w') this.bad(p); pats.push(p); if (this.isOp('|')){ this.take(); continue; } break; }
+    if (!this.isOp(')')) this.bad(this.peek());
+    this.take(); this.nl();
+    const body = this.isOp(';;') || this.is('esac') ? null : this.list(true);
+    items.push({ pats, body });
+    if (this.isOp(';;')){ this.take(); continue; }
+    this.nl(); this.expect('esac'); break;
+  }
+  this.ctx.pop(); return { t:'case', word:w, items, line };
+};
+Parser.prototype.funcdef = function(n){
+  this.take(); if (!this.isOp(')')) this.bad(this.peek());
+  this.take();
+  if (this.lx.sh === 'dash' && !/^[A-Za-z_]\w*$/.test(n.raw)) throw new SynErr(n, 'Bad function name');
+  this.nl(); return { t:'func', name:n.raw, body:this.compound(), line:n.line };
+};
+Parser.prototype.fnkw = function(){   // function name { ... }   (bash and zsh)
+  this.take(); const n = this.take(); if (n.t !== 'w') this.bad(n);
+  if (this.isOp('(')){ this.take(); if (!this.isOp(')')) this.bad(this.peek()); this.take(); }
+  this.nl(); return { t:'func', name:n.raw, body:this.compound(), line:n.line };
+};
+Parser.prototype.compound = function(){
+  const t = this.peek();
+  if (t.t === 'op' && t.v === '(') return this.redirs(this.subshell());
+  if (this.plain(t) && ['{', 'if', 'while', 'until', 'for', 'case'].includes(t.raw)) return this.command();
+  this.bad(t);
+};
+Parser.prototype.dbrack = function(){   // [[ ... ]]   (bash and zsh): words are kept, operators are read as words
+  const line = this.take().line, items = []; this.ctx.push('cond');
+  for (;;){
+    const t = this.peek();
+    if (t.t === 'eof') this.bad(t);
+    this.take();
+    if (this.plain(t) && t.raw === ']]') break;
+    if (t.t === 'op' && t.v === '\n') continue;
+    items.push(t);
+  }
+  this.ctx.pop(); return { t:'dbrack', items, line };
+};
+// a whole text parsed at once, for $( ) written with backticks and for eval
+function parseAll(text, line = 1){
+  const lx = new Lexer(text, flav(), false), ps = new Parser(lx), items = []; lx.line = line;
+  for (let n = ps.command1(); n; n = ps.command1()) items.push({ node:n, bg:false, text:'' });
+  return { t:'list', items };
+}
+
+/* ---------- expansions, in POSIX order: {a,b} (bash, zsh), ~, $x $( ) $(( )), field splitting, then * ? [ ] ---------- */
+const escGlob = (s) => s.replace(/[\\*?[\]]/g, '\\$&');
+function* words(ws, o = {}){
+  const out = [];
+  for (const w of ws) for (const b of o.nobrace || flav() === 'dash' ? [w] : braces(w)){ const f = yield* fields(b, o); if (f === null) return null; out.push(...f); }
+  return out;
+}
+function braces(w){
+  for (let i = 0; i < w.parts.length; i++){
+    const p = w.parts[i]; if (p.k !== 'L' || p.q) continue;
+    const b = braceAt(p.v); if (!b) continue;
+    const pre = p.v.slice(0, b.start), post = p.v.slice(b.end);
+    return b.alts.flatMap(alt => braces({ parts:[...w.parts.slice(0, i), { k:'L', v:pre + alt + post }, ...w.parts.slice(i + 1)] }));
+  }
+  return [w];
+}
+function braceAt(s){
+  for (let i = s.indexOf('{'); i >= 0; i = s.indexOf('{', i + 1)){
+    let d = 0, j = i; const commas = [];
+    for (; j < s.length; j++){ const c = s[j]; if (c === '{') d++; else if (c === '}'){ if (!--d) break; } else if (c === ',' && d === 1) commas.push(j); }
+    if (j >= s.length) continue;
+    if (commas.length){ const alts = []; let k = i + 1; for (const c of commas){ alts.push(s.slice(k, c)); k = c + 1; } alts.push(s.slice(k, j)); return { start:i, end:j + 1, alts }; }
+    const inner = s.slice(i + 1, j), m = /^(-?\d+)\.\.(-?\d+)(?:\.\.(-?\d+))?$/.exec(inner) || /^([a-zA-Z])\.\.([a-zA-Z])(?:\.\.(-?\d+))?$/.exec(inner);
+    if (m) return { start:i, end:j + 1, alts:range(m) };
+  }
+  return null;
+}
+function range(m){
+  const num = /\d/.test(m[1]), a = num ? +m[1] : m[1].charCodeAt(0), b = num ? +m[2] : m[2].charCodeAt(0), st = Math.abs(+m[3] || 1);
+  const w = num && (/^-?0\d/.test(m[1]) || /^-?0\d/.test(m[2])) ? Math.max(m[1].length, m[2].length) : 0, out = [];
+  for (let v = a; a <= b ? v <= b : v >= b; v += a <= b ? st : -st){
+    out.push(!num ? String.fromCharCode(v) : !w ? String(v) : v < 0 ? '-' + String(-v).padStart(w - 1, '0') : String(v).padStart(w, '0'));
+    if (out.length > 100000) break;
+  }
+  return out;
+}
+function tildeParts(parts){
+  const p0 = parts[0];
+  if (!p0 || p0.k !== 'L' || p0.q || p0.v[0] !== '~') return parts;
+  const sl = p0.v.indexOf('/'), pre = sl < 0 ? p0.v : p0.v.slice(0, sl), h = sl >= 0 || parts.length === 1 ? homeOf(pre.slice(1)) : null;
+  return h === null ? parts : [{ k:'L', v:h, q:1 }, { k:'L', v:p0.v.slice(pre.length) }, ...parts.slice(1)];
+}
+const homeOf = (u) => u === '' ? getVar('HOME') : u === S.user ? full(S.home) : u === 'root' ? (mac() ? '/var/root' : '/root') : null;
+const ifs1 = () => isSet('IFS') ? getVar('IFS').slice(0, 1) : ' ';
+function* fields(w, o = {}){
+  const F = []; let cur = null;
+  const begin = () => cur || (cur = { s:'', p:'', g:false, keep:false });
+  const add = (v, q) => { const c = begin(); c.s += v; if (q){ c.p += escGlob(v); c.keep = true; } else { c.p += v; if (/[*?[]/.test(v)) c.g = true; } };
+  const end = () => { if (cur && (cur.s || cur.keep)) F.push(cur); cur = null; };
+  const split = !o.nosplit && flav() !== 'zsh';
+  const exp = (v, q) => {   // the result of an unquoted expansion is split into fields at IFS characters
+    if (q || !split) return add(v, q);
+    const ifs = isSet('IFS') ? getVar('IFS') : ' \t\n';
+    if (!ifs) return add(v, false);
+    const isW = (c) => ifs.includes(c) && ' \t\n'.includes(c), isN = (c) => ifs.includes(c) && !' \t\n'.includes(c);
+    let i = 0, piece = '';
+    if (isW(v[0])){ while (i < v.length && isW(v[i])) i++; end(); }
+    while (i < v.length){
+      if (!isW(v[i]) && !isN(v[i])){ piece += v[i++]; continue; }
+      while (i < v.length && isW(v[i])) i++;
+      let hard = false;
+      if (i < v.length && isN(v[i])){ hard = true; i++; while (i < v.length && isW(v[i])) i++; }
+      add(piece, false); piece = '';
+      if (hard) begin().keep = true;
+      end();
+    }
+    if (piece) add(piece, false);
+  };
+  let parts = o.notilde ? w.parts : tildeParts(w.parts);
+  if (w.assign) parts = parts.map((p, i) => p.k === 'L' && !p.q && p.v.includes(':~') ? { k:'L', v:p.v.replace(/:~([^/:]*)/g, (m, u) => { const h = homeOf(u); return h === null ? m : ':' + h; }) } : p);
+  for (const p of parts){
+    if (p.k === 'L'){ add(p.v, !!p.q); continue; }
+    if (p.k === 'P' && (p.name === '@' || p.name === '*') && !p.op){
+      if (o.nosplit && !p.q){ add(E.args.join(' '), false); continue; }
+      if (p.q && p.name === '*'){ add(E.args.join(ifs1()), true); continue; }
+      E.args.forEach((v, i) => { if (i) end(); p.q ? add(v, true) : exp(v, false); });
+      if (!E.args.length && p.q && o.nosplit) add('', true);
+      continue;
+    }
+    if (p.k === 'P' && !p.q && ['-', ':-', '+', ':+'].includes(p.op)){
+      const set = isSet(p.name), empty = !set || getVar(p.name) === '', o = p.op;
+      if (o === '-' ? !set : o === ':-' ? empty : o === '+' ? set : !empty){ for (const w of tildeParts(p.word)) if (w.k === 'L') w.q ? add(w.v, true) : exp(w.v, false); else exp(yield* part(w), !!w.q); }
+      else if (o[o.length - 1] === '-') exp(getVar(p.name), false);
+      continue;
+    }
+    exp(yield* part(p), !!p.q);
+  }
+  end();
+  const out = [];
+  for (const f of F){
+    if (f.g && !E.opts.f && !o.noglob && isPattern(f.p)){
+      const m = globPath(f.p);
+      if (m.length){ out.push(...m); continue; }
+      if (flav() === 'zsh'){ err(`${whoz()}no matches found: ${f.s}`); return null; }
+    }
+    out.push(f.s);
+  }
+  return out;
+}
+function* str(w, o = {}){ const f = yield* fields(w, { ...o, nosplit:true, noglob:true }); return f.join(' '); }
+function* pattern(parts){   // a pattern for case, ${x#...} and [[ == ]]: quoted characters match themselves
+  let p = ''; parts = tildeParts(parts || []);
+  for (const x of parts || []){ if (x.k === 'L') p += x.q ? escGlob(x.v) : x.v; else { const v = yield* part(x); p += x.q ? escGlob(v) : v; } }
+  return p;
+}
+function* part(p){
+  if (p.k === 'C') return yield* cmdSub(p);
+  if (p.k === 'A') return String(arith(yield* str({ parts:p.parts || (p.parts = dqParts(p.src, flav())) })));
+  return yield* param(p);
+}
+function* param(p){
+  const { name, op } = p, f = flav();
+  if (op === 'bad') throw new ExpErr(f === 'dash' ? `Bad substitution` : f === 'zsh' ? `bad substitution` : `${p.raw}: bad substitution`, true);
+  if (op === 'len') return String(name === '@' || name === '*' ? E.args.length : [...getVar(name)].length);
+  if (f === 'dash' && /^(?::|\/\/?|\/#|\/%|\^\^?|,,?)$/.test(op)) throw new ExpErr('Bad substitution', true);
+  const set = isSet(name), val = getVar(name), unset = !set, empty = unset || val === '';
+  const word = () => str({ parts:p.word });
+  switch (op){
+    case undefined: case '':
+      if (unset && E.opts.u && !'@*'.includes(name)) throw new ExpErr(f === 'dash' ? `${name}: parameter not set` : f === 'zsh' ? `${name}: parameter not set` : `${name}: unbound variable`, true);
+      return val;
+    case '-': return unset ? yield* word() : val;
+    case ':-': return empty ? yield* word() : val;
+    case '=': case ':=':
+      if (op === '=' ? !unset : !empty) return val;
+      if (!/^[A-Za-z_]\w*$/.test(name)) throw new ExpErr(f === 'dash' ? `${name}: bad variable name` : `$${name}: cannot assign in this way`, true);
+      { const v = yield* word(); setVar(name, v); return v; }
+    case '+': return unset ? '' : yield* word();
+    case ':+': return empty ? '' : yield* word();
+    case '?': case ':?':
+      if (op === '?' ? !unset : !empty) return val;
+      { const m = yield* word(); throw new ExpErr(`${name}: ${m || (f !== 'bash' && (op === '?' || f === 'dash') ? 'parameter not set' : 'parameter null or not set')}`, true); }
+    case '#': case '##': case '%': case '%%': return trim(val, patRe(yield* pattern(p.word), false), op);
+    case '^': case '^^': case ',': case ',,': { const up = op[0] === '^', c = (s) => up ? s.toUpperCase() : s.toLowerCase(); return op.length === 2 ? c(val) : c(val.slice(0, 1)) + val.slice(1); }
+    case ':': {
+      const [a, b] = (yield* word()).split(':'), n = val.length;
+      let off = arith(a || '0'); if (off < 0) off = Math.max(0, n + off);
+      if (b === undefined) return val.slice(off);
+      let len = arith(b); return len < 0 ? val.slice(off, Math.max(off, n + len)) : val.slice(off, off + len);
+    }
+    default: {   // ${x/pattern/replacement}, // all, /# at the start, /% at the end
+      const i = p.word.findIndex(x => x.k === 'L' && !x.q && x.v.includes('/')), pp = i < 0 ? p.word : p.word.slice(0, i), rp = i < 0 ? [] : p.word.slice(i + 1);
+      if (i >= 0){ const [l, ...r] = p.word[i].v.split('/'); if (l) pp.push({ k:'L', v:l }); if (r.length) rp.unshift({ k:'L', v:r.join('/') }); }
+      return replace(val, patRe(yield* pattern(pp), false), yield* str({ parts:rp }), op);
+    }
+  }
+}
+function trim(v, re, op){
+  const n = v.length;
+  if (op === '#'){ for (let i = 0; i <= n; i++) if (re.test(v.slice(0, i))) return v.slice(i); }
+  if (op === '##'){ for (let i = n; i >= 0; i--) if (re.test(v.slice(0, i))) return v.slice(i); }
+  if (op === '%'){ for (let i = n; i >= 0; i--) if (re.test(v.slice(i))) return v.slice(0, i); }
+  if (op === '%%'){ for (let i = 0; i <= n; i++) if (re.test(v.slice(i))) return v.slice(0, i); }
+  return v;
+}
+function replace(v, re, rep, op){
+  const n = v.length;
+  if (op === '/#'){ for (let j = n; j >= 0; j--) if (re.test(v.slice(0, j))) return rep + v.slice(j); return v; }
+  if (op === '/%'){ for (let i = 0; i <= n; i++) if (re.test(v.slice(i))) return v.slice(0, i) + rep; return v; }
+  let out = '', i = 0;
+  while (i < n){
+    let hit = -1;
+    for (let j = n; j > i; j--) if (re.test(v.slice(i, j))){ hit = j; break; }
+    if (hit < 0){ out += v[i++]; continue; }
+    out += rep; i = hit;
+    if (op === '/') return out + v.slice(i);
+  }
+  return out;
+}
+function* cmdSub(p){
+  const body = p.body || (p.body = parseAll(p.src, flav() === 'bash' ? E.line : 1)), b = buffer(), pe = E, pio = IO;   // inside `...`, dash counts lines from 1 again; bash keeps the line of the command
+  E = sub(E); E.lvl = (pe.lvl || 0) + 1; IO = { fd:{ ...IO.fd, 1:b } };
+  let st;
+  try { st = yield* exec(body); }
+  catch (ex){ if (ex instanceof Ctl) st = ex.kind === 'exit' ? ex.n : 0; else throw ex; }
+  finally { E = pe; IO = pio; }
+  S.subSt = st;
+  return b.buf.replace(/\n+$/, '');
+}
+
+/* ---------- patterns: * ? [abc] [!a] [[:digit:]] ---------- */
+const CLASSES = { alpha:'a-zA-Z', digit:'0-9', alnum:'a-zA-Z0-9', upper:'A-Z', lower:'a-z', space:' \\t\\n\\r\\f\\v', blank:' \\t', punct:'!-\\/:-@\\[-`{-~', xdigit:'0-9A-Fa-f', print:' -~', graph:'!-~', cntrl:'\\x00-\\x1f\\x7f' };
+const reEsc = (c) => c.replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&'), cEsc = (c) => c.replace(/[\\\]\[^-]/g, '\\$&');
+const patCache = new Map();
+function patRe(p, path){
+  const key = (path ? '/' : ':') + p; if (patCache.has(key)) return patCache.get(key);
+  let r = '', i = 0;
+  while (i < p.length){
+    const c = p[i];
+    if (c === '\\' && i + 1 < p.length){ r += reEsc(p[i + 1]); i += 2; continue; }
+    if (c === '*'){ r += path ? '[^/]*' : '[\\s\\S]*'; i++; continue; }
+    if (c === '?'){ r += path ? '[^/]' : '[\\s\\S]'; i++; continue; }
+    if (c === '['){
+      let j = i + 1, neg = false, set = '';
+      if (p[j] === '!' || p[j] === '^'){ neg = true; j++; }
+      if (p[j] === ']'){ set += '\\]'; j++; }
+      while (j < p.length && p[j] !== ']'){
+        if (p[j] === '[' && p[j + 1] === ':'){ const k = p.indexOf(':]', j + 2); if (k > 0){ set += CLASSES[p.slice(j + 2, k)] || ''; j = k + 2; continue; } }
+        let ch = p[j]; if (ch === '\\' && j + 1 < p.length) ch = p[++j];
+        if (p[j + 1] === '-' && p[j + 2] && p[j + 2] !== ']'){ set += cEsc(ch) + '-' + cEsc(p[j + 2] === '\\' ? p[j + 3] : p[j + 2]); j += p[j + 2] === '\\' ? 4 : 3; continue; }
+        set += cEsc(ch); j++;
+      }
+      if (j < p.length && set){ r += (neg ? '[^' + (path ? '/' : '') : '[') + set + ']'; i = j + 1; continue; }
+    }
+    r += reEsc(c); i++;
+  }
+  let re; try { re = new RegExp('^' + r + '$'); } catch { re = new RegExp('^' + reEsc(p) + '$'); }
+  patCache.set(key, re); return re;
+}
+const hasGlob = (c) => /(^|[^\\])[*?[]/.test(c);
+// * or ?, or a [ with a ] after it (a lone [ is just a character, as in [ $n -lt 3 ])
+function isPattern(p){ for (let i = 0; i < p.length; i++){ const c = p[i]; if (c === '\\'){ i++; continue; } if (c === '*' || c === '?') return true; if (c === '[' && p.indexOf(']', i + 1) > 0) return true; } return false; }
+const unesc = (c) => c.replace(/\\(.)/g, '$1');
+// pathname expansion: every part of the path can hold a pattern; names starting with . need a . in the pattern
+function globPath(p){
+  const abs = p.startsWith('/'), comps = p.split('/').filter(Boolean);
+  const dirOnly = p.endsWith('/') && p.length > 1;
+  let paths = [[abs ? S.root : S.cwd, abs ? '/' : '']];
+  for (const c of comps){
+    const next = [];
+    for (const [node, pre] of paths){
+      if (!node.dir || !can(node, 'x')) continue;
+      const join = (name) => pre + (pre && !pre.endsWith('/') ? '/' : '') + name;
+      if (!hasGlob(c)){ const lit = unesc(c), k = lit === '.' ? node : lit === '..' ? (node.parent || node) : find(node, lit); if (k) next.push([k, join(lit)]); continue; }
+      if (!can(node, 'r')) continue;
+      const re = patRe(c, true), dot = c[0] === '.' || c.startsWith('\\.');
+      if (dot && flav() === 'dash') for (const [nm, k] of [['.', node], ['..', node.parent || node]]) if (re.test(nm)) next.push([k, join(nm)]);
+      for (const k of kids(node)) if ((dot || k.name[0] !== '.') && re.test(k.name)) next.push([k, join(k.name)]);
+    }
+    paths = next;
+  }
+  if (dirOnly) paths = paths.filter(([n]) => n.dir).map(([n, s]) => [n, s + '/']);
+  const out = paths.map(x => x[1]);
+  return flav() === 'dash' ? out.sort((a, b) => a < b ? -1 : a > b ? 1 : 0) : out.sort((a, b) => a.localeCompare(b));
+}
+
+/* ---------- arithmetic: $(( )) and (( )) ---------- */
+const AR = /\s*(?:(0[xX][\da-fA-F]+|\d+#[\da-zA-Z@_]+|\d+)|([A-Za-z_]\w*)|(\*\*=|<<=|>>=|\*\*|<<|>>|<=|>=|==|!=|&&|\|\||\+\+|--|[-+*/%&|^]=|[-+*/%<>=!~&|^?:(),]))/y;
+const BIN = { '||':4, '&&':5, '|':6, '^':7, '&':8, '==':9, '!=':9, '<':10, '<=':10, '>':10, '>=':10, '<<':11, '>>':11, '+':12, '-':12, '*':13, '/':13, '%':13, '**':14 };
+function arith(src, depth = 0){
+  const f = flav(), text = src.trim(), T = [];
+  const fail = (what, tok) => new ExpErr(f === 'dash' ? `arithmetic expression: ${what === 'division by 0' ? 'division by zero' : 'expecting primary'}: "${text}"` : f === 'zsh' ? (what === 'division by 0' ? 'division by zero' : `bad math expression: ${what}`) : `${text}: ${what === 'division by 0' ? 'division by 0' : 'syntax error: ' + what} (error token is "${tok}")`, f === 'dash');
+  AR.lastIndex = 0; let m;
+  while (AR.lastIndex < src.length && !/^\s*$/.test(src.slice(AR.lastIndex))){
+    const at = AR.lastIndex; m = AR.exec(src);
+    if (!m) throw fail('invalid arithmetic operator', src.slice(at).trim());
+    if (m[1] !== undefined){
+      const s = m[1]; let n;
+      if (/^0[xX]/.test(s)) n = parseInt(s, 16);
+      else if (s.includes('#')){ const [b, d] = s.split('#'); n = parseInt(d, +b); }
+      else if (/^0\d/.test(s)){ if (/[89]/.test(s)) throw new ExpErr(f === 'dash' ? `Illegal number: ${s}` : `${s}: value too great for base (error token is "${s}")`); n = parseInt(s, 8); }
+      else n = +s;
+      T.push({ n });
+    } else if (m[2]) T.push({ v:m[2] }); else T.push({ o:m[3] });
+  }
+  if (f === 'dash' && T.some(t => t.o === '++' || t.o === '--' || t.o === '**')) throw fail('', '');
+  let k = 0, skip = 0;
+  const is = (o) => T[k] && T[k].o === o;
+  const left = () => T.slice(k).map(t => t.n ?? t.v ?? t.o).join(' ');
+  const num = (name) => {
+    const s = getVar(name).trim();
+    if (s === ''){ if (E.opts.u && !isSet(name)) throw new ExpErr(`${name}: unbound variable`, true); return 0; }
+    const m = /^([-+]?)(0[xX][\da-fA-F]+|0[0-7]*|[1-9]\d*)$/.exec(s);
+    if (m) return (m[1] === '-' ? -1 : 1) * (/^0[xX]/.test(m[2]) ? parseInt(m[2], 16) : m[2].length > 1 && m[2][0] === '0' ? parseInt(m[2], 8) : +m[2]);
+    if (f === 'dash') throw new ExpErr(`Illegal number: ${s}`);
+    if (depth > 9) throw new ExpErr(`${s}: expression recursion level exceeded`);
+    return arith(s, depth + 1);
+  };
+  const store = (name, v) => { if (!skip) setVar(name, String(v)); return v; };
+  const bin = (o, a, b) => {
+    switch (o){
+      case '+': return a + b; case '-': return a - b; case '*': return a * b;
+      case '/': case '%': if (b === 0){ if (skip) return 0; throw fail('division by 0', String(b)); } return o === '/' ? Math.trunc(a / b) : a % b;
+      case '**': if (b < 0) throw new ExpErr(`${text}: exponent less than 0`); return a ** b;
+      case '<<': return a << b; case '>>': return a >> b; case '&': return a & b; case '|': return a | b; case '^': return a ^ b;
+      case '<': return +(a < b); case '<=': return +(a <= b); case '>': return +(a > b); case '>=': return +(a >= b);
+      case '==': return +(a === b); case '!=': return +(a !== b);
+    }
+  };
+  function primary(){
+    const t = T[k++];
+    if (!t) throw fail('operand expected', '');
+    if (t.n !== undefined) return t.n;
+    if (t.v){ if (is('++') || is('--')){ const o = T[k++].o, n = num(t.v); store(t.v, n + (o === '++' ? 1 : -1)); return n; } return num(t.v); }
+    if (t.o === '('){ const v = expr(); if (!is(')')) throw fail('missing `)\'', left()); k++; return v; }
+    k--; throw fail('operand expected', left());
+  }
+  function unary(){
+    const t = T[k];
+    if (t && (t.o === '++' || t.o === '--') && T[k + 1] && T[k + 1].v){ k += 2; return store(T[k - 1].v, num(T[k - 1].v) + (t.o === '++' ? 1 : -1)); }
+    if (t && ['-', '+', '!', '~'].includes(t.o)){ k++; const v = unary(); return t.o === '-' ? -v : t.o === '+' ? v : t.o === '!' ? +!v : ~v; }
+    return primary();
+  }
+  function binary(min){
+    let l = unary();
+    for (;;){
+      const t = T[k], p = t && t.o && BIN[t.o];
+      if (!p || p < min) return l;
+      k++;
+      if (t.o === '&&' || t.o === '||'){ const sk = t.o === '&&' ? !l : !!l; if (sk) skip++; const r = binary(p + 1); if (sk) skip--; l = t.o === '&&' ? +(!!l && !!r) : +(!!l || !!r); continue; }
+      l = bin(t.o, l, t.o === '**' ? binary(p) : binary(p + 1));
+    }
+  }
+  function cond(){
+    const c = binary(4);
+    if (!is('?')) return c;
+    k++; if (!c) skip++; const a = expr(); if (!c) skip--;
+    if (!is(':')) throw fail('`:\' expected for conditional expression', left());
+    k++; if (c) skip++; const b = assign(); if (c) skip--;
+    return c ? a : b;
+  }
+  function assign(){
+    const t = T[k], n = T[k + 1];
+    if (t && t.v && n && n.o && /^(?:[-+*/%&|^]|<<|>>|\*\*)?=$/.test(n.o)){ k += 2; const r = assign(); return store(t.v, n.o === '=' ? r : bin(n.o.slice(0, -1), num(t.v), r)); }
+    return cond();
+  }
+  function expr(){ let v = assign(); while (is(',')){ k++; v = assign(); } return v; }
+  if (!T.length) return 0;
+  const v = expr();
+  if (k < T.length) throw fail(f === 'bash' ? 'invalid arithmetic operator' : 'syntax error', left());
+  return Math.trunc(v);
+}
+
+/* ---------- test and [ ---------- */
+const UNARY = new Set(['-b', '-c', '-d', '-e', '-f', '-g', '-h', '-k', '-L', '-n', '-p', '-r', '-s', '-S', '-t', '-u', '-w', '-x', '-z', '-O', '-G', '-N']);
+const BINOP = new Set(['=', '==', '!=', '<', '>', '-eq', '-ne', '-lt', '-le', '-gt', '-ge', '-nt', '-ot', '-ef']);
+function unaryT(op, x){
+  if (op === '-n') return x !== ''; if (op === '-z') return x === '';
+  if (op === '-t') return x === '0' ? !IO.fd[0] : !!(IO.fd[+x] && IO.fd[+x].tty);
+  const n = x === '' ? null : x === '/dev/null' ? { dir:false, text:'', dev:true } : resolve(x).node;
+  switch (op){
+    case '-e': return !!n; case '-f': return !!n && !n.dir && !n.dev; case '-d': return !!n && n.dir;
+    case '-r': return !!n && (n.dev || can(n, 'r')); case '-w': return !!n && (n.dev || can(n, 'w')); case '-x': return !!n && !n.dev && can(n, 'x');
+    case '-s': return !!n && (n.dir || n.text.length > 0); case '-O': case '-G': return !!n && !n.dev && mine(n); case '-c': return !!n && !!n.dev;
+    case '-u': return !!n && !!(n.mode & 0o4000); case '-g': return !!n && !!(n.mode & 0o2000); case '-k': return !!n && !!(n.mode & 0o1000);
+    default: return false;
+  }
+}
+function binaryT(a, op, b, int){
+  switch (op){
+    case '=': case '==': return a === b; case '!=': return a !== b;
+    case '<': return a < b; case '>': return a > b;
+    case '-eq': return int(a) === int(b); case '-ne': return int(a) !== int(b); case '-lt': return int(a) < int(b);
+    case '-le': return int(a) <= int(b); case '-gt': return int(a) > int(b); case '-ge': return int(a) >= int(b);
+    case '-ef': { const x = resolve(a).node; return !!x && x === resolve(b).node; }
+    default: return false;   // -nt and -ot: every file here has the same time
+  }
+}
+class TErr {}
+function testCmd(args, name){
+  const f = flav();
+  const fail = (m) => { err(f === 'zsh' ? `${whoz()}${name}: ${m}` : `${who()}: ${name}: ${m}`); throw new TErr(); };
+  if (name === '['){ if (args[args.length - 1] !== ']'){ err(f === 'dash' ? `${who()}: [: missing ]` : f === 'zsh' ? `${whoz()}[: ']' expected` : `${who()}: [: missing \`]'`); return 2; } args = args.slice(0, -1); }
+  const int = (s) => { const t = s.trim(); if (/^[-+]?\d+$/.test(t)) return +t; fail(f === 'dash' ? `Illegal number: ${s}` : f === 'zsh' ? `integer expression expected: ${s}` : `${s}: integer expression expected`); };
+  const one = (x) => x !== '';
+  const general = (a) => {
+    let k = 0;
+    const prim = () => {
+      if (a[k] === '!'){ k++; return !prim(); }
+      if (a[k] === '(' && a.length - k > 1){ k++; const v = or(); if (a[k] !== ')') fail(f === 'dash' ? 'closing paren expected' : '`)\' expected'); k++; return v; }
+      if (k + 2 < a.length && BINOP.has(a[k + 1])){ const v = binaryT(a[k], a[k + 1], a[k + 2], int); k += 3; return v; }
+      if (UNARY.has(a[k]) && k + 1 < a.length){ const v = unaryT(a[k], a[k + 1]); k += 2; return v; }
+      if (k >= a.length) fail('argument expected');
+      return one(a[k++]);
+    };
+    const and = () => { let v = prim(); while (a[k] === '-a'){ k++; const w = prim(); v = v && w; } return v; };
+    const or = () => { let v = and(); while (a[k] === '-o'){ k++; const w = and(); v = v || w; } return v; };
+    const v = or(); if (k < a.length) fail(f === 'dash' ? `${a[k]}: unexpected operator` : 'too many arguments'); return v;
+  };
+  const ev = (a) => {
+    switch (a.length){
+      case 0: return false;
+      case 1: return one(a[0]);
+      case 2:
+        if (a[0] === '!') return !one(a[1]);
+        if (UNARY.has(a[0])) return unaryT(a[0], a[1]);
+        if (f === 'dash' && BINOP.has(a[1])) fail(`${a[1]}: argument expected`);
+        fail(f === 'dash' ? `${a[0]}: unexpected operator` : f === 'zsh' ? `condition expected: ${a[0]}` : `${a[0]}: unary operator expected`);
+        break;
+      case 3:
+        if (BINOP.has(a[1])) return binaryT(a[0], a[1], a[2], int);
+        if (a[0] === '!') return !ev(a.slice(1));
+        if (a[0] === '(' && a[2] === ')') return one(a[1]);
+        if (a[1] === '-a') return one(a[0]) && one(a[2]);
+        if (a[1] === '-o') return one(a[0]) || one(a[2]);
+        fail(f === 'dash' ? `${a[1]}: unexpected operator` : f === 'zsh' ? `condition expected: ${a[1]}` : `${a[1]}: binary operator expected`);
+        break;
+      case 4:
+        if (a[0] === '!') return !ev(a.slice(1));
+        if (a[0] === '(' && a[3] === ')') return ev(a.slice(1, 3));
+    }
+    return general(a);
+  };
+  try { return ev(args) ? 0 : 1; } catch (e){ if (e instanceof TErr) return 2; throw e; }
 }
 function opts(args){ const f = new Set(), a = []; for (const x of args){ if (x.length > 1 && x[0] === '-' && x !== '--' && !/^-\d+$/.test(x)) [...x.slice(1)].forEach(c => f.add(c)); else if (x !== '--') a.push(x); } return { f, a }; }
 function numOpt(args, def){ let n = def; const a = []; for (let i = 0; i < args.length; i++){ const x = args[i]; if (x === '-n'){ n = parseInt(args[++i], 10); } else if (/^-n\d+$/.test(x)) n = parseInt(x.slice(2), 10); else if (/^-\d+$/.test(x)) n = parseInt(x.slice(1), 10); else a.push(x); } return { n:isNaN(n) ? def : n, a }; }
-/* ---------- reading files and pipes ---------- */
+/* ---------- reading files, pipes and redirections ---------- */
 const toLines = (text) => text ? text.replace(/\n$/, '').split('\n') : [];
+const isBin = (n) => n.text.startsWith('\u0000');
 function readFile(t, cmdName){
+  if (t === '/dev/null') return [];
   const r = resolve(t);
   if (!r.node){ fail(cmdName, '', t, why(r), r.at); return null; }
   if (r.node.dir){ fail(cmdName, mac() && cmdName !== 'cat' ? 'read error' : '', t, 'Is a directory'); return null; }
   if (!can(r.node, 'r')){ fail(cmdName, '', t, 'Permission denied', r.node); return null; }
-  if (r.node.text === '\u0000'){ line(`(${t} is a program, not text, so ${cmdName} would print gibberish.)`, 'note'); return null; }
+  if (isBin(r.node)){ line(`(${t} is a program, not text, so ${cmdName} would print gibberish.)`, 'note'); return null; }
   return toLines(r.node.text);
 }
 function sources(files, input, cmdName){
-  if (!files.length) return [{ name:null, lines:input || [] }];
-  return files.map(f => ({ name:f, lines:readFile(f, cmdName) })).filter(x => x.lines);
+  if (!files.length){ IO.used = true; return [{ name:null, lines:input || [] }]; }
+  return files.map(f => f === '-' ? (IO.used = true, { name:'-', lines:input || [] }) : { name:f, lines:readFile(f, cmdName) }).filter(x => x.lines);
 }
-function writeFile(t, text, append){
+const stdinLines = () => IO.fd[0] ? toLines(IO.fd[0].text.slice(IO.fd[0].pos)) : null;
+// what a shell says when a redirection fails
+function rerr(t, msg, mode){
+  const f = flav();
+  if (f === 'zsh') err(`${whoz()}${msg.toLowerCase()}: ${t}`);
+  else if (f === 'dash') err(`${who()}: cannot ${mode} ${t}: ${msg === 'No such file or directory' ? (mode === 'open' ? 'No such file' : 'Directory nonexistent') : msg}`);
+  else err(`${who()}: ${t}: ${msg}`);
+}
+function openIn(t){
+  if (t === '/dev/null') return stream('');
+  if (t === '/dev/stdin' || t === '/dev/tty') return IO.fd[0];
+  const r = resolve(t);
+  if (!r.node){ rerr(t, why(r), 'open'); return undefined; }
+  if (r.node.dir){ rerr(t, 'Is a directory', 'open'); return undefined; }
+  if (!can(r.node, 'r')){ rerr(t, 'Permission denied', 'open'); if (!mine(r.node)) sudoNote(); return undefined; }
+  return stream(r.node.text);
+}
+// > empties the file (or creates it) before the command runs, as a real shell does
+function openOut(t, append, files, clobber){
+  if (t === '/dev/null') return NUL;
+  if (t === '/dev/stdout') return IO.fd[1];
+  if (t === '/dev/stderr') return IO.fd[2];
+  if (t === '/dev/tty') return TERM;
   const r = resolveNew(t);
-  if (r.missing || r.notdir || r.denied){ err(mac() ? `zsh: ${why(r).toLowerCase()}: ${t}` : `bash: ${t}: ${why(r)}`); if (r.denied && r.at && !mine(r.at)) sudoNote(); return false; }
-  if (r.existing && r.existing.dir){ err(mac() ? `zsh: is a directory: ${t}` : `bash: ${t}: Is a directory`); return false; }
+  if (r.exists || (r.existing && r.existing.dir)){ rerr(t, 'Is a directory', 'create'); return null; }
+  if (r.missing || r.notdir || r.denied){ rerr(t, why(r), 'create'); if (r.denied && r.at && !mine(r.at)) sudoNote(); return null; }
   const target = r.existing || r.dir;
-  if (!can(target, 'w') || (!r.existing && !can(r.dir, 'w'))){ err(mac() ? `zsh: permission denied: ${t}` : `bash: ${t}: Permission denied`); if (!mine(target)) sudoNote(); return false; }
+  if (!can(target, 'w') || (!r.existing && !can(r.dir, 'w'))){ rerr(t, 'Permission denied', 'create'); if (!mine(target)) sudoNote(); return null; }
+  if (E.opts.C && !append && !clobber && r.existing){ const f = flav(); err(f === 'dash' ? `${who()}: cannot create ${t}: File exists` : f === 'zsh' ? `${whoz()}file exists: ${t}` : `${who()}: ${t}: cannot overwrite existing file`); return null; }
   let n = r.existing;
   if (!n){ n = add(r.dir, mk(r.name, false)); flash(n, 'new'); } else flash(n, 'changed');
-  n.text = append ? n.text + text : text;
-  status(`${append ? 'Added to' : 'Wrote to'} ${tilde(n)}`);
-  return true;
+  if (!append) n.text = '';
+  files.push({ n, append }); paint();
+  return { tty:false, write(x){ n.text += x; } };
 }
-
 /* ---------- commands ---------- */
 const C = {};
-C.help = (args) => {
-  if (args[0]){ const b = BUILTIN[args[0]]; if (b) return b.split('\n').forEach(x => line(x)); return err(mac() ? `help: no help found for ${args[0]}` : `bash: help: no help topics match \`${args[0]}'.  Try \`help help' or \`man -k ${args[0]}' or \`info ${args[0]}'.`); }
-  line('Commands you can use here (man COMMAND explains each one):', 'note');
-  [['Find your way','pwd  ls  cd  tree  find  which'],['Files and folders','mkdir  touch  cp  mv  rm  rmdir'],['Read and write','cat  less  head  tail  echo  printf  >  >>  <'],
-   ['Work with text','grep  sort  uniq  wc  cut  |'],['Permissions','chmod  id  whoami  ls -l'],['Processes','sleep  sleep 100 &  jobs  ps  kill  Ctrl + C'],
-   ['Settings','echo $HOME  env  export  unset'],['Everything else','man  help  date  clear  history']].forEach(([a, b]) => line(`  ${a.padEnd(20)}${b}`));
-  line('You can look anywhere, but only change things inside your home folder. Tab finishes names; ↑ brings back earlier commands.', 'note');
-};
 C.pwd = () => line(full(S.cwd));
-C.clear = () => { out.textContent = ''; };
 C.whoami = () => line(S.user);
 C.id = () => line(mac() ? `uid=501(${S.user}) gid=20(staff) groups=20(staff),80(admin)` : `uid=1000(${S.user}) gid=1000(${S.user}) groups=1000(${S.user}),27(sudo)`);
 C.date = () => {
@@ -416,21 +1324,10 @@ C.date = () => {
   line(`${day} ${mon} ${mac() ? p(d.getDate()) : String(d.getDate()).padStart(2, ' ')} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())} ${tz} ${d.getFullYear()}`);
 };
 C.history = () => S.hist.forEach((h, i) => line(`${String(i + 1).padStart(5)}  ${h}`));
-C.exit = () => line('(This practice terminal stays open. Use Start again to reset everything.)', 'note');
 C.sudo = () => { line('sudo is switched off in this practice terminal. You can look around outside your home folder, but not change anything there.', 'note'); S.toldSudo = true; };
-C.cd = (args) => {
-  let t = args[0];
-  if (t === '-'){ if (!S.prev){ err(mac() ? 'cd: no previous folder' : 'bash: cd: OLDPWD not set'); return; } t = full(S.prev); line(t); }
-  const r = resolve(t);
-  const bad = (m) => err(mac() ? `cd: ${m.toLowerCase()}: ${t}` : `bash: cd: ${t}: ${m}`);
-  if (!r.node) return bad(why(r));
-  if (!r.node.dir) return bad('Not a directory');
-  if (!can(r.node, 'x')) return bad('Permission denied');
-  if (r.node !== S.cwd){ S.prev = S.cwd; const from = S.cwd; S.cwd = r.node; travel(from, r.node); }
-};
 const owner = (n) => mine(n) ? S.user : 'root';
 const group = (n) => mine(n) ? (mac() ? 'staff' : S.user) : (mac() ? 'wheel' : 'root');
-const size = (n) => n.dir ? (mac() ? 64 + 32 * kids(n).length : 4096) : (n.text === '\u0000' ? 35328 : new Blob([n.text]).size);
+const size = (n) => n.dir ? (mac() ? 64 + 32 * kids(n).length : 4096) : (isBin(n) ? 35328 : new Blob([n.text]).size);
 function row(n, name){ return `${modeStr(n)}  1 ${owner(n).padEnd(9)} ${group(n).padEnd(9)} ${String(size(n)).padStart(6)} Oct 28 09:15 ${name}`; }
 function shownKids(n, f){ let k = kids(n); if (!f.has('a')) k = k.filter(x => !x.name.startsWith('.')); return k; }
 function lsDir(n, f, label){
@@ -482,7 +1379,7 @@ C.mkdir = (args) => {
     if (!can(r.dir, 'w')){ fail('mkdir', 'cannot create directory', t, 'Permission denied', r.dir); continue; }
     const n = add(r.dir, mk(r.name, true)); flash(n, 'new'); status(`Created ${tilde(n)}/`);
   }
-  render();
+  paint();
 };
 C.touch = (args) => {
   if (!args.length) return err(mac() ? 'usage: touch [-A [-][[hh]mm]SS] [-acfhm] [-r file] [-t [[CC]YY]MMDDhhmm[.SS]] file ...' : 'touch: missing file operand');
@@ -494,18 +1391,7 @@ C.touch = (args) => {
     if (!can(r.dir, 'w')){ fail('touch', 'cannot touch', t, 'Permission denied', r.dir); continue; }
     const n = add(r.dir, mk(r.name, false)); flash(n, 'new'); status(`Created ${tilde(n)}`);
   }
-  render();
-};
-C.echo = (args) => { const n = args[0] === '-n'; line((n ? args.slice(1) : args).join(' ')); };
-C.printf = (args) => {
-  if (!args.length) return err(mac() ? 'usage: printf format [arguments ...]' : 'printf: usage: printf [-v var] format [arguments]');
-  const fmt = args[0].replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\\\/g, '\\'); let rest = args.slice(1), o = '';
-  do { let used = 0; o += fmt.replace(/%([sd%])/g, (m, c) => c === '%' ? '%' : (used++, c === 'd' ? String(parseInt(rest[used - 1], 10) || 0) : (rest[used - 1] ?? ''))); rest = rest.slice(used); if (!used) break; } while (rest.length);
-  o.replace(/\n$/, '').split('\n').forEach(x => line(x));
-};
-C.cat = (args, input) => {
-  if (!args.length && !input) return line('(cat with nothing after it waits for you to type. Here, give it a file name, or pipe something into it.)', 'note');
-  sources(args, input, 'cat').forEach(s => s.lines.forEach(x => line(x)));
+  paint();
 };
 C.head = (args, input) => { const { n, a } = numOpt(args, 10); const src = sources(a, input, 'head'); src.forEach((s, i) => { if (src.length > 1){ if (i) line(''); line(`==> ${s.name} <==`); } s.lines.slice(0, n).forEach(x => line(x)); }); };
 C.tail = (args, input) => { const { n, a } = numOpt(args, 10); const src = sources(a, input, 'tail'); src.forEach((s, i) => { if (src.length > 1){ if (i) line(''); line(`==> ${s.name} <==`); } s.lines.slice(Math.max(0, s.lines.length - n)).forEach(x => line(x)); }); };
@@ -517,17 +1403,33 @@ C.wc = (args, input) => {
   const w = mac() ? 8 : (a.length || keys.length === 1 ? Math.max(1, ...rows.flatMap(r => keys.map(k => String(r[k]).length))) : 7);
   rows.forEach(r => line(['l', 'w', 'c'].filter(k => pick.has(k)).map(k => String(r[k]).padStart(w)).join(mac() ? '' : ' ') + (r.name ? ' ' + r.name : '')));
 };
+// patterns are POSIX basic regular expressions (-E extended, -F fixed text); -e gives one, and can be repeated
 C.grep = (args, input) => {
-  const { f, a } = opts(args);
-  if (!a.length) return err(mac() ? 'usage: grep [-cinv] pattern [file ...]' : 'Usage: grep [OPTION]... PATTERNS [FILE]...');
-  const [pat, ...files] = a; let re;
-  try { re = new RegExp(pat, f.has('i') ? 'i' : ''); } catch { re = new RegExp(pat.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), f.has('i') ? 'i' : ''); }
-  const src = sources(files, input, 'grep'); let found = 0;
-  src.forEach(s => {
+  const f = new Set(), pats = [], rest = [];
+  for (let i = 0; i < args.length; i++){
+    const x = args[i];
+    if (x === '-e'){ pats.push(args[++i] ?? ''); continue; }
+    if (x === '--'){ rest.push(...args.slice(i + 1)); break; }
+    if (/^-[A-Za-z]+$/.test(x)){ [...x.slice(1)].forEach(c => f.add(c)); continue; }
+    rest.push(x);
+  }
+  if (!pats.length){ if (!rest.length) return err(mac() ? 'usage: grep [-cinv] pattern [file ...]' : 'Usage: grep [OPTION]... PATTERNS [FILE]...'); pats.push(rest.shift()); }
+  const esc = (q) => q.replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&');
+  const mk = (q) => {
+    let r = f.has('F') ? esc(q) : f.has('E') ? q : bre(q);
+    if (f.has('w')) r = `(?<!\\w)(?:${r})(?!\\w)`;
+    if (f.has('x')) r = `^(?:${r})$`;
+    try { return new RegExp(r, f.has('i') ? 'i' : ''); } catch { return new RegExp(esc(q), f.has('i') ? 'i' : ''); }
+  };
+  const res = pats.flatMap(q => q.split('\n')).map(mk), hit = (x) => res.some(r => r.test(x)) !== f.has('v');
+  const src = sources(rest, input, 'grep'), many = src.length > 1 && !f.has('h'); let found = 0;
+  for (const s of src){
     let c = 0;
-    s.lines.forEach((x, i) => { if (re.test(x) !== f.has('v')){ c++; found++; if (!f.has('c')) line((src.length > 1 ? s.name + ':' : '') + (f.has('n') ? (i + 1) + ':' : '') + x); } });
-    if (f.has('c')) line((src.length > 1 ? s.name + ':' : '') + c);
-  });
+    s.lines.forEach((x, i) => { if (!hit(x)) return; c++; found++; if (!f.has('c') && !f.has('l') && !f.has('q')) line((many ? s.name + ':' : '') + (f.has('n') ? (i + 1) + ':' : '') + x); });
+    if (f.has('q')) continue;
+    if (f.has('l')){ if (c) line(s.name ?? '(standard input)'); continue; }
+    if (f.has('c')) line((many ? s.name + ':' : '') + c);
+  }
   if (!found) S.err = true;
 };
 C.sort = (args, input) => {
@@ -552,7 +1454,7 @@ C.cut = (args, input) => {
 };
 C.find = (args) => {
   const starts = [], tests = [];
-  for (let i = 0; i < args.length; i++){ const x = args[i]; if (x === '-name') tests.push(['name', globRe(args[++i] || '')]); else if (x === '-type') tests.push(['type', args[++i]]); else if (x.startsWith('-')) return err(`find: unknown predicate \`${x}'`); else starts.push(x); }
+  for (let i = 0; i < args.length; i++){ const x = args[i]; if (x === '-name') tests.push(['name', patRe(args[++i] || '', false)]); else if (x === '-type') tests.push(['type', args[++i]]); else if (x.startsWith('-')) return err(`find: unknown predicate \`${x}'`); else starts.push(x); }
   if (!starts.length) starts.push('.');
   const ok = (n) => tests.every(([k, v]) => k === 'name' ? v.test(n === S.root ? '/' : n.name) : (v === 'd' ? n.dir : !n.dir));
   const go = (n, p) => {
@@ -564,8 +1466,8 @@ C.find = (args) => {
   starts.forEach(t => { const r = resolve(t); if (!r.node) return err(mac() ? `find: ${t}: ${why(r)}` : `find: ‘${t}’: ${why(r)}`); go(r.node, t); });
 };
 function treeLine(pre, name, dir, after){
-  if (S.cap){ S.cap.push(pre + name + after); return; }
-  const d = document.createElement('div'); d.className = 'l'; d.append(pre);
+  if (!IO.fd[1].tty){ line(pre + name + after); return; }
+  TERM.open = null; const d = document.createElement('div'); d.className = 'l'; d.append(pre);
   const s = document.createElement('span'); if (dir) s.className = 'd'; s.textContent = name; d.append(s, after); out.appendChild(d);
 }
 C.tree = (args) => {
@@ -600,13 +1502,6 @@ C.tree = (args) => {
   });
   line(''); line(`${nd} director${nd === 1 ? 'y' : 'ies'}` + (f.has('d') ? '' : `, ${nf} file${nf === 1 ? '' : 's'}`));
 };
-C.which = (args) => {
-  args.forEach(c => {
-    if (BUILTIN[c]){ if (mac()) line(`${c}: shell built-in command`); else S.err = true; return; }
-    if (CMDS.includes(c) || ['bash', 'sh', 'zsh'].includes(c)) line(mac() ? (['ls','cat','cp','mv','rm','mkdir','rmdir','pwd','echo','date','sleep','chmod','ps','kill'].includes(c) ? '/bin/' : '/usr/bin/') + c : '/usr/bin/' + c);
-    else if (mac()) err(`${c} not found`); else S.err = true;
-  });
-};
 function clone(n){ const c = mk(n.name, n.dir, n.text, n.mode); if (n.dir) kids(n).forEach(k => add(c, clone(k))); return c; }
 function dest(src, t, cmdName, verb){
   const r = resolve(t);
@@ -626,8 +1521,8 @@ C.cp = (args) => {
   const d = dest(r.node, t, 'cp', 'cannot create regular file'); if (!d) return;
   if (!can(d.dir, 'w')) return fail('cp', r.node.dir ? 'cannot create directory' : 'cannot create regular file', d.path, 'Permission denied', d.dir);
   if (r.node.dir && inside(d.dir, r.node)) return err(`cp: cannot copy a directory, '${s}', into itself, '${d.path}'`);
-  if (d.existing){ if (d.existing.dir || r.node.dir) return err(`cp: cannot overwrite '${t}'`); d.existing.text = r.node.text; flash(d.existing, 'changed'); status(`Copied over ${tilde(d.existing)}`); return render(); }
-  const c = clone(r.node); c.name = d.name; if (c.text === '\u0000') c.mode = 0o755; add(d.dir, c); flash(c, 'new'); status(`Copied to ${tilde(c)}${c.dir ? '/' : ''}`); render();
+  if (d.existing){ if (d.existing.dir || r.node.dir) return err(`cp: cannot overwrite '${t}'`); d.existing.text = r.node.text; flash(d.existing, 'changed'); status(`Copied over ${tilde(d.existing)}`); return paint(); }
+  const c = clone(r.node); c.name = d.name; if (isBin(c)) c.mode = 0o755; add(d.dir, c); flash(c, 'new'); status(`Copied to ${tilde(c)}${c.dir ? '/' : ''}`); paint();
 };
 C.mv = (args) => {
   const { a } = opts(args);
@@ -644,32 +1539,8 @@ C.mv = (args) => {
   if (d.existing){ if (d.existing.dir) return err(`mv: cannot overwrite directory '${t}'`); detach(d.existing); }
   const renamed = r.node.parent === d.dir;
   detach(r.node); r.node.name = d.name; add(d.dir, r.node); flash(r.node, 'new');
-  status(renamed ? `Renamed to ${tilde(r.node)}` : `Moved to ${tilde(r.node)}`); render();
+  status(renamed ? `Renamed to ${tilde(r.node)}` : `Moved to ${tilde(r.node)}`); paint();
 };
-C.rm = (args) => {
-  const { f, a } = opts(args);
-  if (!a.length) return err(mac() ? 'usage: rm [-f | -i] [-dIPRrvWx] file ...' : 'rm: missing operand');
-  const queue = [];
-  for (const t of a){
-    const r = resolve(t);
-    if (!r.node){ if (!f.has('f')) fail('rm', 'cannot remove', t, why(r), r.at); continue; }
-    if (r.node === S.root){ err(mac() ? 'rm: "/" may not be removed' : "rm: it is dangerous to operate recursively on '/'"); continue; }
-    if (r.node.dir && !f.has('r') && !f.has('R')){ fail('rm', 'cannot remove', t, 'Is a directory'); continue; }
-    if (r.node === S.home){ err('rm: refusing to remove your home folder in this practice terminal'); continue; }
-    if (!can(r.node.parent, 'w')){ fail('rm', 'cannot remove', t, 'Permission denied', r.node); continue; }
-    const protectedFile = !r.node.dir && !can(r.node, 'w') && !f.has('f');
-    queue.push([t, r.node, protectedFile]);
-  }
-  const ask = queue.filter(q => f.has('i') || q[2]);
-  queue.filter(q => !(f.has('i') || q[2])).forEach(([t, n]) => { remove(n); status(`Deleted ${tilde(n)}${n.dir ? '/' : ''}`, true); });
-  if (ask.length){ S.rmAsk = ask; askNext(); }
-};
-function askNext(){
-  const [t, n, prot] = S.rmAsk[0];
-  const kind = n.dir ? 'directory' : (n.text ? 'regular file' : 'regular empty file');
-  S.asking = mac() ? (prot ? `override ${modeStr(n).slice(1)}  ${S.user}/staff for ${t}? ` : `remove ${t}? `) : `rm: remove ${prot ? 'write-protected ' : ''}${kind} '${t}'? `;
-  showPrompt();
-}
 C.rmdir = (args) => {
   if (!args.length) return err(mac() ? 'usage: rmdir [-p] directory ...' : 'rmdir: missing operand');
   for (const t of args){
@@ -687,12 +1558,16 @@ C.chmod = (args) => {
   if (a.length < 2) return err(mac() ? 'usage: chmod [-R] mode file ...' : `chmod: missing operand${a.length ? ` after '${a[0]}'` : ''}`);
   const [m, ...files] = a;
   const apply = (n) => {
-    if (/^[0-7]{3,4}$/.test(m)) return parseInt(m, 8) & 0o777;
+    if (/^[0-7]{3,4}$/.test(m)) return parseInt(m, 8) & 0o7777;
     let mode = n.mode;
     for (const cl of m.split(',')){
-      const x = /^([ugoa]*)([+\-=])([rwx]*)$/.exec(cl); if (!x) return null;
+      const x = /^([ugoa]*)([+\-=])([rwxst]*)$/.exec(cl); if (!x) return null;
       const who = (x[1] || 'a').replace('a', 'ugo'); let bits = 0;
-      for (const w of who){ const sh = { u:6, g:3, o:0 }[w]; for (const p of x[3]) bits |= { r:4, w:2, x:1 }[p] << sh; if (x[2] === '=') mode &= ~(7 << sh); }
+      for (const w of who){
+        const sh = { u:6, g:3, o:0 }[w];
+        for (const p of x[3]) bits |= p === 's' ? (w === 'u' ? 0o4000 : w === 'g' ? 0o2000 : 0) : p === 't' ? (w === 'o' ? 0o1000 : 0) : { r:4, w:2, x:1 }[p] << sh;
+        if (x[2] === '=') mode &= ~(7 << sh);
+      }
       mode = x[2] === '-' ? mode & ~bits : mode | bits;
     }
     return mode;
@@ -705,61 +1580,708 @@ C.chmod = (args) => {
     if (!each(r.node)) return err(mac() ? `chmod: Invalid file mode: ${m}` : `chmod: invalid mode: ‘${m}’`);
     status(`${tilde(r.node)} is now ${modeStr(r.node).slice(1)}`);
   }
-  render();
+  paint();
 };
-C.sleep = (args, input, bg) => {
-  const s = Math.min(parseFloat(args[0]) || 0, 3600);
-  if (!(s > 0)) return err(mac() ? 'usage: sleep seconds' : 'sleep: missing operand');
-  if (bg){
-    const n = (S.jobs.length ? Math.max(...S.jobs.map(j => j.n)) : 0) + 1, pid = S.pid++;
-    const j = { n, pid, cmd:`sleep ${args[0]}`, state:'Running' };
-    j.timer = setTimeout(() => { j.state = 'Done'; S.notices.push(j); }, s * 1000);
-    S.jobs.push(j); line(`[${n}] ${pid}`);
-    return;
+/* ---------- the shell's built-in commands ---------- */
+// built in, so no program in /bin is needed; the SPECIAL ones keep variable assignments, and a POSIX script stops when they fail
+const SPECIAL = new Set(['break', ':', 'continue', '.', 'eval', 'exec', 'exit', 'export', 'readonly', 'return', 'set', 'shift', 'times', 'trap', 'unset']);
+const BI = new Set(['cd', 'pwd', 'echo', 'printf', 'read', 'test', '[', 'true', 'false', 'local', 'type', 'command', 'getopts', 'wait', 'jobs', 'kill', 'fg', 'bg', 'alias', 'unalias', 'umask', 'help', 'history', 'let', 'hash', 'ulimit', 'source']);
+const KEYWORDS = new Set(['if', 'then', 'else', 'elif', 'fi', 'case', 'esac', 'for', 'while', 'until', 'do', 'done', 'in', '{', '}', '!', '[[', ']]', 'function', 'select', 'time']);
+const INTR = {};   // what a waiting command gets back when Ctrl + C is caught by a trap
+const special = (st) => { if (!E.inter && flav() === 'dash') throw new Ctl('exit', st); return st; };
+const berr = (b, m) => err(flav() === 'zsh' ? (E.script ? `${E.script.name}:${b}:${E.line}: ${m}` : `${b}: ${m}`) : `${who()}: ${b}: ${m}`);
+const ident = (s) => /^[A-Za-z_]\w*$/.test(s);
+C.help = (args) => {
+  if (args[0]){ const b = BUILTIN[args[0]]; if (b) return b.split('\n').forEach(x => line(x)); return err(mac() ? `help: no help found for ${args[0]}` : `${who()}: help: no help topics match \`${args[0]}'.  Try \`help help' or \`man -k ${args[0]}' or \`info ${args[0]}'.`); }
+  line('Commands you can use here (man COMMAND explains each one):', 'note');
+  [['Find your way','pwd  ls  cd  tree  find  which'],['Files and folders','mkdir  touch  cp  mv  rm  rmdir'],['Read and write','cat  less  head  tail  echo  printf  >  >>  <  <<'],
+   ['Work with text','grep  sort  uniq  wc  cut  |'],['Permissions','chmod  id  whoami  ls -l'],['Processes','sleep  sleep 100 &  jobs  ps  kill  wait  Ctrl + C'],
+   ['Settings','echo $HOME  env  export  unset'],['Scripts','nano  sh script.sh  ./script.sh  read  test  if  for  while  case'],['Everything else','man  help  date  clear  history']].forEach(([a, b]) => line(`  ${a.padEnd(20)}${b}`));
+  line('You can look anywhere, but only change things inside your home folder. Tab finishes names; ↑ brings back earlier commands.', 'note');
+};
+C.clear = () => { if (IO.fd[1].tty){ out.textContent = ''; TERM.open = null; } };
+C.exit = (args) => {
+  let n = E.status;
+  if (args.length){
+    if (/^[-+]?\d+$/.test(args[0])) n = +args[0] & 255;
+    else if (flav() === 'dash'){ err(`${who()}: exit: Illegal number: ${args[0]}`); n = 2; }
+    else { berr('exit', `${args[0]}: numeric argument required`); n = 2; }
   }
-  S.sleeping = setTimeout(() => { S.sleeping = null; showPrompt(); }, s * 1000);
+  if (E === MAIN){ line('(This practice terminal stays open. Use Start again to reset everything.)', 'note'); return 0; }
+  throw new Ctl('exit', n);
 };
-C.jobs = () => S.jobs.filter(j => j.state === 'Running').forEach((j, i, all) => {
+C.cd = (args) => {
+  const f = flav(); let t = args[0] === '--' ? args[1] : args[0];
+  if (t === '-'){
+    if (!S.prev){ berr('cd', f === 'zsh' ? 'no previous folder' : f === 'dash' ? "can't cd to -" : 'OLDPWD not set'); return 1; }
+    t = full(S.prev); line(t);
+  }
+  if (t === undefined){ if (!isSet('HOME')){ berr('cd', 'HOME not set'); return 1; } t = getVar('HOME'); }
+  if (t === '') return 0;
+  const r = resolve(t);
+  const bad = (m) => { berr('cd', f === 'zsh' ? `${m.toLowerCase()}: ${t}` : f === 'dash' ? `can't cd to ${t}` : `${t}: ${m}`); return f === 'dash' ? 2 : 1; };
+  if (!r.node) return bad(why(r));
+  if (!r.node.dir) return bad('Not a directory');
+  if (!can(r.node, 'x')) return bad('Permission denied');
+  delete E.vars.PWD; delete E.vars.OLDPWD;
+  if (r.node !== S.cwd){ const from = S.cwd; S.prev = from; S.cwd = r.node; if (E === MAIN) travel(from, r.node); }
+  return 0;
+};
+// \n \t \\ \0NNN and friends, for echo -e, zsh's and dash's echo, and printf %b; \c stops all output
+function escapes(s){
+  const map = { a:'\x07', b:'\b', e:'\x1b', E:'\x1b', f:'\f', n:'\n', r:'\r', t:'\t', v:'\v', '\\':'\\' }; let o = '';
+  for (let i = 0; i < s.length; i++){
+    const c = s[i];
+    if (c !== '\\' || i + 1 >= s.length){ o += c; continue; }
+    const n = s[++i];
+    if (n in map){ o += map[n]; continue; }
+    if (n === 'c') return { s:o, stop:true };
+    if (n === '0'){ let d = '', j = i + 1; while (d.length < 3 && /[0-7]/.test(s[j] || '')) d += s[j++]; o += String.fromCharCode(parseInt(d || '0', 8)); i = j - 1; continue; }
+    if (n === 'x' && /[\da-fA-F]/.test(s[i + 1] || '')){ let d = '', j = i + 1; while (d.length < 2 && /[\da-fA-F]/.test(s[j] || '')) d += s[j++]; o += String.fromCharCode(parseInt(d, 16)); i = j - 1; continue; }
+    o += '\\' + n;
+  }
+  return { s:o, stop:false };
+}
+C.echo = (args) => {
+  const f = flav(); let n = false, e = f !== 'bash', i = 0;
+  for (; i < args.length; i++){
+    const a = args[i];
+    if (f === 'dash' ? a !== '-n' : !/^-[neE]+$/.test(a)) break;
+    for (const c of a.slice(1)){ if (c === 'n') n = true; else e = c === 'e'; }
+  }
+  let s = args.slice(i).join(' ');
+  if (e){ const r = escapes(s); s = r.s; if (r.stop) n = true; }
+  out1(s + (n ? '' : '\n'));
+};
+C.printf = (args) => {
+  const f = flav(); let v = null;
+  if (args[0] === '-v' && f === 'bash'){ v = args[1]; args = args.slice(2); }
+  if (args[0] === '--') args = args.slice(1);
+  if (!args.length) return err(mac() ? 'usage: printf format [arguments ...]' : 'printf: usage: printf [-v var] format [arguments]');
+  const fmt = args[0]; let rest = args.slice(1), o = '', st = 0, stop = false;
+  const num = (s) => {
+    if (s === undefined || s === '') return 0;
+    if (/^['"]/.test(s)) return s.length > 1 ? s.codePointAt(1) : 0;
+    if (f === 'zsh' && !/^\s*[-+]?\d/.test(s)){ try { return arith(s); } catch { err(`${whoz()}printf: bad math expression: ${s}`); st = 1; return 0; } }
+    const m = /^\s*([-+]?)(0[xX][\da-fA-F]+|0[0-7]*|[1-9]\d*)/.exec(s);
+    const n = m ? (m[1] === '-' ? -1 : 1) * (/^0[xX]/.test(m[2]) ? parseInt(m[2], 16) : m[2].length > 1 ? parseInt(m[2], m[2][0] === '0' ? 8 : 10) : +m[2]) : 0;
+    if (!m || m[0].length !== s.length){ err(f === 'dash' ? `${who()}: printf: ${s}: ${m ? 'not completely converted' : 'expected numeric value'}` : f === 'zsh' ? `${whoz()}printf: ${m ? 'expression' : 'bad math expression'}: ${s}` : `${who()}: printf: ${s}: invalid number`); st = 1; }
+    return n;
+  };
+  const fesc = (i) => {   // an escape in the format itself
+    const n = fmt[i + 1], map = { a:'\x07', b:'\b', f:'\f', n:'\n', r:'\r', t:'\t', v:'\v', '\\':'\\', '"':'"', "'":"'" };
+    if (n in map) return [map[n], i + 2];
+    if (/[0-7]/.test(n || '')){ let d = '', j = i + 1; while (d.length < 3 && /[0-7]/.test(fmt[j] || '')) d += fmt[j++]; return [String.fromCharCode(parseInt(d, 8)), j]; }
+    if (n === 'x' && f !== 'dash'){ let d = '', j = i + 2; while (d.length < 2 && /[\da-fA-F]/.test(fmt[j] || '')) d += fmt[j++]; if (d) return [String.fromCharCode(parseInt(d, 16)), j]; }
+    if (n === 'c' && f !== 'dash'){ stop = true; return ['', fmt.length]; }
+    return ['\\' + (n ?? ''), i + 2];
+  };
+  const pass = () => {   // once through the format; it is used again while arguments are left
+    let used = 0, i = 0;
+    while (i < fmt.length && !stop){
+      const c = fmt[i];
+      if (c === '\\'){ const [s, j] = fesc(i); o += s; i = j; continue; }
+      if (c !== '%'){ o += c; i++; continue; }
+      if (fmt[i + 1] === '%'){ o += '%'; i += 2; continue; }
+      const m = /^%([-+ #0]*)(\*|\d+)?(?:\.(\*|\d*))?([diouxXcsbeEfgG])/.exec(fmt.slice(i));
+      if (!m){ err(f === 'dash' ? `${who()}: printf: %${fmt[i + 1] ?? ''}: invalid directive` : `${who()}: printf: \`${fmt[i + 1] ?? ''}': invalid format character`); st = 1; stop = true; break; }
+      i += m[0].length;
+      let [, fl, wd, pr, cv] = m;
+      if (wd === '*') wd = String(num(rest[used++]));
+      if (pr === '*') pr = String(num(rest[used++]));
+      const arg = rest[used++], prec = pr === undefined ? null : +pr || 0;
+      let s, numeric = true;
+      if (cv === 'd' || cv === 'i'){ const n = Math.trunc(num(arg)); s = String(Math.abs(n)); if (prec !== null) s = s.padStart(prec, '0'); s = (n < 0 ? '-' : fl.includes('+') ? '+' : fl.includes(' ') ? ' ' : '') + s; }
+      else if ('ouxX'.includes(cv)){
+        let n = BigInt(Math.trunc(num(arg))); if (n < 0n) n += 1n << 64n;
+        s = n.toString(cv === 'o' ? 8 : cv === 'u' ? 10 : 16); if (cv === 'X') s = s.toUpperCase(); if (prec !== null) s = s.padStart(prec, '0');
+        if (fl.includes('#') && n){ if (cv === 'o' && s[0] !== '0') s = '0' + s; else if (cv === 'x') s = '0x' + s; else if (cv === 'X') s = '0X' + s; }
+      }
+      else if ('eEfgG'.includes(cv)){
+        const n = parseFloat(arg) || 0, p = prec === null ? 6 : prec;
+        s = cv === 'f' ? n.toFixed(p) : cv === 'e' || cv === 'E' ? n.toExponential(p).replace(/e([+-])(\d)$/, 'e$10$2') : String(+n.toPrecision(p || 1));
+        if (cv === 'E' || cv === 'G') s = s.toUpperCase(); if (n >= 0 && fl.includes('+')) s = '+' + s;
+      }
+      else {
+        numeric = false;
+        if (cv === 'c') s = (arg ?? '').slice(0, 1);
+        else if (cv === 's') s = prec === null ? arg ?? '' : (arg ?? '').slice(0, prec);
+        else { const r = escapes(arg ?? ''); s = prec === null ? r.s : r.s.slice(0, prec); if (r.stop) stop = true; }
+      }
+      const w = +wd || 0;
+      if (s.length < w) s = fl.includes('-') ? s.padEnd(w) : numeric && fl.includes('0') && !(prec !== null && 'diouxX'.includes(cv)) ? (/^[-+ ]/.test(s) ? s[0] + s.slice(1).padStart(w - 1, '0') : s.padStart(w, '0')) : s.padStart(w);
+      o += s;
+    }
+    return used;
+  };
+  for (;;){ const used = pass(); rest = rest.slice(used); if (stop || !used || !rest.length) break; }
+  if (v !== null){ if (!setVar(v, o)) return 1; } else out1(o);
+  return st;
+};
+// commands with no file name read what you type, until Ctrl + D
+function hint(){ if (S.toldStdin) return; S.toldStdin = true; line('(It’s reading what you type now. Press Ctrl + D on an empty line to finish, or Ctrl + C to stop.)', 'note'); }
+function* keyboard(){
+  hint(); const lines = [];
+  for (;;){ const v = yield { input:'' }; if (v === null) return lines; if (v === INTR) return null; lines.push(v); }
+}
+C.cat = function*(args, input){
+  if (!args.length && input === null){
+    if (!CUR || !CUR.fg) return 0;
+    hint();
+    for (;;){ const v = yield { input:'' }; if (v === null) return 0; if (v === INTR) return 130; line(v); }
+  }
+  sources(args, input, 'cat').forEach(s => s.lines.forEach(x => line(x)));
+};
+const SYSBIN = new Set(['/bin', '/usr/bin', '/usr/local/bin', '/sbin', '/usr/sbin', '/usr/local/sbin']);
+const MAC_BIN = new Set(['ls', 'cat', 'cp', 'mv', 'rm', 'mkdir', 'rmdir', 'pwd', 'echo', 'date', 'sleep', 'chmod', 'ps', 'kill', 'bash', 'sh', 'zsh', 'dash', 'test', 'expr', '[']);
+const progs = () => new Set([...CMDS, 'test', 'true', 'false', '[', 'bash', 'dash', 'sh', 'clear', 'sudo', ...(mac() ? ['zsh'] : [])]);
+// where a command is found on $PATH: one of the system's programs, or an executable file of your own
+function lookup(name){
+  const all = progs();
+  for (const d of getVar('PATH').split(':')){
+    const dir = (d || '.').replace(/(.)\/$/, '$1');
+    if (SYSBIN.has(dir)){ if (all.has(name) && C[name]) return { util:name, path:(mac() ? (MAC_BIN.has(name) ? '/bin/' : '/usr/bin/') : '/usr/bin/') + name }; continue; }
+    const p = (dir === '/' ? '' : dir) + '/' + name, r = resolve(p);
+    if (r.node && !r.node.dir && can(r.node, 'x')) return { node:r.node, path:p };
+  }
+  return null;
+}
+C.which = (args) => args.forEach(c => {
+  if (mac()){
+    if (E.aliases[c] !== undefined) return line(`${c}: aliased to ${E.aliases[c]}`);
+    if (E.funcs[c]) return line(`${c}: shell function`);
+    if (KEYWORDS.has(c)) return line(`${c}: shell reserved word`);
+    if (BI.has(c) || SPECIAL.has(c) || BUILTIN[c]) return line(`${c}: shell built-in command`);
+  }
+  const f = lookup(c);
+  if (f) return line(f.path);
+  if (mac()) err(`${c} not found`); else S.err = true;
+});
+// rm -i reads its answer from stdin: the keyboard, or a pipe or file
+function* askLine(prompt){
+  const s = IO.fd[0];
+  if (s){
+    IO.fd[2].write(prompt);
+    if (s.pos >= s.text.length){ IO.fd[2].write('\n'); return null; }
+    const e = s.text.indexOf('\n', s.pos), ans = s.text.slice(s.pos, e < 0 ? s.text.length : e);
+    s.pos = e < 0 ? s.text.length : e + 1; IO.fd[2].write('\n'); return ans;
+  }
+  if (!CUR || !CUR.fg) return null;
+  const v = yield { input:prompt };
+  return v === INTR ? null : v;
+}
+C.rm = function*(args){
+  const { f, a } = opts(args);
+  if (!a.length) return err(mac() ? 'usage: rm [-f | -i] [-dIPRrvWx] file ...' : 'rm: missing operand');
+  const queue = [];
+  for (const t of a){
+    const r = resolve(t);
+    if (!r.node){ if (!f.has('f')) fail('rm', 'cannot remove', t, why(r), r.at); continue; }
+    if (r.node === S.root){ err(mac() ? 'rm: "/" may not be removed' : "rm: it is dangerous to operate recursively on '/'"); continue; }
+    if (r.node.dir && !f.has('r') && !f.has('R')){ fail('rm', 'cannot remove', t, 'Is a directory'); continue; }
+    if (r.node === S.home){ err('rm: refusing to remove your home folder in this practice terminal'); continue; }
+    if (!can(r.node.parent, 'w')){ fail('rm', 'cannot remove', t, 'Permission denied', r.node); continue; }
+    queue.push([t, r.node, !r.node.dir && !can(r.node, 'w') && !f.has('f')]);
+  }
+  const asks = (q) => f.has('i') || q[2];
+  queue.filter(q => !asks(q)).forEach(([t, n]) => { remove(n); status(`Deleted ${tilde(n)}${n.dir ? '/' : ''}`, true); });
+  for (const [t, n, prot] of queue.filter(asks)){
+    const kind = n.dir ? 'directory' : (n.text ? 'regular file' : 'regular empty file');
+    const ans = yield* askLine(mac() ? (prot ? `override ${modeStr(n).slice(1)}  ${S.user}/staff for ${t}? ` : `remove ${t}? `) : `rm: remove ${prot ? 'write-protected ' : ''}${kind} '${t}'? `);
+    if (/^y(es)?$/i.test((ans ?? '').trim())){ remove(n); status(`Deleted ${tilde(n)}${n.dir ? '/' : ''}`, true); }
+  }
+};
+C.sleep = function*(args){
+  const bad = args.find(x => /^-./.test(x)), wrong = args.find(x => !/^\d*\.?\d+[smhd]?$/.test(x));
+  const usage = () => { err('usage: sleep number[unit] [...]'); err("Unit can be 's' (seconds, the default), m (minutes), h (hours), or d (days)."); };
+  if (bad){ if (!mac()) return err(`sleep: invalid option -- '${bad[1]}'`); err(`sleep: illegal option -- ${bad[1]}`); return usage(); }
+  if (!args.length){ if (!mac()) return err('sleep: missing operand'); return usage(); }
+  if (wrong !== undefined){ if (!mac()) return err(`sleep: invalid time interval ‘${wrong}’`); err(`sleep: invalid time interval: ${wrong}`); return usage(); }
+  const s = args.reduce((t, x) => t + parseFloat(x) * ({ s:1, m:60, h:3600, d:86400 }[x.slice(-1)] || 1), 0);
+  const r = yield { sleep:Math.min(s, 3600) * 1000 };
+  return r === INTR ? 130 : 0;
+};
+const myJobs = () => S.jobs.filter(j => j.owner === E.id && j.state === 'Running');
+C.jobs = () => myJobs().forEach((j, i, all) => {
   const mark = i === all.length - 1 ? '+' : (i === all.length - 2 ? '-' : ' ');
-  line(mac() ? `[${j.n}]  ${mark} running    ${j.cmd}` : `[${j.n}]${mark}  Running                 ${j.cmd} &`);
+  line(mac() ? `[${j.n}]  ${mark} running    ${j.text}` : `[${j.n}]${mark}  Running                 ${j.text} &`);
 });
 C.ps = () => {
   const run = S.jobs.filter(j => j.state === 'Running');
-  if (mac()){ line('  PID TTY           TIME CMD'); line(' 1001 ttys000    0:00.04 -zsh'); run.forEach(j => line(` ${j.pid} ttys000    0:00.00 ${j.cmd}`)); return; }
+  if (mac()){ line('  PID TTY           TIME CMD'); line(' 1001 ttys000    0:00.04 -zsh'); run.forEach(j => line(` ${j.pid} ttys000    0:00.00 ${j.text}`)); return; }
   line('    PID TTY          TIME CMD'); line('   1001 pts/0    00:00:00 bash');
-  run.forEach(j => line(`   ${j.pid} pts/0    00:00:00 sleep`)); line(`   ${S.pid++} pts/0    00:00:00 ps`);
+  run.forEach(j => line(`   ${j.pid} pts/0    00:00:00 ${j.name}`)); line(`   ${S.pid++} pts/0    00:00:00 ps`);
 };
+const sigOf = (args) => { const i = args.findIndex(x => /^-./.test(x)); if (i < 0) return 'TERM'; let s = /^-[sn]$/.test(args[i]) ? args[i + 1] : args[i].slice(1); s = String(s).toUpperCase().replace(/^SIG/, ''); return SIGS[s] || s; };
 C.kill = (args) => {
-  const a = args.filter(x => !/^-(9|15|KILL|TERM|s)$/.test(x));
+  const a = args.filter((x, i) => !/^-(\d+|[A-Z]+|s|n)$/.test(x) && !/^-(s|n)$/.test(args[i - 1] || ''));
   if (!a.length) return err(mac() ? 'kill: not enough arguments' : 'kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]');
   a.forEach(t => {
-    const j = t.startsWith('%') ? S.jobs.find(x => x.n === parseInt(t.slice(1), 10) && x.state === 'Running') : S.jobs.find(x => x.pid === parseInt(t, 10) && x.state === 'Running');
+    if (E.pid && +t === E.pid){   // a script signalling itself
+      const sig = sigOf(args), act = E.traps[sig];
+      if (act === '') return;
+      if (act !== undefined){ if (CUR) CUR.pend = sig; return; }
+      throw new Ctl('exit', 128 + +Object.keys(SIGS).find(n => SIGS[n] === sig));
+    }
     if (t === '1001' || t === '$$') return line('(That’s the shell itself. This practice terminal won’t stop it.)', 'note');
-    if (!j) return err(t.startsWith('%') ? (mac() ? `kill: ${t}: no such job` : `bash: kill: ${t}: no such job`) : (mac() ? `kill: kill ${t} failed: no such process` : `bash: kill: (${t}) - No such process`));
-    clearTimeout(j.timer); j.state = 'Terminated'; S.notices.push(j);
+    const j = t.startsWith('%') ? S.jobs.find(x => x.owner === E.id && x.n === parseInt(t.slice(1), 10) && x.state === 'Running') : S.jobs.find(x => x.pid === parseInt(t, 10) && x.state === 'Running');
+    if (!j) return err(t.startsWith('%') ? (mac() ? `kill: ${t}: no such job` : `${who()}: kill: ${t}: no such job`) : (mac() ? `kill: kill ${t} failed: no such process` : `${who()}: kill: (${t}) - No such process`));
+    stop(j);
   });
 };
-C.env = () => { ENV_BASE.forEach(k => line(`${k}=${getVar(k)}`)); [...S.exported].forEach(k => line(`${k}=${S.vars[k] ?? ''}`)); };
+C.env = () => { ENV_BASE.forEach(k => { if (isSet(k)) line(`${k}=${getVar(k)}`); }); [...E.exported].filter(k => !ENV_BASE.includes(k) && isSet(k)).forEach(k => line(`${k}=${getVar(k)}`)); };
+function exports(p){
+  const f = flav(), names = [...new Set([...ENV_BASE, ...E.exported])].filter(k => E.exported.has(k)).sort();
+  for (const k of names){
+    if (!isSet(k)){ line(f === 'bash' ? `declare -x ${k}` : `export ${k}`); continue; }
+    const v = getVar(k);
+    line(f === 'bash' ? `declare -x ${k}="${v.replace(/(["\\$`])/g, '\\$1')}"` : f === 'zsh' ? `${p ? 'export ' : ''}${k}=${shq(v)}` : `export ${k}='${v.replace(/'/g, `'"'"'`)}'`);   // zsh's plain export leaves out the word export
+  }
+}
 C.export = (args) => {
-  if (!args.length) return C.env();
-  args.forEach(x => { const m = /^([A-Za-z_]\w*)(=(.*))?$/s.exec(x); if (!m) return err(mac() ? `export: not valid in this context: ${x}` : `bash: export: \`${x}': not a valid identifier`); if (m[2] !== undefined) S.vars[m[1]] = m[3]; if (!ENV_BASE.includes(m[1])) S.exported.add(m[1]); });
+  const p = args[0] === '-p'; if (p) args = args.slice(1);
+  if (!args.length) return exports(p);
+  for (const x of args){
+    const m = /^([A-Za-z_]\w*)(=(.*))?$/s.exec(x);
+    if (!m){ err(flav() === 'zsh' ? `${E.script ? whoz() : ''}export: not valid in this context: ${x}` : flav() === 'dash' ? `${who()}: export: ${x}: bad variable name` : `${who()}: export: \`${x}': not a valid identifier`); special(2); continue; }
+    if (m[2] !== undefined && !setVar(m[1], m[3])) continue;
+    E.exported.add(m[1]);
+  }
 };
-C.unset = (args) => args.forEach(x => { delete S.vars[x]; S.exported.delete(x); });
-C.man = (args) => {
+C.unset = (args) => {
+  let fn = false, i = 0;
+  if (args[0] === '-f'){ fn = true; i = 1; } else if (args[0] === '-v') i = 1;
+  for (const x of args.slice(i)){
+    if (fn){ delete E.funcs[x]; continue; }
+    if (E.ro.has(x)){ err(flav() === 'dash' ? `${who()}: unset: ${x}: is read only` : flav() === 'zsh' ? `${whoz()}read-only variable: ${x}` : `${who()}: unset: ${x}: cannot unset: readonly variable`); special(flav() === 'dash' ? 2 : 1); continue; }
+    if (flav() === 'bash' && !isSet(x) && E.funcs[x]){ delete E.funcs[x]; continue; }
+    E.vars[x] = undefined; E.exported.delete(x);
+  }
+};
+C.man = function*(args){
   const c = args[0];
   if (!c) return err(mac() ? 'usage: man [-adho] [-t | -w] [-M manpath] [-P pager] [-S mansect] [-m arch[:machine]] [-p [eprtv]] [mansect] page ...' : 'What manual page do you want?\nFor example, try \'man man\'.');
-  if (MAN[c]) return openPager(manLines(c), `Manual page ${c}(1)`);
+  if (MAN[c]) return yield* page(manLines(c), `Manual page ${c}(1)`);
   if (BUILTIN[c]){
-    if (mac()) return openPager(builtinLines(), 'Manual page builtin(1)');
-    err(`No manual entry for ${c}`); line(`(${c} is built into the shell, so it has no page of its own. Try help ${c}.)`, 'note'); return;
+    if (mac()) return yield* page(builtinLines(), 'Manual page builtin(1)');
+    err(`No manual entry for ${c}`); line(`(${c} is built into the shell, so it has no page of its own. Try help ${c}.)`, 'note'); return 16;
   }
-  err(`No manual entry for ${c}`);
+  err(`No manual entry for ${c}`); return mac() ? 1 : 16;   // man-db on Ubuntu exits 16, the Mac's man 1
 };
-C.less = (args, input) => {
-  if (!args.length){ if (input) return openPager(input.map(t => ({ t })), 'standard input'); return err(mac() ? 'Missing filename ("less --help" for help)' : 'Missing filename ("less --help" for help)'); }
-  const l = readFile(args[0], 'less'); if (l) openPager(l.map(t => ({ t })), args[0]);
+// the viewer takes over the terminal and the command waits until you press q; piped, the text is just printed
+function* page(lines, label){
+  if (!IO.fd[1].tty || !CUR || !CUR.fg){ lines.forEach(l => line(l.t)); return 0; }
+  openPager(lines, label); yield { pager:true }; return 0;
+}
+C.less = function*(args, input){
+  if (!args.length){ if (input){ IO.used = true; return yield* page(input.map(t => ({ t })), 'standard input'); } return err('Missing filename ("less --help" for help)'); }
+  const l = readFile(args[0], 'less'); if (l) return yield* page(l.map(t => ({ t })), args[0]);
 };
 C.more = C.less;
+C.test = (args) => testCmd(args, 'test');
+C['['] = (args) => testCmd(args, '[');
+C.true = () => 0;
+C.false = () => 1;
+C[':'] = () => 0;
+C.read = function*(args){
+  const f = flav(); let raw = false, prompt = '', i = 0;
+  for (; i < args.length; i++){
+    const a = args[i];
+    if (a === '--'){ i++; break; }
+    if (a[0] !== '-' || a === '-') break;
+    for (let k = 1; k < a.length; k++){
+      const c = a[k];
+      if (c === 'r') raw = true;
+      else if (c === 's' && f !== 'dash') continue;
+      else if (c === 'p' && f === 'bash'){ prompt = a.slice(k + 1) || args[++i] || ''; break; }
+      else { err(f === 'dash' ? `${who()}: read: Illegal option -${c}` : `${who()}: read: -${c}: invalid option`); return 2; }
+    }
+  }
+  const vars = args.slice(i);
+  if (f === 'zsh' && vars[0] && vars[0].includes('?')){ const q = vars[0].indexOf('?'); prompt = vars[0].slice(q + 1); vars[0] = vars[0].slice(0, q); }
+  const reply = !vars.length;
+  if (reply){ if (f === 'dash'){ err(`${who()}: read: arg count`); return 2; } vars.push('REPLY'); }
+  for (const v of vars) if (!ident(v)){ berr('read', f === 'dash' ? `${v}: bad variable name` : `\`${v}': not a valid identifier`); return special(f === 'dash' ? 2 : 1); }
+  let text = '', eof = false;
+  const s = IO.fd[0];
+  if (s){   // a line from a file, a pipe or a here-document; without -r, a backslash at the end joins the next line
+    for (;;){
+      if (s.pos >= s.text.length){ eof = true; break; }
+      const e = s.text.indexOf('\n', s.pos), ln = s.text.slice(s.pos, e < 0 ? s.text.length : e);
+      s.pos = e < 0 ? s.text.length : e + 1;
+      if (e < 0) eof = true;
+      if (!raw && /(^|[^\\])(\\\\)*\\$/.test(ln) && !eof){ text += ln.slice(0, -1); continue; }
+      text += ln; break;
+    }
+  } else if (!CUR || !CUR.fg) eof = true;
+  else {
+    if (prompt) IO.fd[2].write(prompt);
+    const v = yield { input:'' };
+    if (v === INTR) return 130;
+    if (v === null) eof = true; else text = v;
+  }
+  // split the line at IFS characters; the last variable gets the rest of the line
+  const ifs = isSet('IFS') ? getVar('IFS') : ' \t\n', ch = [];
+  for (let k = 0; k < text.length; k++){ const c = text[k]; if (c === '\\' && !raw){ if (k + 1 < text.length) ch.push([text[++k], 1]); continue; } ch.push([c, 0]); }
+  if (reply && f === 'bash'){ setVar('REPLY', ch.map(x => x[0]).join('')); return eof ? 1 : 0; }
+  const W = (x) => !x[1] && ifs.includes(x[0]) && ' \t\n'.includes(x[0]), N = (x) => !x[1] && ifs.includes(x[0]) && !' \t\n'.includes(x[0]);
+  let k = 0; const vals = [];
+  while (k < ch.length && W(ch[k])) k++;
+  for (let vi = 0; vi < vars.length; vi++){
+    if (vi === vars.length - 1){
+      let end = ch.length; while (end > k && W(ch[end - 1])) end--;
+      // one field left, ended by its delimiter: the delimiter goes too
+      let e = k; while (e < end && !W(ch[e]) && !N(ch[e])) e++;
+      let d = e; while (d < end && W(ch[d])) d++; if (d < end && N(ch[d])) d++; while (d < end && W(ch[d])) d++;
+      vals.push(ch.slice(k, d === end && e < end ? e : end).map(x => x[0]).join('')); break;
+    }
+    let v = '';
+    while (k < ch.length && !W(ch[k]) && !N(ch[k])) v += ch[k++][0];
+    while (k < ch.length && W(ch[k])) k++;
+    if (k < ch.length && N(ch[k])){ k++; while (k < ch.length && W(ch[k])) k++; }
+    vals.push(v);
+  }
+  for (let vi = 0; vi < vars.length; vi++) if (!setVar(vars[vi], vals[vi] ?? '')) return 1;
+  return eof ? 1 : 0;
+};
+// . and source: run a file in this shell, so its variables, functions and cd stay
+function* dot(args, nm){
+  const f = flav();
+  if (!args.length){ if (f === 'dash') return 0; berr(nm, 'filename argument required'); return 2; }
+  const t = args[0]; let node = null;
+  if (t.includes('/')) node = resolve(t).node;
+  else {
+    for (const d of getVar('PATH').split(':')){ const r = resolve((d || '.') + '/' + t); if (r.node && !r.node.dir){ node = r.node; break; } }
+    if (!node && f !== 'dash') node = resolve(t).node;
+  }
+  if (!node || node.dir || !can(node, 'r')){
+    const why = !node ? 'No such file or directory' : node.dir ? 'Is a directory' : 'Permission denied';
+    if (f === 'dash'){ err(!node && !t.includes('/') ? `${who()}: .: ${t}: not found` : `${who()}: .: cannot open ${t}: ${why === 'No such file or directory' ? 'No such file' : why}`); return special(2); }
+    if (f === 'zsh') err(`${whoz()}${why.toLowerCase()}: ${t}`); else err(`${who()}: ${t}: ${why}`);
+    return 1;
+  }
+  const saved = [E.args, E.script, E.line], own = args.length > 1 && f !== 'dash';   // dash ignores the extra arguments
+  if (own) E.args = args.slice(1);
+  E.src++; E.script = { name:t };
+  let st = 0;
+  try { st = yield* runText(node.text); }
+  catch (ex){ if (ex instanceof Ctl && ex.kind === 'return') st = ex.n; else throw ex; }
+  finally { E.src--; if (own) E.args = saved[0]; E.script = saved[1]; E.line = saved[2]; }
+  return st;
+}
+C['.'] = function*(args){ return yield* dot(args, '.'); };
+C.source = function*(args){ return yield* dot(args, 'source'); };
+C.eval = function*(args){
+  const t = args.join(' '); if (!t.trim()) return 0;
+  const line0 = E.line; try { return yield* runText(t, true); } finally { E.line = line0; }
+};
+C.exec = function*(args){
+  if (!args.length) return 0;
+  const st = yield* invoke(args[0], args.slice(1));
+  if (E === MAIN){ line(`(exec would replace this shell with ${args[0]}. This practice terminal stays open.)`, 'note'); return st; }
+  throw new Ctl('exit', st);
+};
+C.return = (args) => {
+  const n = args.length && /^-?\d+$/.test(args[0]) ? +args[0] & 255 : E.status;
+  if (E.fn || E.src) throw new Ctl('return', n);
+  if (flav() !== 'bash' && !E.inter) throw new Ctl('exit', n);
+  berr('return', "can only `return' from a function or sourced script"); return 1;
+};
+function loopCtl(k, args){
+  const n = args.length ? parseInt(args[0], 10) : 1;
+  if (!(n >= 1)){ berr(k, `${args[0]}: loop count out of range`); return special(1); }
+  if (!E.loop){ if (flav() === 'bash') berr(k, "only meaningful in a `for', `while', or `until' loop"); return 0; }
+  throw new Ctl(k, Math.min(n, E.loop));
+}
+C.break = (args) => loopCtl('break', args);
+C.continue = (args) => loopCtl('continue', args);
+C.shift = (args) => {
+  const f = flav(), n = args.length ? parseInt(args[0], 10) : 1;
+  if (isNaN(n) || n < 0){ berr('shift', f === 'dash' ? `Illegal number: ${args[0]}` : `${args[0]}: numeric argument required`); return special(2); }
+  if (n > E.args.length){
+    if (f === 'dash'){ err(`${who()}: shift: can't shift that many`); return special(2); }
+    if (f === 'zsh'){ berr('shift', 'shift count must be <= $#'); return 1; }
+    return 1;   // bash only explains with shopt -s shift_verbose
+  }
+  E.args = E.args.slice(n); return 0;
+};
+const LONG = { allexport:'a', errexit:'e', noglob:'f', noexec:'n', nounset:'u', verbose:'v', xtrace:'x', noclobber:'C', pipefail:'pipefail' };
+const shq = (v) => /^[\w@%+=:,./-]+$/.test(v) ? v : `'${v.replace(/'/g, `'\\''`)}'`;
+C.set = (args) => {
+  const f = flav();
+  if (!args.length){ Object.keys(E.vars).filter(k => E.vars[k] !== undefined).sort().forEach(k => line(`${k}=${shq(E.vars[k])}`)); return 0; }
+  let i = 0;
+  for (; i < args.length; i++){
+    const a = args[i];
+    if (a === '--'){ E.args = args.slice(i + 1); if (f === 'dash'){ E.vars.OPTIND = '1'; E.optpos = 0; } return 0; }
+    if (a === '-'){ E.opts.x = E.opts.v = false; i++; break; }
+    if (a === '-o' || a === '+o'){
+      const nm = args[++i];
+      if (nm === undefined){ Object.entries(LONG).forEach(([k, c]) => line(a === '-o' ? `${k.padEnd(15)}\t${E.opts[c] ? 'on' : 'off'}` : `set ${E.opts[c] ? '-' : '+'}o ${k}`)); continue; }
+      if (!LONG[nm]){ berr('set', f === 'dash' ? `Illegal option -o ${nm}` : `${nm}: invalid option name`); return special(2); }
+      E.opts[LONG[nm]] = a === '-o'; continue;
+    }
+    if (/^[-+][a-zA-Z]+$/.test(a)){
+      for (const c of a.slice(1)){ if (!'aefnuvxC'.includes(c)){ berr('set', f === 'dash' ? `Illegal option ${a[0]}${c}` : `${a[0]}${c}: invalid option`); return special(2); } E.opts[c] = a[0] === '-'; }
+      continue;
+    }
+    break;
+  }
+  if (i < args.length){ E.args = args.slice(i); if (f === 'dash'){ E.vars.OPTIND = '1'; E.optpos = 0; } }
+  return 0;
+};
+C.readonly = (args) => {
+  if (!args.length || args[0] === '-p'){ [...E.ro].sort().forEach(k => line(flav() === 'bash' ? `declare -r ${k}="${getVar(k)}"` : `readonly ${k}='${getVar(k).replace(/'/g, `'"'"'`)}'`)); return 0; }
+  for (const a of args){
+    const m = /^([A-Za-z_]\w*)(?:=(.*))?$/s.exec(a);
+    if (!m){ berr('readonly', flav() === 'dash' ? `${a}: bad variable name` : `\`${a}': not a valid identifier`); special(2); continue; }
+    if (m[2] !== undefined && !setVar(m[1], m[2])) continue;
+    E.ro.add(m[1]);
+  }
+};
+C.local = (args) => {
+  if (!E.fn){ berr('local', 'can only be used in a function'); return 1; }
+  for (const a of args){
+    const m = /^([A-Za-z_]\w*)(?:=(.*))?$/s.exec(a);
+    if (!m){ berr('local', `\`${a}': not a valid identifier`); continue; }
+    const k = m[1];
+    if (!E.local.some(s => s[0] === k)) E.local.push([k, k in E.vars, E.vars[k]]);
+    if (m[2] !== undefined) setVar(k, m[2]); else if (flav() !== 'dash') E.vars[k] = undefined;
+  }
+};
+const SIGS = { 0:'EXIT', 1:'HUP', 2:'INT', 3:'QUIT', 9:'KILL', 10:'USR1', 12:'USR2', 15:'TERM' };
+C.trap = (args) => {
+  if (!args.length){ Object.entries(E.traps).forEach(([s, a]) => line(`trap -- ${shq(a).startsWith("'") ? shq(a) : `'${a}'`} ${s}`)); return 0; }
+  let act = args[0], sigs = args.slice(1);
+  if (/^\d+$/.test(act)){ sigs = args; act = '-'; }
+  for (const raw of sigs){
+    let s = raw.toUpperCase().replace(/^SIG/, ''); if (/^\d+$/.test(s)) s = SIGS[s];
+    if (!s || !Object.values(SIGS).includes(s)){ berr('trap', flav() === 'dash' ? `${raw}: bad trap` : `${raw}: invalid signal specification`); continue; }
+    if (act === '-') delete E.traps[s]; else E.traps[s] = act;
+  }
+};
+C.wait = function*(args){
+  const mine = S.jobs.filter(j => j.owner === E.id);
+  const targets = args.length ? args.map(a => a.startsWith('%') ? mine.find(j => j.n === +a.slice(1)) : S.jobs.find(j => j.pid === +a)) : mine;
+  if (args.length && targets.some(t => !t)){ const a = args[targets.findIndex(t => !t)]; berr('wait', flav() === 'dash' ? `${a}: not found` : `pid ${a} is not a child of this shell`); return 127; }
+  while (targets.some(j => j.state === 'Running')){ const v = yield { join:true }; if (v === INTR) return 130; }
+  if (!E.inter) S.jobs = S.jobs.filter(j => !targets.includes(j));
+  return args.length ? targets[targets.length - 1].status : 0;
+};
+function typeOf(a){
+  const f = flav();
+  if (E.aliases[a] !== undefined) return f === 'bash' ? `${a} is aliased to \`${E.aliases[a]}'` : `${a} is an alias for ${E.aliases[a]}`;
+  if (KEYWORDS.has(a) && !(f === 'dash' && ['[[', ']]', 'function', 'select', 'time'].includes(a))) return f === 'zsh' ? `${a} is a reserved word` : `${a} is a shell keyword`;
+  if (E.funcs[a]) return f === 'bash' ? `${a} is a function` : `${a} is a shell function`;
+  if (SPECIAL.has(a)) return f === 'bash' ? `${a} is a shell builtin` : `${a} is a special shell builtin`;
+  if (BI.has(a) && (a !== 'source' || f !== 'dash')) return `${a} is a shell builtin`;
+  const p = lookup(a); return p ? `${a} is ${p.path}` : null;
+}
+C.type = (args) => {
+  let st = 0;
+  for (const a of args){
+    const t = typeOf(a);
+    if (t) line(t);
+    else { st = 1; if (flav() === 'bash') err(`${who()}: type: ${a}: not found`); else line(flav() === 'zsh' ? `${a} not found` : `${a}: not found`); }
+  }
+  return st;
+};
+C.command = function*(args){
+  let v = false, i = 0;
+  for (; i < args.length && /^-[vVp]+$/.test(args[i]); i++) if (/[vV]/.test(args[i])) v = args[i].includes('V') ? 'V' : 'v';
+  if (args[i] === '--') i++;
+  const rest = args.slice(i); if (!rest.length) return 0;
+  if (v){
+    let st = 0;
+    for (const a of rest){
+      if (v === 'V'){ const t = typeOf(a); if (t) line(t); else { st = 1; berr('command', `${a}: not found`); } continue; }
+      if (E.aliases[a] !== undefined) line(`alias ${a}='${E.aliases[a]}'`);
+      else if (E.funcs[a] || BI.has(a) || SPECIAL.has(a) || KEYWORDS.has(a)) line(a);
+      else { const p = lookup(a); if (p) line(p.path); else st = flav() === 'dash' ? 127 : 1; }
+    }
+    return st;
+  }
+  const [name, ...ra] = rest;
+  if (!name.includes('/') && (SPECIAL.has(name) || BI.has(name))) return yield* builtin(name, ra);
+  if (name.includes('/')) return yield* runPath(name, ra);
+  const p = lookup(name); if (!p) return notFound(name);
+  return p.util ? yield* util(p.util, ra) : yield* runFile(p.node, name, ra);
+};
+C.getopts = (args) => {
+  const [spec, name, ...given] = args, f = flav();
+  if (spec === undefined || name === undefined){ berr('getopts', 'usage: getopts optstring name [arg ...]'); return 2; }
+  const list = given.length ? given : E.args, silent = spec[0] === ':', sp = silent ? spec.slice(1) : spec;
+  let ind = parseInt(getVar('OPTIND'), 10) || 1, pos = E.optpos || 1;
+  const save = () => { E.vars.OPTIND = String(ind); E.optpos = pos; };
+  const w = list[ind - 1];
+  if (w === undefined || w[0] !== '-' || w === '-' || pos >= w.length && pos === 1){ setVar(name, '?'); pos = 1; save(); E.optpos = 0; return 1; }
+  if (w === '--'){ ind++; setVar(name, '?'); pos = 1; save(); E.optpos = 0; return 1; }
+  const c = w[pos], k = c === ':' ? -1 : sp.indexOf(c);
+  const step = () => { if (pos + 1 < w.length) pos++; else { ind++; pos = 1; } };
+  const me = E.script ? E.script.name : SH();
+  if (k < 0){
+    if (silent){ setVar(name, '?'); setVar('OPTARG', c); }
+    else { err(f === 'dash' ? `Illegal option -${c}` : `${me}: illegal option -- ${c}`); setVar(name, '?'); delete E.vars.OPTARG; }
+    step(); save(); return 0;
+  }
+  if (sp[k + 1] === ':'){
+    let arg;
+    if (pos + 1 < w.length){ arg = w.slice(pos + 1); ind++; pos = 1; }
+    else { arg = list[ind]; ind += 2; pos = 1; }
+    if (arg === undefined){
+      ind = Math.min(ind, list.length + 1);
+      if (silent){ setVar(name, ':'); setVar('OPTARG', c); }
+      else { err(f === 'dash' ? `No arg for -${c} option` : `${me}: option requires an argument -- ${c}`); setVar(name, '?'); delete E.vars.OPTARG; }
+      save(); return 0;
+    }
+    setVar('OPTARG', arg); setVar(name, c); save(); return 0;
+  }
+  setVar(name, c); if (f === 'dash') setVar('OPTARG', ''); else delete E.vars.OPTARG; step(); save(); return 0;
+};
+C.alias = (args) => {
+  const f = flav(), show = (k) => line(f === 'bash' ? `alias ${k}='${E.aliases[k]}'` : f === 'zsh' ? `${k}=${shq(E.aliases[k])}` : `${k}='${E.aliases[k]}'`);
+  if (!args.length){ Object.keys(E.aliases).sort().forEach(show); return 0; }
+  let st = 0;
+  for (const a of args){ const i = a.indexOf('='); if (i > 0) E.aliases[a.slice(0, i)] = a.slice(i + 1); else if (E.aliases[a] !== undefined) show(a); else { st = 1; if (f === 'zsh') continue; berr('alias', `${a}: not found`); } }
+  return st;
+};
+C.unalias = (args) => {
+  if (args[0] === '-a'){ E.aliases = {}; return 0; }
+  let st = 0;
+  for (const a of args){ if (E.aliases[a] === undefined){ st = 1; berr('unalias', flav() === 'zsh' ? `no such hash table element: ${a}` : `${a}: not found`); } else delete E.aliases[a]; }
+  return st;
+};
+C.umask = (args) => {
+  const sym = args[0] === '-S', a = sym ? args.slice(1) : args, m = E.umask ?? 0o022;
+  if (!a.length){
+    if (!sym){ line(m.toString(8).padStart(flav() === 'zsh' ? 3 : 4, '0')); return 0; }
+    const keep = (sh) => 'rwx'.split('').filter((c, i) => !(m >> sh & (4 >> i))).join('');
+    line(`u=${keep(6)},g=${keep(3)},o=${keep(0)}`); return 0;
+  }
+  if (/^[0-7]{1,4}$/.test(a[0])){ E.umask = parseInt(a[0], 8) & 0o777; return 0; }
+  let mask = m;
+  for (const cl of a[0].split(',')){
+    const x = /^([ugoa]*)=([rwx]*)$/.exec(cl);
+    if (!x){ berr('umask', flav() === 'dash' ? `Illegal mode: ${a[0]}` : `\`${a[0][0]}': invalid symbolic mode operator`); return 1; }
+    for (const w of (x[1] || 'a').replace('a', 'ugo')){ const sh = { u:6, g:3, o:0 }[w]; let keep = 0; for (const c of x[2]) keep |= { r:4, w:2, x:1 }[c]; mask = mask & ~(7 << sh) | ((~keep & 7) << sh); }
+  }
+  E.umask = mask; return 0;
+};
+C.let = (args) => { if (!args.length){ berr('let', 'expression expected'); return 1; } let v = 0; try { for (const a of args) v = arith(a); } catch (ex){ if (ex instanceof ExpErr){ berr('let', ex.msg); return 1; } throw ex; } return v ? 0 : 1; };
+C.hash = () => { line(flav() === 'bash' ? 'hash: hash table empty' : ''); return 0; };
+C.ulimit = () => { line('unlimited'); return 0; };
+C.times = () => { line('0m0.010s 0m0.020s'); line('0m0.000s 0m0.000s'); return 0; };
+C.fg = function*(args){
+  const all = S.jobs.filter(j => j.owner === E.id && j.state === 'Running'), j = args[0] ? all.find(x => x.n === parseInt(String(args[0]).replace('%', ''), 10)) : all[all.length - 1];
+  if (!j){ berr('fg', args[0] ? `${args[0]}: no such job` : 'current: no such job'); return 1; }
+  line(j.text); j.fg = true;
+  while (j.state === 'Running'){ const v = yield { join:true }; if (v === INTR){ stop(j); return 130; } }
+  S.notices = S.notices.filter(x => x !== j); S.jobs = S.jobs.filter(x => x !== j);
+  return j.status;
+};
+C.bg = (args) => { const all = S.jobs.filter(j => j.owner === E.id && j.state === 'Running'), j = all[all.length - 1]; if (!j){ berr('bg', 'current: no such job'); return 1; } berr('bg', `job ${j.n} already in background`); return 0; };
+// sh, bash, dash, zsh: run a script file, or -c 'commands', in a new shell
+function* shellCmd(name, args){
+  const o = {}; let i = 0, c = null;
+  for (; i < args.length; i++){
+    const a = args[i];
+    if (a === '--'){ i++; break; }
+    if (a === '-c'){ c = args[i + 1]; i += 2; break; }
+    if (/^[-+][euxnvf]+$/.test(a)){ for (const ch of a.slice(1)) o[ch] = a[0] === '-'; continue; }
+    if (a[0] === '-' && a.length > 1){ err(`${name}: ${a}: invalid option`); return 2; }
+    break;
+  }
+  if (c !== null){
+    if (c === undefined){ err(`${name}: -c: option requires an argument`); return 2; }
+    const rest = args.slice(i);
+    return yield* script(c, rest[0] ?? name, rest.slice(1), name, { opts:o, c:true });
+  }
+  const file = args[i], dashy = name === 'dash' || (name === 'sh' && !mac());
+  if (file === undefined){ line(`(${name} would start a second shell inside this one. To run a script, give its name: ${name} script.sh)`, 'note'); return 0; }
+  const r = resolve(file), n = r.node;
+  const no = (msg, st) => { if (dashy) err(`${name}: 0: cannot open ${file}: ${msg === 'No such file or directory' ? 'No such file' : msg}`); else if (name === 'zsh') err(`zsh: ${msg.toLowerCase()}: ${file}`); else err(`${name}: ${file}: ${msg}`); return dashy ? 2 : st; };
+  if (!n) return no(why(r), 127);
+  if (n.dir) return no('Is a directory', 126);
+  if (!can(n, 'r')) return no('Permission denied', 126);
+  if (isBin(n)){ err(`${file}: ${file}: cannot execute binary file`); return 126; }
+  return yield* script(n.text, file, args.slice(i + 1), name, { opts:o });
+}
+C.bash = function*(a){ return yield* shellCmd('bash', a); };
+C.sh = function*(a){ return yield* shellCmd('sh', a); };
+C.dash = function*(a){ return yield* shellCmd('dash', a); };
+C.zsh = function*(a){ return yield* shellCmd('zsh', a); };
+C.seq = (args) => {
+  let sep = '\n', wide = false; const a = [];
+  for (let i = 0; i < args.length; i++){ const x = args[i]; if (x === '-s') sep = args[++i] ?? ''; else if (/^-s./.test(x)) sep = x.slice(2); else if (x === '-w') wide = true; else a.push(x); }
+  if (!a.length || a.length > 3) return err(mac() ? 'usage: seq [-w] [-f format] [-s string] [-t string] [first [incr]] last' : a.length ? `seq: extra operand ‘${a[3]}’` : 'seq: missing operand');
+  const bad = a.find(x => x === '' || isNaN(Number(x)));
+  if (bad !== undefined) return err(mac() ? `seq: invalid floating point argument: ${bad}` : `seq: invalid floating point argument: ‘${bad}’`);
+  const n = a.map(Number); let [first, inc, last] = n.length === 1 ? [1, 1, n[0]] : n.length === 2 ? [n[0], 1, n[1]] : n;
+  if (n.length < 3 && mac() && last < first) inc = -1;
+  if (inc === 0) return err(mac() ? 'seq: zero increment' : 'seq: invalid Zero increment value: ‘0’');
+  const dec = Math.max(0, ...a.map(x => (x.split('.')[1] || '').length)), vals = [];
+  for (let v = first; inc > 0 ? v <= last + 1e-9 : v >= last - 1e-9; v += inc){ vals.push(v); if (vals.length > 100000) break; }
+  let s = vals.map(v => v.toFixed(dec));
+  if (wide){ const w = Math.max(...s.map(x => x.length)); s = s.map(x => x.startsWith('-') ? '-' + x.slice(1).padStart(w - 1, '0') : x.padStart(w, '0')); }
+  if (s.length) out1(s.join(sep) + '\n');
+};
+C.basename = (args) => {
+  const a = args.filter(x => x !== '--');
+  if (!a.length) return err(mac() ? 'usage: basename string [suffix]' : 'basename: missing operand');
+  let s = a[0].replace(/\/+$/, '');
+  if (!s) return line(a[0] ? '/' : '');
+  s = s.slice(s.lastIndexOf('/') + 1);
+  if (a[1] && s !== a[1] && s.endsWith(a[1])) s = s.slice(0, -a[1].length);
+  line(s);
+};
+C.dirname = (args) => {
+  if (!args.length) return err(mac() ? 'usage: dirname string [...]' : 'dirname: missing operand');
+  args.forEach(p => { let s = p.replace(/\/+$/, ''); if (!s) return line(p ? '/' : '.'); const i = s.lastIndexOf('/'); if (i < 0) return line('.'); line(s.slice(0, i).replace(/\/+$/, '') || '/'); });
+};
+// expr: integer arithmetic, comparisons and STRING : REGEX on its arguments (POSIX)
+class XErr { constructor(m){ this.m = m; } }
+function bre(r){   // a basic regular expression, as expr uses it, turned into a JavaScript one
+  let o = '';
+  for (let i = 0; i < r.length; i++){
+    const c = r[i];
+    if (c === '\\' && i + 1 < r.length){ const n = r[++i]; o += '(){}'.includes(n) ? n : /\d/.test(n) ? '\\' + n : '\\' + n; continue; }
+    o += '(){}+?|'.includes(c) ? '\\' + c : c;
+  }
+  return o;
+}
+C.expr = (args) => {
+  const a = args; let k = 0;
+  const isInt = (s) => /^[-+]?\d+$/.test(s), truthy = (s) => s !== '' && !/^-?0+$/.test(s);
+  const need = (x) => { if (!isInt(x)) throw new XErr(mac() ? `not a decimal number: '${x}'` : 'non-integer argument'); return BigInt(x); };
+  const prim = () => {
+    if (k >= a.length) throw new XErr(mac() ? 'syntax error' : `syntax error: missing argument after ‘${a[k - 1] ?? ''}’`);
+    const t = a[k++];
+    if (t === '('){ const v = or(); if (a[k++] !== ')') throw new XErr(mac() ? 'syntax error' : 'syntax error: expecting ‘)’'); return v; }
+    return t;
+  };
+  const match = () => {
+    let l = prim();
+    while (a[k] === ':'){ k++; const r = prim(), re = new RegExp('^(?:' + bre(r) + ')'), m = re.exec(l); l = m ? (m.length > 1 ? (m[1] ?? '') : String(m[0].length)) : (/\\\(/.test(r) ? '' : '0'); }
+    return l;
+  };
+  const mul = () => { let l = match(); while (['*', '/', '%'].includes(a[k])){ const o = a[k++], r = match(), x = need(l), y = need(r); if (o !== '*' && y === 0n) throw new XErr('division by zero'); l = String(o === '*' ? x * y : o === '/' ? x / y : x % y); } return l; };
+  const sum = () => { let l = mul(); while (a[k] === '+' || a[k] === '-'){ const o = a[k++], r = mul(); l = String(o === '+' ? need(l) + need(r) : need(l) - need(r)); } return l; };
+  const cmp = () => {
+    let l = sum();
+    while (['=', '==', '!=', '<', '<=', '>', '>='].includes(a[k])){
+      const o = a[k++], r = sum(), c = isInt(l) && isInt(r) ? Number(BigInt(l) - BigInt(r)) : l < r ? -1 : l > r ? 1 : 0;
+      l = (o === '=' || o === '==') ? +(c === 0) + '' : o === '!=' ? +(c !== 0) + '' : o === '<' ? +(c < 0) + '' : o === '<=' ? +(c <= 0) + '' : o === '>' ? +(c > 0) + '' : +(c >= 0) + '';
+    }
+    return l;
+  };
+  const and = () => { let l = cmp(); while (a[k] === '&'){ k++; const r = cmp(); l = truthy(l) && truthy(r) ? l : '0'; } return l; };
+  const or = () => { let l = and(); while (a[k] === '|'){ k++; const r = and(); l = truthy(l) ? l : truthy(r) ? r : '0'; } return l; };
+  try {
+    if (!a.length) throw new XErr(mac() ? 'syntax error' : 'missing operand');
+    const v = or(); if (k < a.length) throw new XErr(mac() ? 'syntax error' : `syntax error: unexpected argument ‘${a[k]}’`);
+    line(v); return truthy(v) ? 0 : 1;
+  } catch (e){ if (!(e instanceof XErr)) throw e; err(`expr: ${e.m}`); return 2; }
+};
 /* ---------- the manual / less viewer ---------- */
 const meas = document.createElement('canvas').getContext('2d');
 function cols(){ meas.font = getComputedStyle(term).font; const w = meas.measureText('0000000000').width / 10 || 11; return Math.max(36, Math.floor((term.clientWidth - 46) / w)); }
@@ -795,7 +2317,7 @@ function builtinLines(){
 function openPager(lines, label){
   const el = document.createElement('div'); el.className = 'pager'; el.setAttribute('role', 'document');
   const pre = document.createElement('pre'), bar = document.createElement('div'); bar.className = 'bar';
-  el.append(pre, bar); term.appendChild(el);
+  el.append(pre, bar); term.appendChild(el); term.scrollTop = 0; term.classList.add('full');
   S.pager = { lines, top:0, label, el, pre, bar, man:label.startsWith('Manual') }; pagerDraw();
 }
 function pagerRows(){ const p = S.pager; return Math.max(3, Math.floor(p.pre.clientHeight / (parseFloat(getComputedStyle(p.pre).lineHeight) || 27)) - 1); }
@@ -808,7 +2330,7 @@ function pagerDraw(){
 }
 function pagerKey(e){
   const p = S.pager, rows = pagerRows(), k = e.key; e.preventDefault();
-  if (k === 'q' || k === 'Q' || (e.ctrlKey && k === 'c')){ p.el.remove(); S.pager = null; cmd.value = ''; showPrompt(); return; }
+  if (k === 'q' || k === 'Q' || (e.ctrlKey && k === 'c')){ p.el.remove(); S.pager = null; term.classList.remove('full'); cmd.value = ''; if (S.fg && S.fg.wait && S.fg.wait.pager) pump(S.fg); else showPrompt(); return; }
   if (k === 'ArrowDown' || k === 'j' || k === 'Enter' || k === 'e') p.top++;
   else if (k === 'ArrowUp' || k === 'k' || k === 'y') p.top--;
   else if (k === ' ' || k === 'f' || k === 'PageDown') p.top += rows;
@@ -818,66 +2340,477 @@ function pagerKey(e){
   pagerDraw();
 }
 
-/* ---------- running a command line: pipes, redirection, background ---------- */
-const TOOLS = { nano:'nano', vim:'vim', git:'git', python:'python3', python3:'python3' };
-function run(text){
-  const toks = tokenize(text);
-  if (toks === null){ S.cont = text; return; }
-  if (!toks.length) return;
-  let bg = false; if (toks[toks.length - 1].op === '&'){ bg = true; toks.pop(); }
-  const stages = [[]]; toks.forEach(t => t.op === '|' ? stages.push([]) : stages[stages.length - 1].push(t));
-  S.err = false; let input = null;
-  for (let si = 0; si < stages.length; si++){
-    const st = stages[si], words = []; let inFile = null, outFile = null, append = false, bad = false;
-    for (let i = 0; i < st.length; i++){
-      const t = st[i];
-      if (t.op === '<' || t.op === '>' || t.op === '>>'){ const f = st[i + 1]; if (!f || f.op){ bad = true; break; } i++; if (t.op === '<') inFile = f.v; else { outFile = f.v; append = t.op === '>>'; } }
-      else if (!t.op) words.push(t);
+/* ---------- running commands: lists, pipelines, compound commands, functions, scripts ---------- */
+// every command runs as a generator, so sleep, read, the pager and nano can wait without freezing the page
+const TOOLS = { vim:'vim', git:'git', python:'python3', python3:'python3', zsh:'zsh' };
+let procSeq = 0;
+// ( ), each part of a pipeline, $( ) and background jobs work on a copy of the shell
+function sub(e){ return { ...e, vars:{ ...e.vars }, exported:new Set(e.exported), args:[...e.args], funcs:{ ...e.funcs }, opts:{ ...e.opts }, ro:new Set(e.ro), traps:{}, aliases:{ ...e.aliases }, id:++procSeq, local:e.fn ? [] : null }; }
+// a script is a new process: it sees only exported variables, and none of your functions
+function proc(e, sh, name, args){
+  const n = newEnv(); Object.assign(n, { id:++procSeq, pid:S.pid++, cwd:e.cwd, prev:e.prev, sh, inter:false, script:{ name }, args, arg0:name, umask:e.umask });
+  e.exported.forEach(k => { if (k in e.vars) n.vars[k] = e.vars[k]; }); n.exported = new Set(e.exported);
+  return n;
+}
+function* exec(n){
+  if (n.redirs && n.redirs.length && n.t !== 'cmd') return yield* redirected(n.redirs, () => run1(n));
+  return yield* run1(n);
+}
+function* run1(n){
+  switch (n.t){
+    case 'list': return yield* execList(n);
+    case 'andor': return yield* execAndOr(n);
+    case 'pipe': return yield* execPipe(n);
+    case 'cmd': return yield* simple(n);
+    case 'group': return yield* exec(n.body);
+    case 'sub': return yield* inSub(() => exec(n.body));
+    case 'if':
+      for (const c of n.clauses) if ((yield* cond(c.cond)) === 0) return yield* exec(c.body);
+      return n.els ? yield* exec(n.els) : 0;
+    case 'while': return yield* loop(function*(){ return ((yield* cond(n.cond)) === 0) !== n.until; }, () => exec(n.body));
+    case 'for': {
+      E.line = n.line;
+      if (n.badName){ berr('for', `\`${n.name}': not a valid identifier`); return 1; }
+      let items; try { items = n.words ? yield* words(n.words) : [...E.args]; } catch (ex){ return expFail(ex); }
+      if (items === null) return 1;
+      let i = 0;
+      return yield* loop(function*(){ return i < items.length && setVar(n.name, items[i++]); }, () => exec(n.body));
     }
-    if (bad || (!words.length && !outFile && stages.length > 1)){ err(mac() ? 'zsh: parse error near `\\n\'' : "bash: syntax error near unexpected token `newline'"); S.status = 2; return; }
-    const argv = [];
-    for (const w of words){ const g = glob(w); if (!g){ S.status = 1; return; } argv.push(...g); }
-    if (argv.length === 1 && /^[A-Za-z_]\w*=/.test(argv[0]) && !outFile){ const i = argv[0].indexOf('='); S.vars[argv[0].slice(0, i)] = argv[0].slice(i + 1); continue; }
-    if (inFile){ const l = readFile(inFile, SH()); if (!l){ S.status = 1; return; } input = l; }
-    const last = si === stages.length - 1;
-    S.cap = (!last || outFile) ? [] : null;
-    if (argv.length){
-      const [name, ...args] = argv;
-      if (C[name]) C[name](args, input, bg && last);
-      else if (TOOLS[name] && !mac()){ err(`Command '${name}' not found, but can be installed with:`); err(''); err(`sudo apt install ${TOOLS[name]}`); }
-      else err(mac() ? `zsh: command not found: ${name}` : `${name}: command not found`);
+    case 'cfor': {
+      const ev = function*(src){ return arith(yield* str({ parts:dqParts(src, flav()) })); };
+      let first = true;
+      try { if (n.init.trim()) yield* ev(n.init); } catch (ex){ return expFail(ex); }
+      return yield* loop(function*(){ if (!first && n.step.trim()) yield* ev(n.step); first = false; return !n.cond.trim() || (yield* ev(n.cond)) !== 0; }, () => exec(n.body));
     }
-    const produced = S.cap || []; S.cap = null;
-    if (outFile){ writeFile(outFile, produced.length ? produced.join('\n') + '\n' : '', append); input = []; }
-    else input = produced;
+    case 'case': {
+      E.line = n.line;
+      let w; try { w = yield* str(n.word); } catch (ex){ return expFail(ex); }
+      for (const it of n.items) for (const p of it.pats) if (patRe(yield* pattern(p.parts), false).test(w)) return it.body ? yield* exec(it.body) : 0;
+      return 0;
+    }
+    case 'func': E.funcs[n.name] = n.body; return 0;
+    case 'arith': E.line = n.line; try { return arith(yield* str({ parts:dqParts(n.src, flav()) })) ? 0 : 1; } catch (ex){ return expFail(ex); }
+    case 'dbrack': E.line = n.line; try { return yield* dbrack(n); } catch (ex){ return expFail(ex); }
   }
-  S.status = S.err ? 1 : 0;
-  render();
+  return 0;
+}
+// conditions (if, while, the left of && and ||) never trigger set -e
+function* cond(n){ E.cond++; try { const s = yield* exec(n); E.status = s; return s; } finally { E.cond--; } }
+function* loop(test, body){
+  let st = 0; E.loop++;
+  try {
+    for (;;){
+      let go; try { go = yield* test(); } catch (ex){ if (ex instanceof ExpErr) return expFail(ex); throw ex; }
+      if (!go) break;
+      try { st = yield* body(); }
+      catch (ex){
+        if (!(ex instanceof Ctl) || (ex.kind !== 'break' && ex.kind !== 'continue')) throw ex;
+        if (ex.n > 1){ ex.n--; throw ex; }
+        st = 0; if (ex.kind === 'break') break;
+      }
+      yield* tick();
+    }
+  } finally { E.loop--; }
+  return st;
+}
+function* tick(){ if (CUR && ++CUR.steps % 1000 === 0){ paint(); yield { tick:true }; } }
+function* execList(n){
+  let st = 0;
+  for (const it of n.items){
+    if (it.bg){ background(it.node, it.text); st = 0; E.status = 0; continue; }
+    E.exempt = false;
+    st = yield* exec(it.node); E.status = st;
+    if (st && E.opts.e && !E.cond && !E.exempt) throw new Ctl('exit', st);
+  }
+  return st;
+}
+function* execAndOr(n){
+  let st = yield* cond(n.first), last = false, ex = false;
+  for (let i = 0; i < n.rest.length; i++){
+    const { op, node } = n.rest[i];
+    if ((op === '&&') !== (st === 0)) continue;
+    last = i === n.rest.length - 1;
+    if (last){ E.exempt = false; st = yield* exec(node); ex = E.exempt; } else st = yield* cond(node);
+    E.status = st;
+  }
+  E.exempt = last ? ex : true;
+  return st;
+}
+function* execPipe(n){
+  let st = 0;
+  if (n.cmds.length === 1) st = yield* exec(n.cmds[0]);
+  else {
+    const pio = IO, sts = []; let input = null;
+    for (let i = 0; i < n.cmds.length; i++){
+      const last = i === n.cmds.length - 1, b = last ? null : buffer();
+      IO = { fd:{ ...pio.fd } }; if (input !== null) IO.fd[0] = stream(input); if (b) IO.fd[1] = b;
+      try { st = last && flav() === 'zsh' ? yield* exec(n.cmds[i]) : yield* inSub(() => exec(n.cmds[i])); }   // zsh runs the last part in this shell
+      finally { IO = pio; }
+      sts.push(st); input = b ? b.buf : null;
+    }
+    if (E.opts.pipefail) st = sts.reverse().find(x => x) ?? 0;
+  }
+  if (n.neg){ st = st ? 0 : 1; E.exempt = true; }
+  return st;
+}
+function* inSub(fn){
+  const pe = E; E = sub(E);
+  try {
+    let st;
+    try { st = yield* fn(); } catch (ex){ if (!(ex instanceof Ctl)) throw ex; st = ex.kind === 'exit' || ex.kind === 'return' ? ex.n : 0; }
+    return yield* atExit(st);
+  } finally { E = pe; }
+}
+function expFail(ex){
+  if (!(ex instanceof ExpErr)) throw ex;
+  err(flav() === 'zsh' ? `${whoz()}${ex.msg}` : `${who()}: ${ex.msg}`);
+  if (!E.inter && (ex.fatal || flav() === 'dash')) throw new Ctl('exit', flav() === 'dash' ? 2 : 1);
+  return 1;
+}
+function* simple(n){
+  E.line = n.line; S.subSt = undefined;
+  yield* tick();
+  let argv;
+  try { argv = yield* words(n.words); } catch (ex){ return expFail(ex); }
+  if (argv === null) return 1;
+  // NAME=value: left to right, each seeing the ones before; in front of a command (not a special built-in) only for that command
+  const keep = !argv.length || SPECIAL.has(argv[0]), as = [], saved = [];
+  const undo = () => { for (const [k, had, v, ex] of saved.reverse()){ if (had) E.vars[k] = v; else delete E.vars[k]; if (!ex) E.exported.delete(k); } };
+  try {
+    for (const a of n.assigns){
+      const v = (a.add ? getVar(a.name) : '') + (yield* str(a.value));
+      as.push([a.name, v]);
+      if (!keep) saved.push([a.name, a.name in E.vars, E.vars[a.name], E.exported.has(a.name)]);
+      if (!setVar(a.name, v)){ undo(); return special(flav() === 'dash' ? 2 : 1); }
+      if (!keep) E.exported.add(a.name);
+    }
+  } catch (ex){ undo(); return expFail(ex); }
+  try {
+    if (E.opts.x && (argv.length || as.length)){
+      const ps4 = flav() === 'zsh' ? `+${E.script ? E.script.name : 'zsh'}:${E.line}> ` : (getVar('PS4')[0] || '').repeat(E.lvl || 0) + getVar('PS4');
+      line(ps4 + as.map(([k, v]) => `${k}=${shq(v)}`).concat(argv.map(shq)).join(' '), 'trace');
+    }
+    if (!argv.length){
+      const st = n.redirs.length ? yield* redirected(n.redirs, function*(){ return 0; }) : 0;
+      return st || (S.subSt ?? 0);
+    }
+    if (argv[0] === 'exec' && argv.length === 1) return yield* redirected(n.redirs, null, true);
+    const go = () => invoke(argv[0], argv.slice(1), n);
+    E.rfail = false;
+    let st = n.redirs.length ? yield* redirected(n.redirs, go) : yield* go();
+    if (E.rfail && SPECIAL.has(argv[0])) st = special(st);
+    if (CUR && CUR.pend){ const sig = CUR.pend; CUR.pend = null; if (E.traps[sig]) yield* runText(E.traps[sig], true); }
+    return st;
+  } finally { undo(); }
+}
+// redirections apply to one command, and are undone after it; exec without a command keeps them
+function* redirected(rs, body, keep){
+  const pio = IO, io = keep ? IO : { fd:{ ...IO.fd } }, files = [];
+  let ok = true;
+  try { for (const r of rs) if (!(yield* openRedir(r, io, files))){ ok = false; break; } }
+  catch (ex){ if (!(ex instanceof ExpErr)) throw ex; expFail(ex); ok = false; }
+  if (!ok){ E.rfail = true; written(files); return flav() === 'dash' ? 2 : 1; }
+  if (keep){ written(files); return 0; }
+  IO = io;
+  try { return yield* body(); }
+  finally { IO = pio; written(files); }
+}
+const written = (files) => files.forEach(({ n, append }) => status(`${append ? 'Added to' : 'Wrote to'} ${tilde(n)}`));
+function* openRedir(r, io, files){
+  const fd = r.fd;
+  if (r.hd){ const h = r.hd; io.fd[fd] = stream(h.quoted ? h.parts[0].v : yield* str({ parts:h.parts }, { notilde:true })); return true; }
+  const t = yield* str(r.word);
+  switch (r.op){
+    case '<': case '<>': { const s = openIn(t); if (s === undefined) return false; io.fd[fd] = s; return true; }
+    case '<<<': io.fd[fd] = stream(t + '\n'); return true;
+    case '>&': case '<&':
+      if (t === '-'){ io.fd[fd] = r.op === '>&' ? CLOSED : stream(''); return true; }
+      if (/^\d+$/.test(t)){ if (!(t in io.fd)){ err(`${who()}: ${t}: Bad file descriptor`); return false; } io.fd[fd] = io.fd[t]; return true; }
+      if (r.op === '<&' || flav() === 'dash'){ err(`${who()}: ${t}: ambiguous redirect`); return false; }
+      // bash reads >& file as &> file
+    case '&>': case '&>>': { const s = openOut(t, r.op === '&>>', files); if (!s) return false; io.fd[1] = io.fd[2] = s; return true; }
+    default: { const s = openOut(t, r.op === '>>', files, r.op === '>|'); if (!s) return false; io.fd[fd] = s; return true; }
+  }
+}
+function* invoke(name, args){
+  if (name.includes('/')) return yield* runPath(name, args);
+  if (SPECIAL.has(name)) return yield* builtin(name, args);
+  if (E.funcs[name]) return yield* callFn(name, args);
+  if (BI.has(name) && C[name] && (name !== 'source' || flav() !== 'dash')) return yield* builtin(name, args);
+  const p = lookup(name);
+  if (!p) return notFound(name);
+  return p.util ? yield* util(p.util, args) : yield* runFile(p.node, name, args);
+}
+function notFound(name){
+  const f = flav();
+  if (f === 'bash' && !E.script && TOOLS[name] && !mac()){ err(`Command '${name}' not found, but can be installed with:`); err(''); err(`sudo apt install ${TOOLS[name]}`); }
+  else if (f === 'zsh') err(E.script ? `${who()}: command not found: ${name}` : `zsh: command not found: ${name}`);
+  else if (f === 'dash') err(`${who()}: ${name}: not found`);
+  else err(E.script ? `${who()}: ${name}: command not found` : `${name}: command not found`);
+  return 127;
+}
+const result = (st) => typeof st === 'number' ? st : (S.err ? 1 : 0);
+function* builtin(name, args){
+  S.err = false;
+  try { const r = C[name](args); return result(r && typeof r.next === 'function' ? yield* r : r); }
+  catch (ex){ if (!(ex instanceof BadFd)) throw ex; berr(name, 'write error: Bad file descriptor'); return 1; }
+}
+const cutFiles = (args) => { const f = []; for (let i = 0; i < args.length; i++){ const x = args[i]; if (x === '-d' || x === '-f') i++; else if (!/^-[df]/.test(x)) f.push(x); } return f; };
+const STDIN = { sort:(a) => !opts(a).a.length, wc:(a) => !opts(a).a.length, uniq:(a) => !opts(a).a.length, head:(a) => !numOpt(a, 10).a.length, tail:(a) => !numOpt(a, 10).a.length, grep:(a) => opts(a).a.length === 1, cut:(a) => !cutFiles(a).length };
+function* util(name, args){
+  S.err = false; IO.used = false;
+  let input = stdinLines();
+  if (input === null && STDIN[name] && STDIN[name](args)){ input = CUR && CUR.fg ? yield* keyboard() : []; if (input === null) return 130; }
+  let st;
+  try { const r = C[name](args, input); st = r && typeof r.next === 'function' ? yield* r : r; }
+  catch (ex){ if (!(ex instanceof BadFd)) throw ex; err(`${name}: write error: Bad file descriptor`); return 1; }
+  if (IO.used && IO.fd[0]) IO.fd[0].pos = IO.fd[0].text.length;
+  return result(st);
+}
+function* callFn(name, args){
+  if (E.fn >= 100){ berr(name, 'maximum function nesting level exceeded (100)'); return 1; }   // bash's FUNCNEST; deeper would overflow the page's stack
+  const body = E.funcs[name], saved = [E.args, E.local, E.arg0];
+  E.args = args; E.local = []; E.fn++; if (flav() === 'zsh') E.arg0 = name;
+  try { return yield* exec(body); }
+  catch (ex){ if (ex instanceof Ctl && ex.kind === 'return') return ex.n; throw ex; }
+  finally { for (const [k, had, v] of E.local.reverse()){ if (had) E.vars[k] = v; else delete E.vars[k]; } [E.args, E.local, E.arg0] = saved; E.fn--; }
+}
+function* runPath(path, args){
+  const r = resolve(path), n = r.node, f = flav();
+  const no = (msg, st) => { err(f === 'zsh' ? `${whoz()}${msg.toLowerCase()}: ${path}` : f === 'dash' ? `${who()}: ${path}: ${msg === 'No such file or directory' ? 'not found' : msg}` : `${who()}: ${path}: ${msg}`); return st; };
+  if (!n) return no(why(r), 127);
+  if (n.dir) return no(f === 'dash' ? 'Permission denied' : 'Is a directory', 126);
+  if (!can(n, 'x')) return no('Permission denied', 126);
+  return yield* runFile(n, path, args);
+}
+// a file you run: a program of the system, or a script for the shell its #! line names
+function* runFile(n, path, args){
+  if (isBin(n)){ const u = n.text.slice(1) || n.name; return C[u] && !SPECIAL.has(u) ? yield* util(u, args) : 0; }
+  const m = /^#!\s*(\S+)(?:[ \t]+(\S+))?/.exec(n.text), o = {};
+  let sh = flav() === 'zsh' ? 'sh' : flav();
+  if (m){
+    const env = m[1].endsWith('/env'), prog = env ? m[2] : m[1].split('/').pop();
+    if (!(['bash', 'sh', 'dash'].includes(prog) || (prog === 'zsh' && mac()))){
+      if (env){ err(mac() ? `env: ${prog}: No such file or directory` : `/usr/bin/env: ‘${prog}’: No such file or directory`); return 127; }
+      err(flav() === 'zsh' ? `zsh: ${path}: bad interpreter: ${m[1]}: no such file or directory` : `${who()}: ${path}: ${m[1]}: bad interpreter: No such file or directory`);
+      return 126;
+    }
+    sh = prog;
+    if (!env && m[2] && m[2][0] === '-') for (const c of m[2].slice(1)) o[c] = true;
+  }
+  if (!can(n, 'r')){ err(`${sh}: ${path}: Permission denied`); return 126; }
+  return yield* script(n.text, path, args, sh, { opts:o });
+}
+function* script(text, name, args, sh, o = {}){
+  const pe = E, pio = IO;
+  E = proc(pe, sh === 'sh' ? (mac() ? 'bash' : 'dash') : sh, name, args);
+  Object.assign(E.opts, o.opts || {}); if (o.c) E.script.c = true;
+  IO = { fd:{ ...pio.fd } };
+  let st = 0;
+  try {
+    try { st = yield* runText(text); }
+    catch (ex){ if (!(ex instanceof Ctl)) throw ex; st = ex.n ?? 0; }
+    st = yield* atExit(st);
+  } finally { E = pe; IO = pio; }
+  return st;
+}
+function* atExit(st){
+  const t = E.traps.EXIT; if (t === undefined || t === '') return st;
+  delete E.traps.EXIT; E.status = st;
+  try { yield* runText(t, true); } catch (ex){ if (ex instanceof Ctl && ex.kind === 'exit') return ex.n; throw ex; }
+  return st;
+}
+// a script, a sourced file or eval'd text: each complete command is read, then run, one after another
+function* runText(text, ev){
+  const lx = new Lexer(text, flav(), false), ps = new Parser(lx); let st = 0;
+  for (;;){
+    let n;
+    try { n = ps.command1(); }
+    catch (ex){
+      if (!(ex instanceof Incomplete) && !(ex instanceof SynErr)) throw ex;
+      synErr(ex, lx);
+      if (ev && flav() === 'dash' && !E.inter) throw new Ctl('exit', 2);
+      return flav() === 'zsh' ? 1 : 2;
+    }
+    if (!n) return st;
+    if (!E.opts.n){ st = yield* exec(n); E.status = st; }
+  }
+}
+function synErr(ex, lx){
+  const f = flav(), inc = ex instanceof Incomplete, t = inc ? null : ex.tok, ln = inc ? (f === 'dash' ? count(lx.s, '\n') + 1 : lx.line) : t.line;
+  const what = inc ? '' : t.t === 'eof' ? 'end of file' : t.t === 'op' ? (t.v === '\n' ? 'newline' : t.v) : t.t === 'arith' ? '((' : t.raw;
+  const q = inc ? { quote:"'", dquote:'"', bquote:'`' }[ex.ctx[ex.ctx.length - 1]] : null;
+  E.line = ln;
+  if (f === 'dash'){
+    const pre = `${E.script ? E.script.name : 'sh'}: ${ln}: Syntax error:`;
+    if (ex.msg) return err(`${pre} ${ex.msg}`);
+    if (q) return err(`${pre} Unterminated quoted string`);
+    const want = { if:'then', then:'fi', elif:'then', else:'fi', for:'do', while:'do', until:'do', '\0do':'done', case:')', cursh:'}', subsh:')', cmdsubst:')' }[(ex.ctx || []).filter(c => !['cmdand', 'cmdor', 'pipe'].includes(c)).pop()];
+    const exp = want && want !== what ? ` (expecting "${want}")` : '';
+    if (inc) return err(`${pre} end of file unexpected${exp}`);
+    return err(`${pre} ${what === 'newline' ? 'newline' : `"${what}"`} unexpected${exp}`);
+  }
+  if (f === 'zsh'){
+    const pre = E.script ? `${E.script.name}:${ln}: ` : 'zsh: ';
+    return err(q ? `${pre}unmatched ${q}` : `${pre}parse error near \`${inc ? '' : what === 'newline' ? '\\n' : what}'`);
+  }
+  const at = (l) => E.script ? `${E.script.name}: ${E.script.c ? '-c: ' : ''}line ${l}` : 'bash', pre = at(ln);
+  if (inc){   // bash: where the quote or $( began, then the end of the file
+    const m = { quote:"'", dquote:'"', bquote:'`', cmdsubst:')', braceparam:'}' }[ex.ctx[ex.ctx.length - 1]];
+    if (m) err(`${at(ex.line ?? ln)}: unexpected EOF while looking for matching \`${m}'`);
+    return err(`${at(count(lx.s, '\n') + 1)}: syntax error: unexpected end of file`);
+  }
+  err(`${pre}: syntax error near unexpected token \`${what}'`);
+  if (E.script) err(`${pre}: \`${(lx.s.split('\n')[ln - 1] || '').trim()}'`);
+}
+function* dbrack(n){   // [[ ... ]]: no field splitting or *, == compares with a pattern, && || ! ( ) inside
+  const it = n.items; let k = 0;
+  const isO = (t, v) => !!t && ((t.t === 'op' && t.v === v) || (t.t === 'w' && t.raw === v && t.parts.length === 1 && !t.parts[0].q));
+  function* prim(){
+    const t = it[k];
+    if (!t) throw new ExpErr('conditional binary operator expected');
+    if (isO(t, '!')){ k++; return !(yield* prim()); }
+    if (isO(t, '(')){ k++; const v = yield* or(); if (!isO(it[k], ')')) throw new ExpErr("expected `)'"); k++; return v; }
+    const o = it[k + 1], op = o && (o.t === 'op' ? (['<', '>'].includes(o.v) ? o.v : null) : (BINOP.has(o.raw) || o.raw === '=~' ? o.raw : null));
+    if (t.t === 'w' && UNARY.has(t.raw) && it[k + 1] && !op){ k += 2; return unaryT(t.raw, yield* str(it[k - 1])); }
+    const a = yield* str(t); k++;
+    if (!op) return a !== '';
+    k++; const rt = it[k++];
+    if (!rt) throw new ExpErr(`unexpected argument to conditional binary operator`);
+    if (op === '==' || op === '=' || op === '!='){ const m = patRe(yield* pattern(rt.parts), false).test(a); return op === '!=' ? !m : m; }
+    if (op === '=~'){ let m = null; try { m = new RegExp(yield* str(rt)).exec(a); } catch {} return !!m; }
+    const b = yield* str(rt);
+    return binaryT(a, op, b, (s) => arith(s));
+  }
+  function* and(){ let v = yield* prim(); while (isO(it[k], '&&')){ k++; const r = yield* prim(); v = v && r; } return v; }
+  function* or(){ let v = yield* and(); while (isO(it[k], '||')){ k++; const r = yield* and(); v = v || r; } return v; }
+  return (yield* or()) ? 0 : 1;
+}
+
+/* ---------- jobs: the command you're running, and the ones in the background ---------- */
+function background(node, text){
+  const owner = E.id, inter = E === MAIN, mine = S.jobs.filter(x => x.owner === owner && x.state === 'Running');
+  const j = { E:sub(E), IO:{ fd:{ ...IO.fd, 0:IO.fd[0] || stream('') } }, text, fg:false, pid:S.pid++, state:'Running', status:0, steps:0, timer:null, wait:null, owner, inter,
+    n:(mine.length ? Math.max(...mine.map(x => x.n)) : 0) + 1, name:node.t === 'cmd' && node.words[0] ? node.words[0].raw.split('/').pop() : SH() };
+  j.gen = (function*(){ try { return yield* exec(node); } catch (ex){ if (ex instanceof Ctl) return ex.n ?? 0; throw ex; } })();
+  S.jobs.push(j); S.lastBg = j.pid;
+  if (inter) (IO.fd[2] === ERRT ? TERM : IO.fd[2]).write(`[${j.n}] ${j.pid}\n`);
+  setTimeout(() => pump(j), 0);
+}
+// runs a job until it finishes or has to wait for time, input, the pager, the editor or other jobs
+function pump(j, v){
+  if (j.state !== 'Running') return;
+  const pe = E, pio = IO, pc = CUR;
+  E = j.E; IO = j.IO; CUR = j; j.timer = null; j.wait = null; S.joiners.delete(j);
+  let r;
+  try { r = j.gen.next(v); }
+  catch (ex){ console.error(ex); err(`${SH()}: ${ex instanceof RangeError ? 'maximum nesting depth exceeded' : 'internal error: ' + (ex && ex.message)}`); r = { done:true, value:1 }; }
+  j.E = E; j.IO = IO; E = pe; IO = pio; CUR = pc;
+  if (r.done) return end(j, r.value ?? 0, 'Done');
+  const w = r.value; j.wait = w; paint();
+  if ('sleep' in w) j.timer = setTimeout(() => pump(j), w.sleep);
+  else if (w.tick) j.timer = setTimeout(() => pump(j), 0);
+  else if (w.join) S.joiners.add(j);
+  else if ('input' in w){ if (j.fg) ask(j, w.input); else j.timer = setTimeout(() => pump(j, null), 0); }
+}
+function end(j, st, state){
+  j.state = state; j.status = st; clearTimeout(j.timer);
+  S.joiners.forEach(w => { S.joiners.delete(w); setTimeout(() => pump(w), 0); });
+  if (j === S.fg){ S.fg = null; MAIN.status = st; S.asking = null; S.inputJob = null; render(); notices(); showPrompt(); }
+  else if (j.inter) S.notices.push(j);
+}
+function stop(j){
+  if (j.state !== 'Running') return;
+  if (j === CUR) throw new Ctl('exit', 143);
+  clearTimeout(j.timer); S.joiners.delete(j);
+  const pe = E, pio = IO, pc = CUR; E = j.E; IO = j.IO; CUR = j;
+  try { j.gen.return(); } catch {}
+  E = pe; IO = pio; CUR = pc;
+  end(j, j.fg ? 130 : 143, 'Terminated');
 }
 function notices(){
-  S.notices.forEach(j => line(mac() ? `[${j.n}]  + ${j.state === 'Done' ? 'done      ' : 'terminated'} ${j.cmd}` : `[${j.n}]+  ${j.state.padEnd(24)}${j.cmd}`));
+  if (!S.notices.length) return;
+  endLine();
+  const word = (j) => j.state === 'Terminated' ? (mac() ? 'terminated' : 'Terminated') : j.status ? (mac() ? `exit ${j.status}` : `Exit ${j.status}`) : (mac() ? 'done' : 'Done');
+  S.notices.forEach(j => TERM.write((mac() ? `[${j.n}]  + ${word(j).padEnd(10)} ${j.text}` : `[${j.n}]+  ${word(j).padEnd(24)}${j.text}`) + '\n'));
   S.jobs = S.jobs.filter(j => !S.notices.includes(j)); S.notices = [];
 }
+// a command is waiting for a line from the keyboard: output that has no newline yet becomes its prompt
+function ask(j, prompt){
+  let p = prompt;
+  if (TERM.open){ p = TERM.open.textContent + p; TERM.open.remove(); TERM.open = null; }
+  S.asking = p; S.inputJob = j; showPrompt();
+}
+// Ctrl + C: a trap can catch it; otherwise the command you're running stops
+function intr(){
+  const j = S.fg;
+  if (S.asking !== null){ TERM.write(S.asking + cmd.value + '^C\n'); S.asking = null; S.inputJob = null; } else TERM.write('^C\n');
+  const trap = j.E.traps.INT;
+  if (trap !== undefined){ if (trap === '') return; j.pend = 'INT'; clearTimeout(j.timer); S.joiners.delete(j); j.timer = setTimeout(() => pump(j, INTR), 0); return; }
+  stop(j);
+}
+// the text you typed (or pasted) runs as one job; a command that isn't finished yet waits for the next line
+function* interactive(text){
+  if (/(^|[^\\])(\\\\)*\\$/.test(text)){ S.cont = text; S.ctx = []; return E.status; }
+  text += '\n';   // the Enter that ended the line, so a command that ends in > or | is judged like a real shell would
+  const lx = new Lexer(text, flav(), true), ps = new Parser(lx);
+  for (;;){
+    let n, at = lx.i;
+    try { ps.nl(); at = ps.peek().pos; n = ps.command1(); }
+    catch (ex){
+      if (ex instanceof Incomplete){ S.cont = text.slice(at, -1); S.ctx = ex.ctx; return E.status; }
+      if (!(ex instanceof SynErr)) throw ex;
+      synErr(ex, lx); E.status = flav() === 'zsh' ? 1 : 2;
+      const nl = text.indexOf('\n', ex.tok ? ex.tok.pos : lx.i);
+      if (nl < 0) return E.status;
+      Object.assign(lx, { i:nl + 1, line:count(text.slice(0, nl + 1), '\n') + 1, hd:[] }); ps.la = []; ps.ctx = [];
+      continue;
+    }
+    if (!n) return E.status;
+    try { E.status = yield* exec(n); }
+    catch (ex){ if (!(ex instanceof Ctl)) throw ex; if (ex.kind === 'exit') line('(This practice terminal stays open. Use Start again to reset everything.)', 'note'); E.status = ex.n ?? 0; }
+  }
+}
+// a command typed over several lines is remembered as one line, the way bash does
+function histText(t){
+  if (!t.includes('\n')) return t;
+  t = t.replace(/\\\n/g, '');   // a line continued with \ is one line
+  try {   // only newlines that separate commands become '; ' (not ones inside quotes or here-documents)
+    const lx = new Lexer(t, flav(), false); let n = 0;
+    for (let x = lx.next(); x.t !== 'eof'; x = lx.next()) if (x.t === 'op' && x.v === '\n') n++;
+    if (n !== count(t, '\n') || /<</.test(t)) return t;
+  } catch { return t; }
+  return joinLines(t);
+}
+const joinLines = (t) => t.split('\n').map(s => s.trim()).filter(Boolean).reduce((a, s) => !a ? s : /(^|[;&|{(]|\bdo|\bthen|\belse|\bin)$/.test(a) ? a + ' ' + s : a + '; ' + s, '');
 
 /* ---------- input handling ---------- */
 function submit(){
   const v = cmd.value; cmd.value = '';
-  if (S.asking){
-    line(S.asking + v); S.asking = null;
-    const [t, n] = S.rmAsk.shift();
-    if (/^y(es)?$/i.test(v.trim())){ remove(n); status(`Deleted ${tilde(n)}${n.dir ? '/' : ''}`, true); }
-    if (S.rmAsk.length) askNext(); else { S.rmAsk = null; showPrompt(); }
+  if (S.editor) return;
+  if (S.asking !== null){
+    const j = S.inputJob, p = S.asking; S.asking = null; S.inputJob = null;
+    TERM.write(p + v + '\n'); showPrompt();
+    if (j && j.state === 'Running') pump(j, v);
     return;
   }
-  if (S.sleeping) return;
+  if (S.fg) return;
   echoInput(v);
-  if (S.cont !== null){ const all = S.cont + '\n' + v; S.cont = null; run(all); }
-  else { if (v.trim()) S.hist.push(v); S.hi = S.hist.length; run(v); }
-  if (!S.pager){ notices(); showPrompt(); }
+  const text = S.cont !== null ? S.cont + '\n' + v : v;
+  S.cont = null; S.ctx = [];
+  const j = { gen:interactive(text), E:MAIN, IO:TIO, text, fg:true, pid:0, state:'Running', status:0, steps:0, timer:null, wait:null, owner:0 };
+  const saved = text.trim() ? S.hist.push(histText(text)) : 0;
+  S.hi = S.hist.length; S.fg = j; showPrompt();
+  pump(j);
+  if (S.cont !== null && saved){ S.hist.pop(); S.hi = S.hist.length; }   // not finished yet: it is saved once it is
 }
 function complete(){
   const v = cmd.value, i = v.lastIndexOf(' ') + 1, word = v.slice(i);
-  if (!v.slice(0, i).trim()){ const c = [...new Set(CMDS.concat(Object.keys(BUILTIN), ['clear', 'history']))].filter(x => x.startsWith(word)).sort(); if (c.length === 1) cmd.value = c[0] + ' '; else if (c.length && S.lastTab === v){ echoInput(v); line(c.join('  ')); showPrompt(); } S.lastTab = v; return; }
+  if (!v.slice(0, i).trim() && !word.includes('/')){
+    const c = [...new Set([...progs(), ...Object.keys(BUILTIN), ...BI, ...SPECIAL, 'clear', 'history', ...Object.keys(E.funcs), ...Object.keys(E.aliases)])].filter(x => x.startsWith(word) && /^[\w-]/.test(x)).sort();
+    if (c.length === 1) cmd.value = c[0] + ' '; else if (c.length && S.lastTab === v){ echoInput(v); line(c.join('  ')); showPrompt(); }
+    S.lastTab = v; return;
+  }
   const slash = word.lastIndexOf('/'), dirPart = slash >= 0 ? word.slice(0, slash + 1) : '', part = word.slice(slash + 1);
   const r = dirPart ? resolve(dirPart) : { node:S.cwd };
   if (!r.node || !r.node.dir) return;
@@ -891,24 +2824,147 @@ function complete(){
   S.lastTab = v;
 }
 cmd.addEventListener('keydown', (e) => {
+  if (S.editor) return;
   if (S.pager) return pagerKey(e);
   if (e.key !== 'Tab') S.lastTab = '';
   if (e.key === 'Enter'){ e.preventDefault(); submit(); }
-  else if (e.key === 'Tab'){ e.preventDefault(); complete(); }
-  else if (e.key === 'ArrowUp'){ e.preventDefault(); if (S.hi > 0){ S.hi--; cmd.value = S.hist[S.hi]; } }
-  else if (e.key === 'ArrowDown'){ e.preventDefault(); if (S.hi < S.hist.length - 1){ S.hi++; cmd.value = S.hist[S.hi]; } else { S.hi = S.hist.length; cmd.value = ''; } }
+  else if (e.key === 'Tab'){ e.preventDefault(); if (!S.fg) complete(); }
+  else if (e.key === 'ArrowUp'){ e.preventDefault(); if (!S.fg && S.hi > 0){ S.hi--; cmd.value = S.hist[S.hi]; } }
+  else if (e.key === 'ArrowDown'){ e.preventDefault(); if (S.fg) return; if (S.hi < S.hist.length - 1){ S.hi++; cmd.value = S.hist[S.hi]; } else { S.hi = S.hist.length; cmd.value = ''; } }
   else if (e.ctrlKey && (e.key === 'c' || e.key === 'C')){
     e.preventDefault();
-    if (S.sleeping){ clearTimeout(S.sleeping); S.sleeping = null; line('^C'); }
-    else if (S.asking){ line(S.asking + '^C'); S.asking = null; S.rmAsk = null; }
-    else { echoInput(cmd.value + '^C'); S.cont = null; }
+    if (S.fg) intr(); else { echoInput(cmd.value + '^C'); S.cont = null; }
     cmd.value = ''; showPrompt();
   }
-  else if (e.ctrlKey && (e.key === 'l' || e.key === 'L')){ e.preventDefault(); out.textContent = ''; showPrompt(); }
+  else if (e.ctrlKey && (e.key === 'd' || e.key === 'D')){   // end of input for read, cat and the rest
+    e.preventDefault();
+    if (S.asking !== null && !cmd.value){ const j = S.inputJob, p = S.asking; S.asking = null; S.inputJob = null; if (p) TERM.write(p + '\n'); showPrompt(); if (j) pump(j, null); }
+  }
+  else if (e.ctrlKey && (e.key === 'l' || e.key === 'L')){ e.preventDefault(); out.textContent = ''; TERM.open = null; showPrompt(); }
 });
-term.addEventListener('click', () => { if (!getSelection().toString()) cmd.focus({ preventScroll:true }); });
+term.addEventListener('click', () => { if (getSelection().toString()) return; if (S.editor) S.editor.ta.focus(); else cmd.focus({ preventScroll:true }); });
 ['input', 'keyup', 'select', 'focus', 'blur'].forEach(ev => cmd.addEventListener(ev, () => drawTyped()));
 cmd.addEventListener('keydown', () => setTimeout(drawTyped, 0));
+
+/* ---------- nano: a small editor over the terminal (GNU nano on Ubuntu, the UW PICO that macOS calls nano) ---------- */
+const NANO_KEYS = [['^G', 'Help'], ['^O', 'Write Out'], ['^W', 'Where Is'], ['^K', 'Cut'], ['^T', 'Execute'], ['^C', 'Location'], ['^X', 'Exit'], ['^R', 'Read File'], ['^\\', 'Replace'], ['^U', 'Paste'], ['^J', 'Justify'], ['^/', 'Go To Line']];
+const PICO_KEYS = [['^G', 'Get Help'], ['^O', 'WriteOut'], ['^R', 'Read File'], ['^Y', 'Prev Pg'], ['^K', 'Cut Text'], ['^C', 'Cur Pos'], ['^X', 'Exit'], ['^J', 'Justify'], ['^W', 'Where is'], ['^V', 'Next Pg'], ['^U', 'UnCut Text'], ['^T', 'To Spell']];
+const NANO_HELP = ['Main nano help text', '', 'Type to add text. The arrow keys move the cursor. The shortcuts at the bottom use Ctrl: ^O means Ctrl + O.', '',
+  '^O  Write Out: save the file (Enter accepts the name)', '^X  Exit: leave nano; if there are changes, it asks whether to save them', '^K  Cut the line the cursor is on', '^U  Paste what you cut',
+  '^W  Where Is: search for text', '^C  Location: show where the cursor is', '^G  Help: this screen', '', 'Press ^X to close this help.'];
+C.nano = function*(args){
+  const t = args.find(a => !a.startsWith('-') && !a.startsWith('+'));
+  if (!IO.fd[1].tty || !CUR || !CUR.fg){ err(mac() ? 'Error opening terminal: unknown.' : 'Too many errors from stdin'); return 1; }
+  let text = '', msg = mac() ? 'New file' : 'New File', name = t;
+  if (t !== undefined){
+    const r = resolve(t);
+    if (r.node && r.node.dir){ msg = `"${t}" is a directory`; name = undefined; }
+    else if (r.node && !can(r.node, 'r')) msg = `Error reading ${t}: Permission denied`;
+    else if (r.node && isBin(r.node)) msg = `"${t}" is a program, not text`;
+    else if (r.node){ text = r.node.text; const n = toLines(text).length; msg = `Read ${n} line${n === 1 ? '' : 's'}`; }
+    else { const nr = resolveNew(t); if (nr.missing || nr.notdir) msg = `Directory '${t.slice(0, t.lastIndexOf('/')) || '/'}' does not exist`; }
+  }
+  editor(name, text, msg);
+  yield { editor:true };
+  return 0;
+};
+function editor(name, text, msg){
+  const pico = mac(), el = document.createElement('div'); el.className = 'editor';
+  const bar = document.createElement('div'), ta = document.createElement('textarea'), status = document.createElement('div'), keys = document.createElement('div');
+  bar.className = 'ebar'; status.className = 'emsg'; keys.className = 'ekeys';
+  ta.spellcheck = false; ta.setAttribute('autocapitalize', 'off'); ta.setAttribute('aria-label', 'Text being edited'); ta.value = text;
+  el.append(bar, ta, status, keys); term.appendChild(el); term.scrollTop = 0; term.classList.add('full');
+  const ed = S.editor = { el, ta, name, saved:text, cut:'', cutting:false, mode:null, help:null };
+  const show = (m) => { status.textContent = ''; if (m){ const s = document.createElement('span'); s.textContent = `[ ${m} ]`; status.appendChild(s); } };
+  const drawBar = () => {
+    const mod = ta.value !== ed.saved ? 'Modified' : '';
+    bar.textContent = '';
+    [pico ? '  UW PICO 5.09' : '  GNU nano 7.2', pico ? (ed.name ? `File: ${ed.name}` : 'New Buffer') : (ed.name || 'New Buffer'), mod].forEach(x => { const s = document.createElement('span'); s.textContent = x; bar.appendChild(s); });
+  };
+  const drawKeys = (list) => { keys.textContent = ''; list.forEach(([k, d]) => { const s = document.createElement('span'), b = document.createElement('b'); b.textContent = k; s.append(b, ' ' + d); keys.appendChild(s); }); };
+  const mainKeys = () => drawKeys(pico ? PICO_KEYS : NANO_KEYS);
+  // a question on the status line: a file name, a search, or yes/no
+  const prompt = (label, value, done, list) => {
+    ed.mode = 'prompt'; status.textContent = '';
+    const l = document.createElement('label'), inp = document.createElement('input');
+    l.className = 'eask'; l.textContent = label; inp.value = value; inp.spellcheck = false; l.appendChild(inp); status.appendChild(l);
+    drawKeys(list || [['^G', 'Help'], ['^C', 'Cancel']]);
+    inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length);
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter'){ e.preventDefault(); ed.mode = null; mainKeys(); ta.focus(); done(inp.value); }
+      else if ((e.ctrlKey && (e.key === 'c' || e.key === 'C')) || e.key === 'Escape'){ e.preventDefault(); ed.mode = null; mainKeys(); ta.focus(); show('Cancelled'); }
+    });
+  };
+  const yesNo = (label, done) => {
+    ed.mode = 'yn'; status.textContent = ''; const l = document.createElement('span'); l.className = 'eask'; l.textContent = label; status.appendChild(l);
+    drawKeys([[' Y', 'Yes'], [' N', 'No'], ['^C', 'Cancel']]); ed.yn = done;
+  };
+  const write = (then) => prompt(pico ? 'File Name to write : ' : 'File Name to Write: ', ed.name || '', (nm) => {
+    if (!nm){ show('Cancelled'); return; }
+    const m = save(ed, nm); show(m); drawBar(); if (then && m.startsWith('Wrote')) then();
+  }, pico ? [['^G', 'Get Help'], ['^C', 'Cancel'], ['^T', 'To Files']] : [['^G', 'Help'], ['M-D', 'DOS Format'], ['M-A', 'Append'], ['M-B', 'Backup File'], ['^C', 'Cancel'], ['M-M', 'Mac Format'], ['M-P', 'Prepend'], ['^T', 'Browse']]);
+  const close = () => {
+    el.remove(); S.editor = null; term.classList.remove('full'); cmd.focus({ preventScroll:true });
+    const j = S.fg; if (j && j.wait && j.wait.editor) pump(j); else showPrompt();
+  };
+  const lineAt = () => { const v = ta.value, p = ta.selectionStart, s = v.lastIndexOf('\n', p - 1) + 1, e0 = v.indexOf('\n', p); return [s, e0 < 0 ? v.length : e0 + 1]; };
+  ta.addEventListener('keydown', (e) => {
+    if (ed.help){ if (e.ctrlKey && (e.key === 'x' || e.key === 'X')){ e.preventDefault(); ed.help.remove(); ed.help = null; ta.style.display = ''; ta.focus(); mainKeys(); } else e.preventDefault(); return; }
+    if (ed.mode === 'yn'){
+      e.preventDefault(); const k = e.key.toLowerCase();
+      if (k === 'y' || k === 'n'){ ed.mode = null; mainKeys(); ed.yn(k === 'y'); }
+      else if (e.ctrlKey && k === 'c'){ ed.mode = null; mainKeys(); show('Cancelled'); }
+      return;
+    }
+    if (e.key === 'Tab'){ e.preventDefault(); ta.setRangeText('\t', ta.selectionStart, ta.selectionEnd, 'end'); drawBar(); return; }
+    if (!e.ctrlKey || e.metaKey || e.altKey) { ed.cutting = false; return; }
+    const k = e.key.toLowerCase();
+    if (!'oxkuwcgs'.includes(k) || k.length !== 1) return;
+    e.preventDefault();
+    if (k !== 'k') ed.cutting = false;
+    if (k === 'o') write();
+    else if (k === 's' && !pico){ if (ed.name){ show(save(ed, ed.name)); drawBar(); } else write(); }
+    else if (k === 'x'){
+      if (ta.value === ed.saved) return close();
+      yesNo(pico ? 'Save modified buffer (ANSWERING "No" WILL DESTROY CHANGES) ? ' : 'Save modified buffer? ', (yes) => yes ? write(close) : close());
+    }
+    else if (k === 'k'){
+      const [s, e0] = lineAt(), cut = ta.value.slice(s, e0);
+      ed.cut = ed.cutting ? ed.cut + cut : cut; ed.cutting = true;
+      ta.setRangeText('', s, e0, 'start'); drawBar(); show('');
+    }
+    else if (k === 'u'){ if (!ed.cut) return; const [s] = lineAt(); ta.setRangeText(ed.cut, s, s, 'end'); drawBar(); }
+    else if (k === 'w') prompt(pico ? 'Search: ' : 'Search: ', ed.last || '', (q) => {
+      if (!q) return show('Cancelled');
+      ed.last = q; const v = ta.value, from = ta.selectionEnd; let i = v.indexOf(q, from); if (i < 0) i = v.indexOf(q);
+      if (i < 0) return show(`"${q}" not found`);
+      ta.setSelectionRange(i, i); if (i < from) show('Search Wrapped');
+    });
+    else if (k === 'c'){
+      const v = ta.value, p = ta.selectionStart, lines = v.split('\n'), ln = v.slice(0, p).split('\n').length, col = p - v.lastIndexOf('\n', p - 1), len = lines[ln - 1].length + 1;
+      const pc = (a, b) => `${Math.round(a / Math.max(b, 1) * 100)}%`;
+      show(pico ? `line ${ln} of ${lines.length} (${pc(ln, lines.length)}), character ${p} of ${v.length} (${pc(p, v.length)})` : `line ${ln}/${lines.length} (${pc(ln, lines.length)}), col ${col}/${len} (${pc(col, len)}), char ${p}/${v.length} (${pc(p, v.length)})`);
+    }
+    else if (k === 'g'){ const h = document.createElement('pre'); h.className = 'ehelp'; h.textContent = NANO_HELP.join('\n'); el.insertBefore(h, ta); ta.style.display = 'none'; ed.help = h; drawKeys([['^X', 'Close']]); ta.focus(); }
+  });
+  ta.addEventListener('input', () => { ed.cutting = false; drawBar(); if (status.firstChild && status.firstChild.tagName === 'SPAN') show(''); });
+  drawBar(); mainKeys(); show(msg); ta.focus(); ta.setSelectionRange(0, 0);
+}
+function save(ed, name){
+  const r = resolveNew(name);
+  const bad = (why) => `Error writing ${name}: ${why}`;
+  if (r.exists || (r.existing && r.existing.dir)) return bad('Is a directory');
+  if (r.missing || r.notdir) return bad('No such file or directory');
+  if (r.denied) return bad('Permission denied');
+  const target = r.existing || r.dir;
+  if (!can(target, 'w') || (!r.existing && !can(r.dir, 'w'))){ if (!mine(target)) sudoNote(); return bad('Permission denied'); }
+  let text = ed.ta.value; if (text && !text.endsWith('\n')) text += '\n';
+  let n = r.existing;
+  if (!n){ n = add(r.dir, mk(r.name, false)); flash(n, 'new'); } else flash(n, 'changed');
+  n.text = text; ed.saved = ed.ta.value; ed.name = name; status(`Wrote to ${tilde(n)}`); paint();
+  const k = toLines(text).length; return `Wrote ${k} line${k === 1 ? '' : 's'}`;
+}
+addEventListener('beforeunload', (e) => { if (S.editor && S.editor.ta.value !== S.editor.saved){ e.preventDefault(); e.returnValue = ''; } });
 
 /* ---------- tree drawing ---------- */
 const NS = 'http://www.w3.org/2000/svg', GAP = 12, PAD = 20;
@@ -932,7 +2988,9 @@ function width(n){
 function lay(n, depth){ n._bw = width(n); n._d = depth; const k = drawn(n); k.forEach(c => lay(c, depth + 1)); n._sum = k.reduce((a, c) => a + c._w, 0); n._w = Math.max(n._bw + GAP, n._sum); }
 function place(n, x0, top){ n._x = x0 + n._w / 2; n._y = top + n._d * LEVEL; let x = x0 + (n._w - n._sum) / 2; drawn(n).forEach(c => { place(c, x, top); x += c._w; }); }
 function el(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
-let dotEl = null, anim = null, dotAt = null;
+let dotEl = null, anim = null, dotAt = null, paintQ = 0;
+// commands that change files ask for a redraw; it happens once, in the next frame
+function paint(){ if (!paintQ) paintQ = requestAnimationFrame(() => { paintQ = 0; render(); }); }
 // the red line left behind the dot: it stays for TRAIL_HOLD ms after the dot arrives, then fades over TRAIL_FADE ms
 let trail = null, trailEl = null, fadeAnim = null;
 const TRAIL_HOLD = 1000, TRAIL_FADE = 800;
@@ -1030,12 +3088,14 @@ function rebuild(keepHome){
   S.home.name = S.user; add(parentOfHomes, S.home);
 }
 function reset(){
+  [...S.jobs, ...(S.fg ? [S.fg] : [])].forEach(j => { clearTimeout(j.timer); j.state = 'Done'; try { j.gen.return(); } catch {} });
+  E = MAIN = newEnv(); TIO.fd = { 0:null, 1:TERM, 2:ERRT }; IO = TIO; CUR = null; TERM.open = null;
   S.id = 1; S.home = null; rebuild(false);
-  S.cwd = S.shown = S.home; S.prev = null; S.cont = null; S.asking = null; S.rmAsk = null; S.toldSudo = false;
-  S.vars = {}; S.exported = new Set(); S.status = 0;
-  S.jobs.forEach(j => clearTimeout(j.timer)); S.jobs = []; S.notices = [];
-  if (S.sleeping){ clearTimeout(S.sleeping); S.sleeping = null; }
+  S.cwd = S.shown = S.home; S.cont = null; S.ctx = []; S.asking = null; S.inputJob = null; S.fg = null; S.toldSudo = false; S.toldStdin = false;
+  S.jobs = []; S.notices = []; S.joiners.clear(); S.lastBg = 0;
   if (S.pager){ S.pager.el.remove(); S.pager = null; }
+  if (S.editor){ S.editor.el.remove(); S.editor = null; }
+  term.classList.remove('full');
   out.textContent = ''; greet(); status(''); render(); showPrompt();
 }
 document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {

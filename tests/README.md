@@ -14,7 +14,7 @@ It exits with 0 when everything passes, 1 when something fails and 2 when it can
 
 ## regression: today's behaviour, captured
 
-`regression/scenarios.json` holds about 250 scenarios. Most run in both modes, Ubuntu (`name@ubuntu`) and Mac (`name@mac`), which makes 404 runs. Together they cover every command and option, every error and its wording, the one-time sudo note, jobs, the pager keys, Tab completion, ↑ history, Ctrl + C and Ctrl + L, the Your name field, Show permissions, Start again, switching laptop, dark mode, and the checks listed in CLAUDE.md. The format is explained at the top of the file. A step is a command string, or `{"type"}`, `{"key"}`, `{"click"}`, `{"name"}`, `{"wait"}`, `{"snap"}` or `{"check"}`.
+`regression/scenarios.json` holds 256 scenarios. Most run in both modes, Ubuntu (`name@ubuntu`) and Mac (`name@mac`), which makes 425 runs. Together they cover every command and option, every error and its wording, the one-time sudo note, jobs, the pager keys, Tab completion, ↑ history, Ctrl + C and Ctrl + L, the Your name field, Show permissions, Start again, switching laptop, dark mode, and the checks listed in CLAUDE.md. The format is explained at the top of the file. A step is a command string, or `{"type"}`, `{"key"}`, `{"click"}`, `{"name"}`, `{"wait"}`, `{"snap"}` or `{"check"}`.
 
 Each scenario starts with a freshly loaded page. After every step the runner waits until the prompt is showing again, with no `.pager` and no `.editor` open, unless the step says to wait for something else. At the end it waits until the dot and its trail have gone. Then it records:
 
@@ -39,16 +39,17 @@ node tests/run.js --update 'regression:help/*,ls/root'
 
 Running `node tests/run.js --update` on its own re-records everything. A run that fails a check, throws a page error or times out is never saved. Goldens must be recorded against a known-good page. The baseline was recorded from `git show HEAD:index.html` at 66b8717 and then passed twice more without changes.
 
-**Expect intended diffs** where the HEAD shell simplifies things that a POSIX shell does differently:
+**When the shell became POSIX-compliant** (the commit after the baseline), 36 scenarios were re-recorded after their diffs were read. In each, the old shell had simplified something that bash, dash, zsh or the real program does differently:
 
-- `~` is not expanded in arguments: `find ~` prints `~/notes`, and `mv` and `rmdir` messages quote `'~'`.
-- `cat a missing a` prints its error before the output.
-- `ls *.txt` puts each file on its own line.
-- `echo -n` and `printf` without `\n` still end the line.
-- Multi-line output sits in one line element with a `\n` inside (see the `echo "a` continuation and `man` with no page).
-- `sleep -1` says "missing operand".
-- `history` survives Start again.
-- Adding commands changes `ls /bin`, `tree /`, `which`, `help` and the Tab completion lists.
+- `~` is expanded before a command sees it, so `find ~`, `mv` and `rmdir` show `/home/yourname`. `/*/c` expands across folders.
+- `echo -n` and `printf` without `\n` leave the line open (zsh marks it with `%`); multi-line output is one line element per line.
+- zsh: `echo` reads `\n`, an unmatched `[]` is "no matches found", continuation prompts are `dquote>`, `quote>`, `pipe>`, and a parse error gives `$?` 1.
+- `>` empties or creates the file before the command runs, so `tree > t.txt` lists `t.txt`.
+- A missing command gives status 127, `./run` says "No such file or directory", `man nosuch` exits 16 on Ubuntu.
+- `cat` with no file reads the keyboard until Ctrl + D, `nano` is an editor, `export` lists like `export -p`, `grep` patterns are basic regular expressions (`p+` is literal), GNU and BSD `sleep` and `printf` complain about bad numbers.
+- New programs change `ls /bin`, `tree /`, `which`, `help` and Tab completion; zsh is not on Ubuntu.
+
+The `shell/*` scenarios were added then: scripts written in `nano`, `read`, continuation lines, Ctrl + C, Ctrl + D, jobs and `wait`, script errors, dash versus bash, `set -x`.
 
 Also, at HEAD a Start again or laptop switch made while the dot is still moving leaves no box marked "here". Scenarios wait for the tree (`{"wait": "tree"}`) before such clicks, so this does not show up in the goldens.
 
@@ -62,4 +63,4 @@ cat > t.sh <<'__PG_EOF__'
 __PG_EOF__
 ```
 
-and then `sh t.sh; echo "__STATUS=$?"`. From the second step, stdout is every line that is not `err`, `note` or `cmdl`, minus the `__STATUS` marker. Text printed just before the marker on its line counts as output without a final newline. stdout and the status must equal `dash.stdout` and `dash.status` exactly. stderr is the `err` lines and is compared separately: a case where only stderr differs is reported as `STDERR`, not `FAIL`, and `--ignore-stderr` lets those pass. `posix-bash` runs `bash t.sh` against the `bash` results, only for cases marked `"differs": false`. Each case has a timeout (`--case-timeout`, 20 s by default), and a page that stops responding is replaced, so the suite never hangs. The HEAD page has no here-docs and no `sh`, so these suites fail there, as expected.
+and then `sh t.sh; echo "__STATUS=$?"`. From the second step, stdout is every line that is not `err`, `note` or `cmdl`, minus the `__STATUS` marker. Text printed just before the marker on its line counts as output without a final newline. stdout and the status must equal `dash.stdout` and `dash.status` exactly. stderr is the `err` lines and is compared separately: a case where only stderr differs is reported as `STDERR`, not `FAIL`, and `--ignore-stderr` lets those pass. `posix-bash` runs `bash t.sh` against the `bash` results, only for cases marked `"differs": false`. Each case has a timeout (`--case-timeout`, 20 s by default), and a page that stops responding is replaced, so the suite never hangs. The playground's `bash` follows bash 5.2, as on Ubuntu, while the expectations come from the Mac's bash 3.2; `posix/bash5.json` lists the cases where the two differ, with the reason, and `posix-bash` uses those results instead. The generator does not touch that file.

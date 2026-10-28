@@ -574,6 +574,7 @@ function splitRun(lines) {
 }
 
 function posixJobs(opts, pats, shell) {
+  const b5 = path.join(opts.posixDir, 'bash5.json'), BASH5 = fs.existsSync(b5) ? JSON.parse(fs.readFileSync(b5, 'utf8')) : {};
   const suite = shell === 'sh' ? 'posix' : 'posix-bash', variant = shell === 'sh' ? 'dash' : 'bash';
   const url = pathToFileURL(opts.page).href;
   const { items, problems, found } = loadPosix(opts);
@@ -587,7 +588,7 @@ function posixJobs(opts, pats, shell) {
     if (!e) { broken(c.name, 'no entry in the expected JSON'); continue; }
     if (e.skip) { skipped.push(`${c.name}: ${e.skip}`); continue; }
     if (shell === 'bash' && e.differs !== false) { skipped.push(`${c.name}: dash and bash differ`); continue; }
-    const want = e[variant];
+    const want = shell === 'bash' && BASH5[c.name] ? { ...e.bash, ...BASH5[c.name] } : e[variant];   // bash 5.2 where it differs from the recording bash 3.2
     if (!want) { broken(c.name, `the expected JSON has no "${variant}" result`); continue; }
     jobs.push({ suite, name: c.name, cost: 5, run: async (page) => {
       const t0 = Date.now(), res = { name: c.name, notes: e.notes, want };

@@ -1,0 +1,11 @@
+{
+ "_about": "Where Ubuntu's bash 5.2 (what the playground's bash follows) differs from the bash 3.2 that recorded expected.json on a Mac. The posix-bash suite uses these instead. Each entry names its reason.",
+ "061-glob-star": {
+  "stdout": "a ab b c\na ab\nab b\n.hidden\n",
+  "why": "bash 5.2 has globskipdots on by default, so .* does not match . and .."
+ },
+ "244-status-not-executable": {
+  "stderr": "t.sh: line 4: ./script: Permission denied\nt.sh: line 6: ./dir: Is a directory\n",
+  "why": "bash 5 prints the system's message for a directory: Is a directory"
+ }
+}
